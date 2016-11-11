@@ -19,6 +19,7 @@ task zipJavadoc(type: Zip){
     baseName = 'jProtein'
 }
 
+// copy any dependencies to $buildDir/lib so that the executables can find them
 task copyDepToLib(type: Copy){
     into "$buildDir/lib"
     from configurations.runtime
