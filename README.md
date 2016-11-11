@@ -7,7 +7,7 @@ This is a library for dealing with Protein structures.
 
 ## Installation
 
-You will need to install the gradle package manager onto your machine
+You will need to install the gradle package manager and jMath onto your machine.
 
 1. Clone the project
 2. `gradle install`
@@ -16,6 +16,12 @@ You will need to install the gradle package manager onto your machine
 5. Add to your PATH $JPROTDIR/build/executables
 6. Now you can import the library into any java project you write, and you can run any of the
    executables provided by jProtein.
+
+Note about jMath. Right now, I don't have my projects pushing their artifacts to a remote gradle 
+(maven or ivy) repository. The dependency resolution in jProtein depends on jMath being in your
+local maven repository. To accomplish this, clone jMath. cd into it. `gradle install`. This will
+compile and install the jar into your default maven repository. Then you will be able to build,
+install, run jProtein. In the future, these projects will be pushed to a remote repository.
 
 ## Usage
 This project is managed by gradle.
