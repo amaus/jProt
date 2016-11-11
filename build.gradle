@@ -134,4 +134,3 @@ jar.doLast {
 
 // Call this for each Main class you want to expose with an app script
 createScript(project, 'com.aaronpmaus.jProtein.executables.PointRunner', 'PointRunner')
-//createScript(project, 'com.aaronpmaus.jProtein.executables.FindMaxClique', 'FindMaxClique')
