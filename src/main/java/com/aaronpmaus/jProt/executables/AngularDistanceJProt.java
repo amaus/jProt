@@ -1,6 +1,6 @@
-package com.aaronpmaus.jProtein.executables;
+package com.aaronpmaus.jProt.executables;
 
-import com.aaronpmaus.jProtein.metrics.*;
+import com.aaronpmaus.jProt.metrics.*;
 import com.aaronpmaus.jMath.graph.*;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;

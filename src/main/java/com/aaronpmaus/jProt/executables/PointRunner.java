@@ -1,5 +1,5 @@
-package com.aaronpmaus.jProtein.executables;
-import com.aaronpmaus.jProtein.protein.Atom;
+package com.aaronpmaus.jProt.executables;
+import com.aaronpmaus.jProt.protein.Atom;
 import com.aaronpmaus.jMath.linearAlgebra.Matrix;
 
 public class PointRunner{

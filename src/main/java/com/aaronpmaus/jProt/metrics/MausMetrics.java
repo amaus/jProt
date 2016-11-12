@@ -1,4 +1,4 @@
-package com.aaronpmaus.jProtein.metrics;
+package com.aaronpmaus.jProt.metrics;
 
 import com.aaronpmaus.jMath.graph.*;
 import com.aaronpmaus.jMath.linearAlgebra.*;

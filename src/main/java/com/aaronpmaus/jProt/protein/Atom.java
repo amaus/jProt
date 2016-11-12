@@ -1,4 +1,4 @@
-package com.aaronpmaus.jProtein.protein;
+package com.aaronpmaus.jProt.protein;
 
 import java.lang.IllegalArgumentException;
 import com.aaronpmaus.jMath.*;
