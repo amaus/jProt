@@ -107,8 +107,8 @@ public class AngularDistanceJProt{
         System.out.printf("Thresholds:\t%.2f\t%.2f\t%.2f\t%.2f\n",
                             thresholds[0], thresholds[1], thresholds[2], thresholds[3]);
         System.out.printf("Num Res:\t%.0f\t%.0f\t%.0f\t%.0f\n",
-                            globalDistanceTest[0][0]*100, globalDistanceTest[1][0]*100, 
-                            globalDistanceTest[2][0]*100, globalDistanceTest[3][0]*100);
+                            globalDistanceTest[0][0], globalDistanceTest[1][0], 
+                            globalDistanceTest[2][0], globalDistanceTest[3][0]);
         System.out.printf("Percents:\t%.2f%%\t%.2f%%\t%.2f%%\t%.2f%%\n",
                             globalDistanceTest[0][1]*100, globalDistanceTest[1][1]*100, 
                             globalDistanceTest[2][1]*100, globalDistanceTest[3][1]*100);
