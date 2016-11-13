@@ -35,7 +35,7 @@ public class AngularDistanceJProt{
         try {
             theTool = new MausMetrics(alphaFileName, betaFileName, differencesFileName);
             angularDistance();
-            localSimilarity(2.0);
+            localSimilarity(1.0);
             double[] thresholds = {1.0, 2.0, 4.0, 8.0};
             globalDistanceTest(thresholds);
         } catch (FileNotFoundException e){
@@ -65,6 +65,7 @@ public class AngularDistanceJProt{
     */
     public static void localSimilarity(double threshold){
         System.out.println("########################### Local Similarity Covering #########################");
+        System.out.printf("\nUnder a threshold of: %.2f\n",threshold);
         long start = new Date().getTime();
         ArrayList<UndirectedGraph<Integer>> localSimilarityRegions;
         localSimilarityRegions = theTool.getLocalSimilarityRegions(threshold);
