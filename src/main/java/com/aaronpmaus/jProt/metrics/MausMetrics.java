@@ -326,7 +326,7 @@ public class MausMetrics{
         pymolScript.add("show cartoon");
         int counter = 1;
         for(UndirectedGraph<Integer> region : regions){
-            pymolScript.add("select clique"+counter+", resi " + getNodesString(region, ","));
+            pymolScript.add("select clique"+counter+", resi " + getNodesString(region, "+"));
             counter++;
         }
         if(regions.size() > 3){
