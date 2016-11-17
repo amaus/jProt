@@ -32,7 +32,7 @@ public class AngularDistanceJProt{
      * <p>Usage: AngularDistanceJProt alphaDistancesFile betaDistancesFile differencesFile</p>
      *
      * Runs the metrics of this program.
-     * @param args the command line arguments. See usage above.
+     * @param arguments the command line arguments. See usage above.
     */
     public static void main(String[] arguments){
         gdtThresholds = new double[3];

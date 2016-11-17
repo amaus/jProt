@@ -14,7 +14,7 @@ public class CommandLineParser{
 
     /**
      * Constructor requires the array of command line arguments
-     * @param args the array of command line args
+     * @param arguments the array of command line args
     */
     public CommandLineParser(String[] arguments){
         this.args = new ArrayList<String>( );
