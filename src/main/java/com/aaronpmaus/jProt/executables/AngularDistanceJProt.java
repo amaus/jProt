@@ -29,10 +29,9 @@ public class AngularDistanceJProt{
     private static boolean mol2FileProvided = false;
     private static MausMetrics theTool;
     /**
-     * <p>Usage: AngularDistanceJProt alphaDistancesFile betaDistancesFile differencesFile</p>
-     *
      * Runs the metrics of this program.
-     * @param arguments the command line arguments. See usage above.
+     * run <p>AngularDistanceJProt -h</p> for help on how to run it.
+     * @param arguments the command line arguments. use -h for usage info.
     */
     public static void main(String[] arguments){
         gdtThresholds = new double[3];
