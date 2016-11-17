@@ -91,11 +91,13 @@ public class MausMetrics{
         this.differencesMatrix = new Double[getNumResidues()][getNumResidues()];
         for(int i = 0; i < this.alphaDistancesMatrix.length; i++){
             for(int j = 0; j < this.alphaDistancesMatrix[i].length; j++){
-                if(this.alphaDistancesMatrix[i][j].isNaN()){       
-                    this.differencesMatrix[i][j] = Double.NaN;
-                } else {
-                    this.differencesMatrix[i][j] = this.alphaDistancesMatrix[i][j] - this.betaDistancesMatrix[i][j];
-                }
+                this.differencesMatrix[i][j] = Double.NaN;
+            }
+        }
+        // only use the values from the upper right hand side of the matrix.
+        for(int i = 0; i < this.alphaDistancesMatrix.length; i++){
+            for(int j = i+1; j < this.alphaDistancesMatrix[i].length; j++){
+                this.differencesMatrix[i][j] = Math.abs(this.alphaDistancesMatrix[i][j] - this.betaDistancesMatrix[i][j]);
             }
         }
     }
@@ -114,14 +116,16 @@ public class MausMetrics{
         }
         int numResidues = dataLines.size();
         Double[][] data = new Double[numResidues][numResidues];
+        for(int i = 0; i < numResidues; i++){
+            for(int j = 0; j < numResidues; j++){
+                data[i][j] = Double.NaN;
+            }
+        }
+        // only use the values from the upper right hand side of the matrix.
         for(int i = 0; i < dataLines.size(); i++){
             String[] tokens = dataLines.get(i).split(",");
-            for(int j = 0; j < tokens.length; j++){
-                if(tokens[j].equals(" ")){
-                    data[i][j] = Double.NaN;
-                } else {
-                    data[i][j] = Double.parseDouble(tokens[j]);
-                }
+            for(int j = i+1; j < tokens.length; j++){
+                data[i][j] = Double.parseDouble(tokens[j]);
             }
         }
         return data;
@@ -226,6 +230,10 @@ public class MausMetrics{
     */
     public ArrayList<UndirectedGraph<Integer>> getLocalSimilarityRegions(double threshold){
         UndirectedGraph<Integer> graph = buildSimilarityGraph(threshold);
+        System.out.println("\nGraph built for structures.");
+        System.out.println("Num Vertices: " + graph.size());
+        System.out.println("Num Edges: " + graph.numEdges());
+        System.out.printf("Density: %.2f\n",graph.density());
         ArrayList<UndirectedGraph<Integer>> cliques = new ArrayList<UndirectedGraph<Integer>>();
         do {
             UndirectedGraph<Integer> clique = graph.findMaxClique(graph);
