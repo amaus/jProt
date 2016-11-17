@@ -8,11 +8,10 @@ import java.util.ArrayList;
 import java.util.Date;
 
 /**
- * <p>Usage: AngularDistanceJProt alphaDistancesFile betaDistancesFile differencesFile</p>
- * 
  * <p>This program calculates the angular distance, regions of local similarity, and regions under
  * the global distance test. For the latter two tasks, it prints out the pymol scripts to color
  * those  regions of the structure. </p>
+ * Pass -h as a command line argument for usage information.
  * @since 0.1.2
 */
 public class AngularDistanceJProt{
