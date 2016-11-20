@@ -119,10 +119,8 @@ public class AngularDistanceJProt{
             theTool = null;
             if(mol1FileProvided && mol2FileProvided){
                 theTool = new MausMetrics(mol1FileName, mol2FileName);
-            } else if(diffFileProvided){
-                theTool = new MausMetrics(differencesFileName);
             } else {
-                System.out.println("You must either provide the two molecule CA distance matrix files or the differences file");
+                System.out.println("You must either provide the two molecule CA distance matrix files");
                 System.exit(1);
             }
             if(runAngularDistance) angularDistance();

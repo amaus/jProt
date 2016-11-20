@@ -41,41 +41,16 @@ import java.util.Collection;
  * There should be no value for a residues distance to itself. The differences file
  * is formatted the same, except the values contains the difference of the two
  * elements from the distances matrices.</p>
- * @since 0.1.1
+ * @since 0.1.2
 */
 public class MausMetrics{
     private Double[][] differencesMatrix;
     private Double[][] alphaDistancesMatrix;
     private Double[][] betaDistancesMatrix;
-    private String[] residueIDs;
-
-    /**
-     * A constructor that takes the differences file. If this constructor is used,
-     * the AngularDistance method can not be called because it relies on the
-     * distance matrices for each structure.
-     * @param differencesMatrixFileName the file containing the differences matrix for two
-     *          structures.
-     * @throws FileNotFoundException if the file is not found
-    */
-    public MausMetrics(String differencesMatrixFileName) throws FileNotFoundException{
-        Scanner reader = new Scanner(new File(differencesMatrixFileName));
-        this.residueIDs = reader.nextLine().split(",");
-        this.differencesMatrix = readInDistanceFile(differencesMatrixFileName);
-    }
-
-    /**
-     * A constructor that both the distance matrix files and the differences file.
-     * @param alphaDistancesFileName the file containing the distances matrix for the first structure
-     * @param betaDistancesFileName the file containing the distances matrix for the second structure
-     * @param differencesMatrixFileName the file containing the differences matrix for two
-     *          structures.
-     * @throws FileNotFoundException if any of the files are not found
-    */
-    public MausMetrics(String alphaDistancesFileName, String betaDistancesFileName, String differencesMatrixFileName) throws FileNotFoundException{
-        this(differencesMatrixFileName);
-        this.alphaDistancesMatrix = readInDistanceFile(alphaDistancesFileName);
-        this.betaDistancesMatrix = readInDistanceFile(betaDistancesFileName);
-    }
+    private String[] alphaResidueIDs;
+    private String[] betaResidueIDs;
+    private String alphaStrucID;
+    private String betaStrucID;
 
     /**
      * A constructor that both the distance matrix files. It will calculate the values for the differences.
@@ -84,8 +59,24 @@ public class MausMetrics{
      * @throws FileNotFoundException if any of the files are not found
     */
     public MausMetrics(String alphaDistancesFileName, String betaDistancesFileName) throws FileNotFoundException{
+        // read in the residue IDs for both structures
         Scanner reader = new Scanner(new File(alphaDistancesFileName));
-        this.residueIDs = reader.nextLine().split(",");
+        this.alphaResidueIDs = reader.nextLine().split(",");
+        reader = new Scanner(new File(betaDistancesFileName));
+        this.betaResidueIDs = reader.nextLine().split(",");
+
+        // get the structure name from each file. Will need this name for building
+        // the pymol selection commands later.
+        // This requires that the distance matrix file begin with the PDB id.
+        // something like PDBid.pdb.CADistanceMatrix.csv is a good idea.
+        String[] fileNameTokens = alphaDistancesFileName.split("/"); // all but last element is path.
+        String fileName = fileNameTokens[fileNameTokens.length-1]; // get the last element
+        this.alphaStrucID = fileName.split("\\.")[0]; // split the filename on . and take the zeroth.
+        fileNameTokens = betaDistancesFileName.split("/"); // all but last element is path.
+        fileName = fileNameTokens[fileNameTokens.length-1]; // get the last element
+        this.betaStrucID = fileName.split("\\.")[0];
+
+        // read in the distance matrices and calculate the differences
         this.alphaDistancesMatrix = readInDistanceFile(alphaDistancesFileName);
         this.betaDistancesMatrix = readInDistanceFile(betaDistancesFileName);
         this.differencesMatrix = new Double[getNumResidues()][getNumResidues()];
@@ -156,11 +147,21 @@ public class MausMetrics{
     }
 
     /**
-     * A query to get the residue IDs
+     * A query to get the residue IDs of the alpha structure
      * @return a array of Strings containing the IDs
+     * @since 0.1.2
     */
-    public String[] getResidueIDs(){
-        return this.residueIDs;
+    public String[] getAlphaResidueIDs(){
+        return this.alphaResidueIDs;
+    }
+
+    /**
+     * A query to get the residue IDs of the beta structure
+     * @return a array of Strings containing the IDs
+     * @since 0.1.2
+    */
+    public String[] getBetaResidueIDs(){
+        return this.betaResidueIDs;
     }
 
     /**
@@ -168,7 +169,7 @@ public class MausMetrics{
      * @return the number of residues
     */
     public int getNumResidues(){
-        return getResidueIDs().length;
+        return getAlphaResidueIDs().length;
     }
 
     /**
@@ -334,7 +335,9 @@ public class MausMetrics{
         pymolScript.add("show cartoon");
         int counter = 1;
         for(UndirectedGraph<Integer> region : regions){
-            pymolScript.add("select clique"+counter+", resi " + getNodesString(region, "+"));
+            pymolScript.add("select clique"+counter+", " + alphaStrucID + " and i. " 
+                            + getNodesString(region, "+", alphaResidueIDs) + " or " 
+                            + betaStrucID + " and i. " + getNodesString(region, "+", betaResidueIDs));
             counter++;
         }
         if(regions.size() > 3){
@@ -395,8 +398,7 @@ public class MausMetrics{
      * @return the string that contains all the residue IDs of the residues in this graph separated
      *          by the delimiter
     */
-    private String getNodesString(UndirectedGraph<Integer> graph, String delimiter){
-        String[] resIDs = getResidueIDs();
+    private String getNodesString(UndirectedGraph<Integer> graph, String delimiter, String[] resIDs){
         Collection<Node<Integer>> nodes = graph.getNodes();
         String ret = "";
         int i = 0;
