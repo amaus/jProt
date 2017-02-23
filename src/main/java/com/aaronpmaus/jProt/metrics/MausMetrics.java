@@ -235,17 +235,7 @@ public class MausMetrics{
         System.out.println("Num Vertices: " + graph.size());
         System.out.println("Num Edges: " + graph.numEdges());
         System.out.printf("Density: %.2f\n",graph.density());
-        ArrayList<UndirectedGraph<Integer>> cliques = new ArrayList<UndirectedGraph<Integer>>();
-        do {
-            UndirectedGraph<Integer> clique = graph.findMaxClique(graph);
-            cliques.add(clique);
-            for(Node<Integer> node : clique.getNodes()){
-                // need to pass in a node from the original graph, not one from the clique
-                // that has the same object
-                graph.removeNodeFromGraph(graph.getNode(node.get()));
-            }
-            //System.out.println(getNodesString(clique,"+"));
-        } while(graph.size() > 0);
+        ArrayList<UndirectedGraph<Integer>> cliques = graph.getCliqueCovering();
         return cliques;
     }
 

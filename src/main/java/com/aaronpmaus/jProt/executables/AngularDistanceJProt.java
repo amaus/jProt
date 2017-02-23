@@ -39,7 +39,7 @@ public class AngularDistanceJProt{
         gdtThresholds[2] = 8.0;
         CommandLineParser args = new CommandLineParser(arguments);
         if(arguments.length == 0 || args.contains("-h")){
-            System.out.println(" Usage: AngularDistanceJProt [<options>] <mol1-f:fname> <mol2-f:fname>");
+            System.out.println(" Usage: AngularDistanceJProt [<options>] <mol1-f fname> <mol2-f fname>");
             System.out.println("    options :");
             System.out.println("              -h");
             System.out.println("              \tdisplay this help file.");
@@ -120,7 +120,7 @@ public class AngularDistanceJProt{
             if(mol1FileProvided && mol2FileProvided){
                 theTool = new MausMetrics(mol1FileName, mol2FileName);
             } else {
-                System.out.println("You must either provide the two molecule CA distance matrix files");
+                System.out.println("You must provide the two molecule CA distance matrix files");
                 System.exit(1);
             }
             if(runAngularDistance) angularDistance();
