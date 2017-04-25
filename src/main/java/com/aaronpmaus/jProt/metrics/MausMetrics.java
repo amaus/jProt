@@ -235,7 +235,8 @@ public class MausMetrics{
         System.out.println("Num Vertices: " + graph.size());
         System.out.println("Num Edges: " + graph.numEdges());
         System.out.printf("Density: %.2f\n",graph.density());
-        ArrayList<UndirectedGraph<Integer>> cliques = graph.getCliqueCovering();
+        MaxCliqueSolver<Integer> maxCliqueTool = new IncMaxCliqueAdapter();
+        ArrayList<UndirectedGraph<Integer>> cliques = maxCliqueTool.getCliqueCovering(graph);
         return cliques;
     }
 
@@ -264,11 +265,12 @@ public class MausMetrics{
             double threshold = thresholds[i];
             UndirectedGraph<Integer> graph = buildSimilarityGraph(threshold);
             UndirectedGraph<Integer> clique;
+            MaxCliqueSolver<Integer> maxCliqueTool = new IncMaxCliqueAdapter();
             if(i == 0){
-                clique = graph.findMaxClique(graph);
+                clique = maxCliqueTool.findMaxClique(graph);
             } else {
                 graph = graph.getNeighborhood(lastClique.getNodes());
-                clique = graph.findMaxClique(graph);
+                clique = maxCliqueTool.findMaxClique(graph);
             }
             regions.add(clique);
             lastClique = clique;
