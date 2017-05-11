@@ -33,10 +33,11 @@ public class AngularDistanceJProt{
      * @param arguments the command line arguments. use -h for usage info.
     */
     public static void main(String[] arguments){
-        gdtThresholds = new double[3];
-        gdtThresholds[0] = 2.0;
-        gdtThresholds[1] = 4.0;
-        gdtThresholds[2] = 8.0;
+        gdtThresholds = new double[4];
+        gdtThresholds[0] = 1.0;
+        gdtThresholds[1] = 2.0;
+        gdtThresholds[2] = 4.0;
+        gdtThresholds[3] = 8.0;
         CommandLineParser args = new CommandLineParser(arguments);
         if(arguments.length == 0 || args.contains("-h")){
             System.out.println(" Usage: AngularDistanceJProt [<options>] <mol1-f fname> <mol2-f fname>");
@@ -85,7 +86,8 @@ public class AngularDistanceJProt{
             }
             if(args.contains("--gdt-ha")){
                 runGDT = true;
-                gdtThresholds[0] = 1.0;
+                gdtThresholds[0] = 0.5;
+                gdtThresholds[1] = 1.0;
                 gdtThresholds[1] = 2.0;
                 gdtThresholds[2] = 4.0;
             }
