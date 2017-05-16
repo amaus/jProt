@@ -88,8 +88,8 @@ public class AngularDistanceJProt{
                 runGDT = true;
                 gdtThresholds[0] = 0.5;
                 gdtThresholds[1] = 1.0;
-                gdtThresholds[1] = 2.0;
-                gdtThresholds[2] = 4.0;
+                gdtThresholds[2] = 2.0;
+                gdtThresholds[3] = 4.0;
             }
             if(args.contains("--ls") || args.contains("--local-similarity")){
                 runLocalSimilarity = true;
