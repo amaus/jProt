@@ -236,6 +236,7 @@ public class MausMetrics{
         System.out.println("Num Edges: " + graph.numEdges());
         System.out.printf("Density: %.2f\n",graph.density());
         MaxCliqueSolver<Integer> maxCliqueTool = new IncMaxCliqueAdapter();
+        //MaxCliqueSolver<Integer> maxCliqueTool = new MausMaxCliqueSolver();
         ArrayList<UndirectedGraph<Integer>> cliques = maxCliqueTool.getCliqueCovering(graph);
         return cliques;
     }
@@ -264,12 +265,15 @@ public class MausMetrics{
         for(int i = 0; i < thresholds.length; i++){
             double threshold = thresholds[i];
             UndirectedGraph<Integer> graph = buildSimilarityGraph(threshold);
+            String fname = graph.getGraphFileName();
             UndirectedGraph<Integer> clique;
             MaxCliqueSolver<Integer> maxCliqueTool = new IncMaxCliqueAdapter();
+            //MaxCliqueSolver<Integer> maxCliqueTool = new MausMaxCliqueSolver();
             if(i == 0){
                 clique = maxCliqueTool.findMaxClique(graph);
             } else {
                 graph = graph.getNeighborhood(lastClique.getNodes());
+                graph.setGraphFileName(fname);
                 clique = maxCliqueTool.findMaxClique(graph);
             }
             regions.add(clique);
@@ -359,6 +363,7 @@ public class MausMetrics{
     private UndirectedGraph<Integer> buildSimilarityGraph( double threshold ){
         UndirectedGraph<Integer> graph = new UndirectedGraph<Integer>();
         Double[][] data = getDifferencesMatrix();
+        Double[][] referenceDistances = getAlphaDistancesMatrix();
         //String dataString = ""; // building the String for debugging purposes is VERY slow (minutes!).
         for(int row = 0; row < data.length; row++){
             for(int col = 0; col < data[row].length; col++){
@@ -366,6 +371,8 @@ public class MausMetrics{
                     //dataString += " N";
                 } else {
                     double val = data[row][col];
+                    double refDist = referenceDistances[row][col];
+                    //if(refDist < 15.0 && val < threshold){
                     if(val < threshold){
                         //dataString += " -";
                         //dataString += " "+val;
@@ -379,6 +386,7 @@ public class MausMetrics{
             //dataString += "\n";
         } // finished reading in the data
         //System.out.print(dataString);
+        graph.setGraphFileName(this.alphaStrucID+"_"+this.betaStrucID+".dimacs");
         return graph;
     }
 

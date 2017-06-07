@@ -18,7 +18,7 @@ public class AngularDistanceJProt{
     private static boolean runAngularDistance = false;
     private static boolean runLocalSimilarity = false;
     private static boolean runGDT = false;
-    private static double localSimilarityThreshold = 2.0;
+    private static double localSimilarityThreshold = 1.0;
     private static double[] gdtThresholds;
     private static String mol1FileName;
     private static String mol2FileName;
@@ -38,6 +38,7 @@ public class AngularDistanceJProt{
         gdtThresholds[1] = 2.0;
         gdtThresholds[2] = 4.0;
         gdtThresholds[3] = 8.0;
+        localSimilarityThreshold = 1.0;
         CommandLineParser args = new CommandLineParser(arguments);
         if(arguments.length == 0 || args.contains("-h")){
             System.out.println(" Usage: AngularDistanceJProt [<options>] <mol1-f fname> <mol2-f fname>");
@@ -172,14 +173,20 @@ public class AngularDistanceJProt{
         String cliquesStr = "Cliques:";
         String resNumStr = "Num Res:";
         String percentsStr = "Percents:";
+        double percentInTopFourCliques = 0;
         for(int i = 0; i < localSimilarityRegions.size(); i++){
             cliquesStr += String.format("\tclique%d",i+1);
             resNumStr += String.format("\t%.0f",globalDistanceTest[i][0]);
             percentsStr += String.format("\t%.2f%%",globalDistanceTest[i][1]*100);
+            if(i < 4){
+                percentInTopFourCliques += globalDistanceTest[i][1];
+            }
         }
         System.out.println(cliquesStr);
         System.out.println(resNumStr);
         System.out.println(percentsStr);
+        System.out.println("The Local Similarity Score is the percent of residues in the top four regions.");
+        System.out.printf("LS Score: %.2f\n", percentInTopFourCliques*100);
         long end = new Date().getTime();
         System.out.println("Total Time for Local Similarity Covering: " + (end - start) + " milleseconds.");
     }
