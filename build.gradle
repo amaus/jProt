@@ -13,6 +13,8 @@ group = "com.aaronpmaus.jProt"
 //       made within private code. It may include PATCH level changes
 // MAJOR is incremented if backwards incompatible changes are introduced to the
 //       public API. It may include MINOR and PATCH level changes.
+// After making a release, update the number. at the very least increment
+// PATCH, that way the next build won't override the last release.
 version '0.5.0'
 // the default jar destinationDir is $buildDir/libs. Make it singular so that
 // the executables made during the build phase will set their CLASSPATH correctly.
@@ -40,9 +42,13 @@ task copyDepToLib(type: Copy){
 // archives of the executables.
 defaultTasks 'build'
 zipJavadoc.dependsOn javadoc
+
+// ONLY USE INSTALL WHEN CREATING A RELEASE. If used for routine compilation, it
+// will override the release file in the local maven repository
 install.dependsOn zipJavadoc, copyDepToLib
-//build.dependsOn zipJavadoc
-build.dependsOn copyDepToLib
+
+// use build for day in and out compilation.
+build.dependsOn javadoc, copyDepToLib
 
 // add the javadoc zip to the list of artifacts to be published in the maven repository
 def javadocZip = file("$buildDir/distributions/jProt-$version"+"-javadoc.zip")
