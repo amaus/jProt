@@ -69,7 +69,8 @@ You can generate the latest javadocs via:
 
 They will be located within the build/docs/javadoc directory in the project.
 
-Javadoc for the most recent minor release of the library can be found at [jprotein.aaronpmaus.com](http://jprotein.aaronpmaus.com).
+Javadoc for the most recent minor release of the library can be found at
+[jprot.aaronpmaus.com](http://jprot.aaronpmaus.com).
 ## Contributing
 1. Fork it!
 2. Create your feature branch: `git checkout -b my-new-feature`
@@ -79,6 +80,9 @@ Javadoc for the most recent minor release of the library can be found at [jprote
 
 ## History
 This project was started in June 2016.
+
+## About Versioning
+This project uses Semantic Versioning. See http://semver.org
 
 ## Credits
 Aaron Maus
