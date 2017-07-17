@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 [None]
 ### Changed
-[None]
+- Internal Change: changed contains(String flag) in CommandLineParser to no
+  longer split on colons. The proper format for arguments if `-flag value`
 ### Deprecated
 [None]
 ### Removed

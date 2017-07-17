@@ -29,18 +29,14 @@ public class CommandLineParser{
 
     /**
      * Checks to see if the command line arguments contains the given
-     * flag. A command line argument can consist of a flag and a value
-     * separated by a ':'. eq. -d:2.6 or --distance:2.6.
-     * This method checks if the flag of any of the arguments is
-     * equal to the given flag.
+     * flag.
      * @param flag the flag to check for
      * @return true if found, false otherwise.
-     * @since 0.3.0
+     * @since 0.6.0
     */
     public boolean contains(String flag){
         for(String arg : args){ // for every cmd argument
-            String[] pair = arg.split(":");
-            if(pair[0].equals(flag)){ // if it contains the flag
+            if(arg.equals(flag)){ // if it contains the flag
                 return true; // return true
             }
         }
