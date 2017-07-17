@@ -12,8 +12,8 @@ import java.util.Date;
  * the global distance test. For the latter two tasks, it prints out the pymol scripts to color
  * those  regions of the structure. </p>
  * Pass -h as a command line argument for usage information.
- * @version 0.1.0
- * @since 0.1.0
+ * @version 0.5.0
+ * @since 0.5.0
 */
 public class JProtMetrics{
     private static boolean runAngularDistance = false;
@@ -141,6 +141,7 @@ public class JProtMetrics{
      * Calculates and prints the Angular Distance between the two structures.
      * Range: (0,100)
      * 0 is identical.
+     * @since 0.5.0
     */
     public static void angularDistance(){
         System.out.println("############################### AngularDistance ###############################");
@@ -154,6 +155,7 @@ public class JProtMetrics{
      * internally consistent and cover the graph. This can be used to find the domains of a structure
      * that don't changes internally but do change in orientation of position relative to each other.
      * @param threshold the threshold to use for finding the regions of local similarity
+     * @since 0.5.0
     */
     public static void localSimilarity(double threshold){
         System.out.println("########################### Local Similarity Covering #########################");
@@ -198,6 +200,7 @@ public class JProtMetrics{
      * It prints out the number and percent of residues under each threshold and it prints
      * out the average of the percent of residues under all thresholds.
      * @param thresholds the thresholds to use in the global distance test.
+     * @since 0.5.0
     */
     public static void globalDistanceTest(double[] thresholds){
         System.out.println("############################# Global Distance Test ############################");

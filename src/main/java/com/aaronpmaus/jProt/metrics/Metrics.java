@@ -41,7 +41,8 @@ import java.util.Collection;
  * There should be no value for a residues distance to itself. The differences file
  * is formatted the same, except the values contains the difference of the two
  * elements from the distances matrices.</p>
- * @since 0.1.2
+ * @version 0.5.0
+ * @since 0.5.0
 */
 public class Metrics{
     private Double[][] differencesMatrix;
@@ -57,6 +58,7 @@ public class Metrics{
      * @param alphaDistancesFileName the file containing the distances matrix for the first structure
      * @param betaDistancesFileName the file containing the distances matrix for the second structure
      * @throws FileNotFoundException if any of the files are not found
+     * @since 0.5.0
     */
     public Metrics(String alphaDistancesFileName, String betaDistancesFileName) throws FileNotFoundException{
         // read in the residue IDs for both structures
@@ -96,6 +98,7 @@ public class Metrics{
     /*
      * a private helper method that takes in a distances file and returns a 2D array with the
      * values.
+     * @param fileName the file to read the distances from.
     */
     private Double[][] readInDistanceFile(String fileName) throws FileNotFoundException{
         Scanner fileReader = new Scanner(new File(fileName));
@@ -125,6 +128,7 @@ public class Metrics{
     /**
      * A query to get the differences matrix
      * @return a 2D array of Doubles containing the differences values
+     * @since 0.5.0
     */
     public Double[][] getDifferencesMatrix(){
         return this.differencesMatrix;
@@ -133,6 +137,7 @@ public class Metrics{
     /**
      * A query to get the alpha distance matrix
      * @return a 2D array of Doubles containing the values
+     * @since 0.5.0
     */
     public Double[][] getAlphaDistancesMatrix(){
         return this.alphaDistancesMatrix;
@@ -141,6 +146,7 @@ public class Metrics{
     /**
      * A query to get the beta distance matrix
      * @return a 2D array of Doubles containing the values
+     * @since 0.5.0
     */
     public Double[][] getBetaDistancesMatrix(){
         return this.betaDistancesMatrix;
@@ -149,7 +155,7 @@ public class Metrics{
     /**
      * A query to get the residue IDs of the alpha structure
      * @return a array of Strings containing the IDs
-     * @since 0.1.2
+     * @since 0.5.0
     */
     public String[] getAlphaResidueIDs(){
         return this.alphaResidueIDs;
@@ -158,7 +164,7 @@ public class Metrics{
     /**
      * A query to get the residue IDs of the beta structure
      * @return a array of Strings containing the IDs
-     * @since 0.1.2
+     * @since 0.5.0
     */
     public String[] getBetaResidueIDs(){
         return this.betaResidueIDs;
@@ -167,6 +173,7 @@ public class Metrics{
     /**
      * A query to get the number of residues
      * @return the number of residues
+     * @since 0.5.0
     */
     public int getNumResidues(){
         return getAlphaResidueIDs().length;
@@ -177,6 +184,7 @@ public class Metrics{
      * flattens them into a vector and calculates the angle between them. It scales the angle
      * to be in the range 0-100 where 0 is identical and returns that value.
      * @return the angular distance between the two structures. range 0-100. 0 is identical.
+     * @since 0.5.0
     */
     public double angularDistance( ) throws NullPointerException{
         if(getAlphaDistancesMatrix() == null || getBetaDistancesMatrix() == null){
@@ -213,6 +221,7 @@ public class Metrics{
      * consistency.
      * @return an ArrayList of the graphs of the regions of local similarity. Each graph
      *          consists of nodes representing the residues in the region of similarity.
+     * @since 0.5.0
     */
     public ArrayList<UndirectedGraph<Integer>> getLocalSimilarityRegions(){
         return getLocalSimilarityRegions(1.0);
@@ -228,6 +237,7 @@ public class Metrics{
      * @param threshold the threshold to use when building the similarity graph.
      * @return an ArrayList of the graphs of the regions of local similarity. Each graph
      *          consists of nodes representing the residues in the region of similarity.
+     * @since 0.5.0
     */
     public ArrayList<UndirectedGraph<Integer>> getLocalSimilarityRegions(double threshold){
         UndirectedGraph<Integer> graph = buildSimilarityGraph(threshold);
@@ -246,6 +256,7 @@ public class Metrics{
      * global distance thresholds of 1.0, 2.0, 4.0, and 8.0 angstroms.
      * @return an ArrayList of the graphs of the regions of similarity under the default
      *          global distance thresholds of 1.0, 2.0, 4.0, and 8.0 angstroms.
+     * @since 0.5.0
     */
     public ArrayList<UndirectedGraph<Integer>> getGlobalDistanceRegions(){
         double[] thresholds = {1.0, 2.0, 4.0, 8.0};
@@ -258,6 +269,7 @@ public class Metrics{
      * @param thresholds the thresholds to use to find the regions of similarity.
      * @return an ArrayList of the graphs of the regions of similarity under the
      *          global distance thresholds passed in.
+     * @since 0.5.0
     */
     public ArrayList<UndirectedGraph<Integer>> getGlobalDistanceRegions(double[] thresholds){
         ArrayList<UndirectedGraph<Integer>> regions = new ArrayList<UndirectedGraph<Integer>>();
@@ -292,6 +304,7 @@ public class Metrics{
      *          at index 1 the percent of residues in that regions.
      *          The last row contains at index 0 the average of the number of residues in
      *          each region and at index 1 the average of the percent of residues in each region.
+     * @since 0.5.0
     */
     public double[][] getGlobalDistanceTestScore(ArrayList<UndirectedGraph<Integer>> regions){
         // returns an array of 5 numbers, the first 4 are the percent residues under the
@@ -322,6 +335,7 @@ public class Metrics{
      * a set of regions of similarity.
      * @param regions an ArrayList of the graphs representing the regions of similarity.
      * @return the set of pymol commands to properly color the structure.
+     * @since 0.5.0
     */
     public ArrayList<String> getPymolColoringScript(ArrayList<UndirectedGraph<Integer>> regions){
         ArrayList<String> pymolScript = new ArrayList<String>();

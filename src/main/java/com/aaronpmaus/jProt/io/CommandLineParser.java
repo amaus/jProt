@@ -8,6 +8,9 @@ import java.security.InvalidParameterException;
  * executables. Arguments to set values are in the form flag:val
  * where flag is something like -d or --distance, and val is the
  * value to be used.
+ * @author Aaron Maus aaron@aaronpmaus.com
+ * @version 0.3.0
+ * @since 0.3.0
 */
 public class CommandLineParser{
     private ArrayList<String> args;
@@ -15,6 +18,7 @@ public class CommandLineParser{
     /**
      * Constructor requires the array of command line arguments
      * @param arguments the array of command line args
+     * @since 0.3.0
     */
     public CommandLineParser(String[] arguments){
         this.args = new ArrayList<String>( );
@@ -31,6 +35,7 @@ public class CommandLineParser{
      * equal to the given flag.
      * @param flag the flag to check for
      * @return true if found, false otherwise.
+     * @since 0.3.0
     */
     public boolean contains(String flag){
         for(String arg : args){ // for every cmd argument
@@ -57,7 +62,7 @@ public class CommandLineParser{
             }
         }
         if(!found){
-            throw new InvalidParameterException("Flag " + flag + 
+            throw new InvalidParameterException("Flag " + flag +
                         "not found in command line arguments.");
         }
         return index;
@@ -68,6 +73,7 @@ public class CommandLineParser{
      * @param flag the flag to get the value of
      * @return the value for that flag
      * @throws InvalidParameterException if the flag is not in the cmd line args
+     * @since 0.3.0
     */
     public String getValue(String flag) throws InvalidParameterException {
         return args.get( getIndex(flag)+1 );
@@ -95,7 +101,7 @@ public class CommandLineParser{
             }
         }
         if(!found){
-            throw new InvalidParameterException("Flag " + flag + 
+            throw new InvalidParameterException("Flag " + flag +
                         "not found in command line arguments.");
         }
         return val;
