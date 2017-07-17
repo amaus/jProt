@@ -3,6 +3,16 @@ apply plugin: "maven"
 apply plugin: "application" // implictly applies the java and distribution plugins
 
 group = "com.aaronpmaus.jProt"
+// for versioning, this project uses Semantic Versioning.
+// see http://semver.org
+// MAJOR.MINOR.PATCH
+// PATCH is incremented if backwards compatible bug fixes are introduced
+// MINOR is incremented if new, backwards compatible functionality is introduced
+//       or if any public API functionality is marked as deprecated. It may
+//       be incremented if substantial new functionality or improvements are
+//       made within private code. It may include PATCH level changes
+// MAJOR is incremented if backwards incompatible changes are introduced to the
+//       public API. It may include MINOR and PATCH level changes.
 version '0.5.0'
 // the default jar destinationDir is $buildDir/libs. Make it singular so that
 // the executables made during the build phase will set their CLASSPATH correctly.

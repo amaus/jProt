@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
-[None]
+- Section on Semantic Versioning to README.
+- Comments in build.gradle to explain Semantic Versioning.
 ### Changed
 - Internal Change: changed contains(String flag) in CommandLineParser to no
   longer split on colons. The proper format for arguments if `-flag value`
