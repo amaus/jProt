@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Section on Semantic Versioning to README.
 - Comments in build.gradle to explain Semantic Versioning.
+- Comments in build.gradle to explain gradle build and install usage.
+- class AminoAcid
+- class Bond
+- class EncadParameters
+- class Molecule
 ### Changed
 - Internal Change: changed contains(String flag) in CommandLineParser to no
   longer split on colons. The proper format for arguments if `-flag value`
