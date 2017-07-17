@@ -10,16 +10,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /**
- * <p>MausMetrics is a collection of protein similarity metrics. It consists of Angular Distance,
+ * <p>Metrics is a collection of protein similarity metrics. It consists of Angular Distance,
  * Local Similarity, and Global Similarity.</p>
- * 
+ *
  * <p>To calculate Angular Distance, we vectorize the Carbon Alpha Distance matrices of two proteins
  * and calculate the angle between those two vectors.</p>
  *
  * <p>Local similarity takes the difference of the two distance matrices, builds a graph out of the
  * differences, finds the max clique (that is, max region where all residues are the same distance
  * apart in both structures) of that graph, removes all those nodes from the graph, finds
- * the next max clique and continues to find a clique covering of the graph. That is, a set of 
+ * the next max clique and continues to find a clique covering of the graph. That is, a set of
  * regions that are all internally consistent and cover the protein structure. To build the graph,
  * if two residues are the same distance apart in the two structures, we draw an edge between vertices
  * representing those residues. In practice, for the two residues, if the difference of their distance
@@ -43,7 +43,7 @@ import java.util.Collection;
  * elements from the distances matrices.</p>
  * @since 0.1.2
 */
-public class MausMetrics{
+public class Metrics{
     private Double[][] differencesMatrix;
     private Double[][] alphaDistancesMatrix;
     private Double[][] betaDistancesMatrix;
@@ -58,7 +58,7 @@ public class MausMetrics{
      * @param betaDistancesFileName the file containing the distances matrix for the second structure
      * @throws FileNotFoundException if any of the files are not found
     */
-    public MausMetrics(String alphaDistancesFileName, String betaDistancesFileName) throws FileNotFoundException{
+    public Metrics(String alphaDistancesFileName, String betaDistancesFileName) throws FileNotFoundException{
         // read in the residue IDs for both structures
         Scanner reader = new Scanner(new File(alphaDistancesFileName));
         this.alphaResidueIDs = reader.nextLine().split(",");
@@ -95,7 +95,7 @@ public class MausMetrics{
 
     /*
      * a private helper method that takes in a distances file and returns a 2D array with the
-     * values. 
+     * values.
     */
     private Double[][] readInDistanceFile(String fileName) throws FileNotFoundException{
         Scanner fileReader = new Scanner(new File(fileName));
@@ -281,7 +281,7 @@ public class MausMetrics{
         }
         return regions;
     }
-    
+
     /**
      * Calculates and returns the percent of residues in each region of similarity along with
      * the average of those percents.
@@ -331,8 +331,8 @@ public class MausMetrics{
         pymolScript.add("show cartoon");
         int counter = 1;
         for(UndirectedGraph<Integer> region : regions){
-            pymolScript.add("select clique"+counter+", " + alphaStrucID + " and i. " 
-                            + getNodesString(region, "+", alphaResidueIDs) + " or " 
+            pymolScript.add("select clique"+counter+", " + alphaStrucID + " and i. "
+                            + getNodesString(region, "+", alphaResidueIDs) + " or "
                             + betaStrucID + " and i. " + getNodesString(region, "+", betaResidueIDs));
             counter++;
         }
@@ -357,7 +357,7 @@ public class MausMetrics{
      * a threshold.
      * @param threshold the threshold to use when determining whether to add an edge or not
      * @return the similarity graph built from that threshold. It consists of a node for each
-     *          residue and an edge between two residues if the difference of their distance 
+     *          residue and an edge between two residues if the difference of their distance
      *          within each of the structures is less than the threshold.
     */
     private UndirectedGraph<Integer> buildSimilarityGraph( double threshold ){

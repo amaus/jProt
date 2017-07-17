@@ -12,9 +12,10 @@ import java.util.Date;
  * the global distance test. For the latter two tasks, it prints out the pymol scripts to color
  * those  regions of the structure. </p>
  * Pass -h as a command line argument for usage information.
- * @since 0.1.2
+ * @version 0.1.0
+ * @since 0.1.0
 */
-public class AngularDistanceJProt{
+public class JProtMetrics{
     private static boolean runAngularDistance = false;
     private static boolean runLocalSimilarity = false;
     private static boolean runGDT = false;
@@ -26,7 +27,7 @@ public class AngularDistanceJProt{
     private static boolean diffFileProvided = false;
     private static boolean mol1FileProvided = false;
     private static boolean mol2FileProvided = false;
-    private static MausMetrics theTool;
+    private static Metrics theTool;
     /**
      * Runs the metrics of this program.
      * run <p>AngularDistanceJProt -h</p> for help on how to run it.
@@ -121,7 +122,7 @@ public class AngularDistanceJProt{
         try {
             theTool = null;
             if(mol1FileProvided && mol2FileProvided){
-                theTool = new MausMetrics(mol1FileName, mol2FileName);
+                theTool = new Metrics(mol1FileName, mol2FileName);
             } else {
                 System.out.println("You must provide the two molecule CA distance matrix files");
                 System.exit(1);
@@ -230,10 +231,10 @@ public class AngularDistanceJProt{
         //System.out.printf("Thresholds:\t%.2f\t%.2f\t%.2f\t%.2f\n",
         //                    thresholds[0], thresholds[1], thresholds[2], thresholds[3]);
         //System.out.printf("Num Res:\t%.0f\t%.0f\t%.0f\t%.0f\n",
-        //                    globalDistanceTest[0][0], globalDistanceTest[1][0], 
+        //                    globalDistanceTest[0][0], globalDistanceTest[1][0],
         //                    globalDistanceTest[2][0], globalDistanceTest[3][0]);
         //System.out.printf("Percents:\t%.2f%%\t%.2f%%\t%.2f%%\t%.2f%%\n",
-        //                    globalDistanceTest[0][1]*100, globalDistanceTest[1][1]*100, 
+        //                    globalDistanceTest[0][1]*100, globalDistanceTest[1][1]*100,
         //                    globalDistanceTest[2][1]*100, globalDistanceTest[3][1]*100);
 
         // The last row in the array holds the averages. If there are 4 thresholds,
