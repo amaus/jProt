@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [0.5.0] - 2017-7-17
 ### Added
 - Section header in README for the blurb about the jMath Dependency
-- Releases all the way through [0.5.0] to this CHANGELOG
+- Releases all the way through 0.5.0 to this CHANGELOG
 ### Changed
 - Renamed class MausMetrics to Metrics and executable AngularDistanceJProt to
   JProtMetrics.
