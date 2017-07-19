@@ -74,7 +74,11 @@ public class Molecule {
     }
 
     /**
-     *
+     * Adds an atom to this molecule. This will add this and all the atoms
+     * bonded to it to this molecule if they are not already there. Will also
+     * add the bonds if they haven't been added as well.
+     * @param atomToAdd the atom to add to this molecule
+     * @param atomsBondedToIt the atoms bonded to it.
     */
     public void addAtom(Atom atomToAdd, Atom... atomsBondedToIt){
         for(Atom atomBondedToIt : atomsBondedToIt){
