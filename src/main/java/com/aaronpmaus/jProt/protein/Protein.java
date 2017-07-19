@@ -2,6 +2,7 @@ package com.aaronpmaus.jProt.protein;
 
 import com.aaronpmaus.jMath.graph.*;
 import java.util.HashMap;
+import java.util.ArrayList;
 /**
  * A Protein has one or more PolypeptideChains
  * @author Aaron Maus aaron@aaronpmaus.com
@@ -31,7 +32,7 @@ public class Protein {
         int index = 0;
         for(PolypeptideChain chain: chains){
             chainIDLookUpTable.put(chain.getChainID(), index);
-            chains.add(chain);
+            this.chains.add(chain);
             index++;
         }
     }
