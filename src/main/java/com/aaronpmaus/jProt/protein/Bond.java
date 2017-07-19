@@ -42,7 +42,7 @@ public class Bond {
             this.a2 = a1;
             this.a1 = a2;
         } else {
-            throw new IllegalArgumentException("Atoms added to a bond must be different.")
+            throw new IllegalArgumentException("Atoms added to a bond must be different.");
         }
         this.bondStrength = bondStrength;
         this.bondLength = a1.distance(a2);
@@ -111,6 +111,17 @@ public class Bond {
         double bondForceConstant = EncadParameters.getBondForceConstant(a1, a2);
         double idealBondLength = EncadParameters.getBondLength(a1, a2);
         return (bondForceConstant * Math.pow(getBondLength() - idealBondLength, 2));
+    }
+
+    /**
+     * The hashCode of a bond is the concatenation of the hash codes of the
+     * atoms in the bond.
+     * @return an int, the concatenations of the hash codes of the atoms in
+     *         the bond.
+    */
+    @Override
+    public int hashCode(){
+        return Integer.parseInt("" + getAtomOne().hashCode() + getAtomTwo().hashCode());
     }
 
     /**
