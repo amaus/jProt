@@ -3,3 +3,4 @@ build
 .gradle
 *.deprecated
 gradle.properties
+.DS_STORE
