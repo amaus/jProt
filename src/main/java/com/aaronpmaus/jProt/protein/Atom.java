@@ -2,7 +2,6 @@ package com.aaronpmaus.jProt.protein;
 
 import java.lang.IllegalArgumentException;
 import com.aaronpmaus.jMath.linearAlgebra.*;
-import java.util.Observable;
 
 /**
  * The classical building block of all matter, the Atom.
@@ -18,7 +17,7 @@ import java.util.Observable;
  * @version 0.6.0
  * @since 0.1.0
 */
-public class Atom extends Observable implements Comparable<Atom> {
+public class Atom implements Comparable<Atom> {
     private static int maxSerialNum = 0;
     private final double mass;
     private double charge;
@@ -207,8 +206,6 @@ public class Atom extends Observable implements Comparable<Atom> {
     */
     public void moveTo(double x, double y, double z) {
         getCoordinates().moveTo(x, y, z);
-        setChanged();
-        notifyObservers();
     }
 
     @Override
@@ -255,7 +252,8 @@ public class Atom extends Observable implements Comparable<Atom> {
 
     @Override
     /**
-     * Idicates whether two atoms are equal.
+     * Idicates whether two atoms are equal. Equality is based on the serial
+     * number. Every atom must have a different serial number
      * @return returns true if the two atoms have the same serial number
      * @since 0.6.0
     */
