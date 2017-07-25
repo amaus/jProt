@@ -10,10 +10,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Section on Semantic Versioning to README.
 - Comments in build.gradle to explain Semantic Versioning.
 - Comments in build.gradle to explain gradle build and install usage.
-- class AminoAcid
+- class Residue
 - class Bond
 - class EncadParameters
 - class Molecule
+- class PolypeptideChain
+- class Protein
+- class PDBFileIO
 ### Changed
 - Internal Change: changed contains(String flag) in CommandLineParser to no
   longer split on colons. The proper format for arguments if `-flag value`
@@ -26,7 +29,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Security
 [None]
 
-## [0.5.0] - 2017-7-17
+## [0.5.0] - 2017-07-17
 ### Added
 - Section header in README for the blurb about the jMath Dependency
 - Releases all the way through [0.5.0] to this CHANGELOG
@@ -36,7 +39,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 - Executable PointRunner from the project.
 
-## [0.4.4] - 2017-6-7
+## [0.4.4] - 2017-06-07
 ### Changed
 - The Regions of Local Similarity now have a default threshold of 1.0 Angstroms.
   The percent of residues in the top 4 regions is now printed out.
@@ -48,12 +51,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - updated Global Distance Test Thresholds in AngularDistanceJProt from 2, 4,
   and 8 to 1, 2, 4, and 8 with high accuracy threshold at half of those.
 
-## [0.4.2] - 2017-4-25
+## [0.4.2] - 2017-04-25
 ### Changed
 - updated MausMetrics to use a faster MAX CLIQUE solver from jMath. The
   speed up is significant.
 
-## [0.4.1] - 2017-2-23
+## [0.4.1] - 2017-02-23
 ### Changed
 - updated logic in MausMetrics when finding clique covering. Removed the clique
   covering logic because it has been added to jMath.
