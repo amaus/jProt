@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 [None]
 ### Fixed
-[None]
+- Dates in CHANGELOG to better conform to ISO 8601
 ### Security
 [None]
 
