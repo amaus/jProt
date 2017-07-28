@@ -89,6 +89,17 @@ public class Molecule {
         calcCenterOfMass();
     }
 
+    /**
+     * Adds a bond to this molecule. It will add both atoms if they are not
+     * already added. It will also add the bond if it hasn't been added.
+     * @param bond the bond to add
+    */
+    public void addBond(Bond bond){
+        atoms.addEdge(bond.getAtomOne(), bond.getAtomTwo());
+        this.covalentBonds.add(bond);
+        calcCenterOfMass();
+    }
+
     @Override
     /**
      * Returns a String Representation of this Molecule.

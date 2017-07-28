@@ -1,6 +1,5 @@
 package com.aaronpmaus.jProt.protein;
 
-import java.lang.IllegalArgumentException;
 import com.aaronpmaus.jMath.linearAlgebra.*;
 
 /**
@@ -26,8 +25,8 @@ public class Atom implements Comparable<Atom> {
     private final double radius;
     private Vector itsCoordinates;
     private int serialNumber;
-    private double occupancy;
-    private double tempFactor;
+    private double occupancy; // -1.0 means no value
+    private double tempFactor; // -1.0 means no value
 
     /**
      * Builds an atom of type element located at the origin.
@@ -40,12 +39,14 @@ public class Atom implements Comparable<Atom> {
      * @param serialNumber The Serial Number for this Atom.
      * @param occupancy the Occupancy for this Atom.
      * @param tempFactor the Temperature Factor for this Atom.
+     * @param charge the charge of the atom.
      * @throws IllegalArgumentException thrown if the element is not one of
      *                                  the allowed elements.
      * @since 0.6.0
     */
-    public Atom(String atomName, int serialNumber, double occupancy, double tempFactor){
-        this(atomName, serialNumber, occupancy, tempFactor, 0, 0, 0);
+    public Atom(String atomName, int serialNumber, double occupancy,
+                double tempFactor, double charge){
+        this(atomName, serialNumber, occupancy, tempFactor, charge, 0, 0, 0);
     }
 
     /**
@@ -59,6 +60,7 @@ public class Atom implements Comparable<Atom> {
      * @param serialNumber The Serial Number for this Atom.
      * @param occupancy the Occupancy for this Atom.
      * @param tempFactor the Temperature Factor for this Atom.
+     * @param charge the charge of the atom.
      * @param x         The x coordinate of this atom.
      * @param y         The y coordinate of this atom.
      * @param z         The z coordinate of this atom.
@@ -66,9 +68,10 @@ public class Atom implements Comparable<Atom> {
      *                                  the allowed elements.
      * @since 0.6.0
     */
-    public Atom(String atomName, int serialNumber, double occupancy, double tempFactor, double x, double y, double z){
+    public Atom(String atomName, int serialNumber, double occupancy,
+                double tempFactor, double charge, double x, double y, double z){
         itsCoordinates = new Vector(x,y,z);
-        this.atomName = atomName;
+        this.atomName = atomName.toUpperCase();
         this.charge = 0;
         this.serialNumber = serialNumber;
         this.occupancy = occupancy;
@@ -178,7 +181,7 @@ public class Atom implements Comparable<Atom> {
     }
 
     /**
-     * Returns the name of this atom
+     * Returns the name of this atom. eg. CA, CB, C, O, N, CD, CD1, etc...
      * @return the name of this atom.
      * @since 0.6.0
     */
