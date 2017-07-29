@@ -1,0 +1,32 @@
+!main bonds
+N   CA
+CA  C
+C   O
+C   OXT
+!hydrogens
+N   H
+N   1H
+N   2H
+N   3H
+CA  1HA
+CA  2HA
+!atom types
+# column 1: atom name
+# column 2: AMBER all atom atomtype
+# column 3: AMBER united atom atomtype
+# column 4: SUMMA atom type
+# column 5: SUMMA environment type
+# column 6: SUMMA topology type
+# column 7: ENCAD atomtype
+# column 8: AMBER95 atomtype
+N    N    N    N1   N
+CA   CT   C2   C2   CT
+C    C    C    AO   C
+O    O    O    OA   O
+OXT  O    O    O"   O
+H    H    -    HN   H
+1HA  HC   -    HC   H1
+2HA  HC   -    HC   H1
+1H   H    -    H    HM
+2H   H    -    H    HM
+3H   H    -    H    HM

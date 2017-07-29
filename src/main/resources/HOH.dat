@@ -1,0 +1,9 @@
+!main bonds
+O
+!atom types
+# column 1: atom name
+# column 2: AMBER all atom atomtype
+# column 3: AMBER united atom atomtype
+# column 4: ENCAD atomtype
+# column 5: AMBER95 atomtype
+O    O    O    O    O

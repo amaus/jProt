@@ -1,0 +1,45 @@
+!alternate protonation state
+ASP
+!main bonds
+N    CA
+CA   C
+CA   CB
+C    O
+CB   CG
+CG   OD1
+CG   OD2
+C    OXT
+!hydrogens
+N    H
+N    1H
+N    2H
+N    3H
+CA   HA
+CB   1HB
+CB   2HB
+OD2  HD2
+!defined dihedral angles
+N    CA    CB    CG    OD1
+!atom types
+# column 1: atom name
+# column 2: AMBER all atom atomtype
+# column 3: AMBER united atom atomtype
+# column 4: ENCAD atomtype
+# column 5: AMBER95 atomtype
+N    N    N    N1   N
+CA   CT   CH   C1   CT
+C    C    C    AO   C
+O    O    O    OA   O
+CB   CT   C2   C2   CT
+CG   C    C    A"   C
+OD1  O2   O2   O"   O
+OD2  OH   OH   OH   OH
+OXT  O    O    O"   O
+H    H    -    HN   H
+HA   HC   -    HC   H1
+1HB  HC   -    HC   HC
+2HB  HC   -    HC   HC
+HD2  HO   -    HO   HO
+1H   H    -    H    HM
+2H   H    -    H    HM
+3H   H    -    H    HM
