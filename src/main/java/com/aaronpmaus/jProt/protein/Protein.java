@@ -12,29 +12,36 @@ import java.util.ArrayList;
 
 public class Protein {
     private ArrayList<PolypeptideChain> chains;
-    // key - chainID, value - index into residues list
-    private HashMap<String,Integer> chainIDLookUpTable;
+    private String pdbName;
 
     /**
      * A constructor for a PolypeptideChain.
+     * @param pdbName the name of the PDB file for this protein
     */
-    public Protein(){
-        super();
+    public Protein(String pdbName){
         chains = new ArrayList<PolypeptideChain>();
-        chainIDLookUpTable = new HashMap<String, Integer>();
+        this.pdbName = pdbName;
     }
 
     /**
      * A constructor for a protein that takes in the chains of this protein.
+     * @param pdbName the name of the PDB file for this protein
      * @param chains one or more chains that make up this protein
     */
-    public Protein(PolypeptideChain... chains){
+    public Protein(String pdbName, PolypeptideChain... chains){
+        this(pdbName);
         int index = 0;
         for(PolypeptideChain chain: chains){
-            chainIDLookUpTable.put(chain.getChainID(), index);
             this.chains.add(chain);
-            index++;
         }
+    }
+
+    /**
+     * Return the name of the PDB file for this Protein
+     * @return the name of the PDB file without the .pdb extension.
+    */
+    public String getPDBName(){
+        return this.pdbName;
     }
 
     /**
@@ -90,5 +97,70 @@ public class Protein {
             numAtoms += chain.getNumAtoms();
         }
         return numAtoms;
+    }
+
+    /**
+     * Calculates and returns the CA Distance Matrix of one of this protein
+     * @return a 2D array of Double containing the CA distances
+    */
+    public Double[][] calculateCarbonAlphaDistanceMatrix(){
+        ArrayList<Residue> residues = new ArrayList<Residue>();
+        for(PolypeptideChain chain : this.chains){
+            for(Residue res : chain){
+                residues.add(res);
+            }
+        }
+        int numResidues = residues.size();
+        Double[][] distanceMatrix = new Double[numResidues][numResidues];
+        int i = 0;
+        int j = 0;
+        for(Residue residueOne : residues){
+            for(Residue residueTwo : residues){
+                Atom carbonAlphaOne = residueOne.getAtom("CA");
+                Atom carbonAlphaTwo = residueTwo.getAtom("CA");
+                distanceMatrix[i][j] = carbonAlphaOne.distance(carbonAlphaTwo);
+                j++;
+            }
+            j = 0;
+            i++;
+        }
+        return distanceMatrix;
+    }
+
+    /**
+     * Calculates and returns the CA Distance Matrix of one of the chains in
+     * this protein
+     * @param chainID the ID of the chain to get the CA Distance Matrix of
+     * @return a 2D array of Double containing the CA distances
+    */
+    public Double[][] calculateCarbonAlphaDistanceMatrix(String chainID){
+        PolypeptideChain chain = getChain(chainID);
+        return chain.calculateCarbonAlphaDistanceMatrix();
+    }
+
+    /**
+     * Returns the residue IDs of all the residues in this Protein
+     * @return an array of Integers holding the residue IDs
+    */
+    public Integer[] getResidueIDs(){
+        Integer[] residueIDs = new Integer[getNumResidues()];
+        int i = 0;
+        for(PolypeptideChain chain : this.chains){
+            for(Integer id : getResidueIDs(chain.getChainID())){
+                residueIDs[i] = id;
+                i++;
+            }
+        }
+        return residueIDs;
+    }
+
+    /**
+     * Returns the residue IDs of all the residues in the chain with the
+     * chainID provided as an argument
+     * @param chainID the letter ID of the chain to get the residue IDs from
+     * @return an array of Integers holding the residue IDs
+    */
+    public Integer[] getResidueIDs(String chainID){
+        return getChain(chainID).getResidueIDs();
     }
 }

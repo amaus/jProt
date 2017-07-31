@@ -1,5 +1,6 @@
 package com.aaronpmaus.jProt.executables;
 
+import com.aaronpmaus.jProt.protein.*;
 import com.aaronpmaus.jProt.metrics.*;
 import com.aaronpmaus.jProt.io.*;
 import com.aaronpmaus.jMath.graph.*;
@@ -19,6 +20,7 @@ public class JProtMetrics{
     private static boolean runAngularDistance = false;
     private static boolean runLocalSimilarity = false;
     private static boolean runGDT = false;
+    private static boolean readInPDBs = false;
     private static double localSimilarityThreshold = 1.0;
     private static double[] gdtThresholds;
     private static String mol1FileName;
@@ -48,6 +50,8 @@ public class JProtMetrics{
             System.out.println("              \tdisplay this help file.");
             System.out.println("              -a, --angular-distance");
             System.out.println("              \tcalculate the angular distance.");
+            System.out.println("              --pdbs");
+            System.out.println("              \tuse pdb files to specify the structures rather than distance matrix files");
             System.out.println("              --mol1-f fname");
             System.out.println("              \tthe file containing the distance matrix for molecule one. This file is csv.");
             System.out.println("              \tThe first row contains the residue IDs. The rest of the file contains the");
@@ -82,6 +86,9 @@ public class JProtMetrics{
         } else {
             if(args.contains("-a") || args.contains("--angular-distance")){ //set set runAngularDistance flag to true
                 runAngularDistance = true;
+            }
+            if(args.contains("--pdbs")){
+                readInPDBs = true;
             }
             if(args.contains("--gdt")){
                 runGDT = true;
@@ -122,7 +129,14 @@ public class JProtMetrics{
         try {
             theTool = null;
             if(mol1FileProvided && mol2FileProvided){
-                theTool = new Metrics(mol1FileName, mol2FileName);
+                if(readInPDBs){
+                    PDBFileIO pdb = new PDBFileIO();
+                    Protein prot1 = pdb.readInPDBFile(mol1FileName);
+                    Protein prot2 = pdb.readInPDBFile(mol2FileName);
+                    theTool = new Metrics(prot1, prot2);
+                } else {
+                    theTool = new Metrics(mol1FileName, mol2FileName);
+                }
             } else {
                 System.out.println("You must provide the two molecule CA distance matrix files");
                 System.exit(1);

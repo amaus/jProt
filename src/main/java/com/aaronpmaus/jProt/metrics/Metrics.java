@@ -1,5 +1,6 @@
 package com.aaronpmaus.jProt.metrics;
 
+import com.aaronpmaus.jProt.protein.*;
 import com.aaronpmaus.jMath.graph.*;
 import com.aaronpmaus.jMath.linearAlgebra.*;
 import java.util.Date;
@@ -81,6 +82,38 @@ public class Metrics{
         // read in the distance matrices and calculate the differences
         this.alphaDistancesMatrix = readInDistanceFile(alphaDistancesFileName);
         this.betaDistancesMatrix = readInDistanceFile(betaDistancesFileName);
+        calculateDifferencesMatrix();
+    }
+
+    public Metrics(Protein prot1, Protein prot2){
+        Integer[] protOneResIDs = prot1.getResidueIDs();
+        this.alphaResidueIDs = new String[protOneResIDs.length];
+        int i = 0;
+        for(Integer id : protOneResIDs){
+            this.alphaResidueIDs[i] = id.toString();
+            i++;
+        }
+
+        Integer[] protTwoResIDs = prot2.getResidueIDs();
+        this.betaResidueIDs = new String[protTwoResIDs.length];
+        i = 0;
+        for(Integer id : protTwoResIDs){
+            this.betaResidueIDs[i] = id.toString();
+            i++;
+        }
+
+        this.alphaStrucID = prot1.getPDBName();
+        this.betaStrucID = prot2.getPDBName();
+        this.alphaDistancesMatrix = prot1.calculateCarbonAlphaDistanceMatrix();
+        this.betaDistancesMatrix = prot2.calculateCarbonAlphaDistanceMatrix();
+        calculateDifferencesMatrix();
+    }
+
+    /**
+     * A private helper method to calculate the differences matrix from the
+     * two distance matrices
+    */
+    private void calculateDifferencesMatrix(){
         this.differencesMatrix = new Double[getNumResidues()][getNumResidues()];
         for(int i = 0; i < this.alphaDistancesMatrix.length; i++){
             for(int j = 0; j < this.alphaDistancesMatrix[i].length; j++){
@@ -346,8 +379,8 @@ public class Metrics{
         int counter = 1;
         for(UndirectedGraph<Integer> region : regions){
             pymolScript.add("select clique"+counter+", " + alphaStrucID + " and i. "
-                            + getNodesString(region, "+", alphaResidueIDs) + " or "
-                            + betaStrucID + " and i. " + getNodesString(region, "+", betaResidueIDs));
+                            + getNodesString(region, "+", getAlphaResidueIDs()) + " or "
+                            + betaStrucID + " and i. " + getNodesString(region, "+", getBetaResidueIDs()));
             counter++;
         }
         if(regions.size() > 3){

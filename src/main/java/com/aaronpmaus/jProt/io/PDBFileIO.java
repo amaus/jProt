@@ -34,7 +34,10 @@ public class PDBFileIO{
         int resSeq = -1;
         String resName = null;
         ArrayList<Atom> residueAtoms = null;
-        Protein protein = new Protein();
+        String[] fileNameParts = fileName.split("\\.");
+        String fileBase = fileNameParts[0];
+        System.out.println("reading in PDB: " + fileBase);
+        Protein protein = new Protein(fileBase);
 
         // bookkeeping to make sure that the number of chains that has
         // been instantiated is the same number that has been added

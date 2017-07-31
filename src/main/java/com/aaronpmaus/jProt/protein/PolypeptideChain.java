@@ -4,6 +4,7 @@ import com.aaronpmaus.jMath.graph.*;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * A PolypeptideChain is a single chain of amino acids
@@ -12,7 +13,7 @@ import java.util.Collection;
  * @since 0.6.0
 */
 
-public class PolypeptideChain extends Molecule{
+public class PolypeptideChain extends Molecule implements Iterable<Residue>{
     private ArrayList<Residue> residues;
     // key: residueID, value: residue index in residues list
     private HashMap<Integer, Integer> residueIndexLookupTable;
@@ -106,5 +107,49 @@ public class PolypeptideChain extends Molecule{
             numAtoms += res.getNumAtoms();
         }
         return numAtoms;
+    }
+
+    /**
+     * Calculates and returns the CA Distance Matrix of this chain
+     * @return a 2D array of Double containing the CA distances
+    */
+    public Double[][] calculateCarbonAlphaDistanceMatrix(){
+        int numResidues = getNumResidues();
+        Double[][] distanceMatrix = new Double[numResidues][numResidues];
+        int i = 0;
+        int j = 0;
+        for(Residue residueOne : this.residues){
+            for(Residue residueTwo : this.residues){
+                Atom carbonAlphaOne = residueOne.getAtom("CA");
+                Atom carbonAlphaTwo = residueTwo.getAtom("CA");
+                distanceMatrix[i][j] = carbonAlphaOne.distance(carbonAlphaTwo);
+                j++;
+            }
+            j = 0;
+            i++;
+        }
+        return distanceMatrix;
+    }
+
+    /**
+     * Returns an array of all the residue IDs of the residues in this chain.
+     * @return an array of the residue IDs of the residues in this chain
+    */
+    public Integer[] getResidueIDs(){
+        Integer[] resIDs = new Integer[getNumResidues()];
+        int i = 0;
+        for(Residue res : this.residues){
+            resIDs[i] = res.getResidueID();
+            i++;
+        }
+        return resIDs;
+    }
+
+    /**
+     * {@inheritDoc}
+    */
+    @Override
+    public Iterator<Residue> iterator(){
+        return this.residues.iterator();
     }
 }
