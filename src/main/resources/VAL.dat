@@ -1,56 +1,49 @@
-!main chain atoms
-N CA C O OXT
-!sidechain branch points
-CA
-!connectivity
-N	CA	H	1H	2H	3H
-CA	C  	CB	HA
-C	O	OXT
-O
-CB	CG1	CG2	HB
-CG1	1HG1	2HG1	3HG1
-CG2	1HG2	2HG2	3HG2
-OXT
-H
-HA
-HB
-1HG1
-2HG1
-3HG1
-1HG2
-2HG2
-3HG2
-1H
-2H
-3H
+!main bonds
+N    CA
+CA   C
+CA   CB
+C    O
+CB   CG1
+CB   CG2
+C    OXT
+!hydrogens
+N    H
+N    1H
+N    2H
+N    3H
+CA   HA
+CB   HB
+CG1  1HG1
+CG1  2HG1
+CG1  3HG1
+CG2  1HG2
+CG2  2HG2
+CG2  3HG2
 !defined dihedral angles
-N	CA	CB	CG1
+N    CA    CB    CG1
 !atom types
 # column 1: atom name
 # column 2: AMBER all atom atomtype
 # column 3: AMBER united atom atomtype
-# column 4: SUMMA atom type
-# column 5: SUMMA environment type
-# column 6: SUMMA topology type
-# column 7: ENCAD atomtype
-# column 8: AMBER95 atomtype
-N		N		N		N		N	2	N1	N
-CA		CT		CH		CA		C	3	C1	CT
-C		C		C		C		C	3	AO	C
-O		O		O		O		O	1	OA	O
-CB		CT		CH		C3		C	3	C1	CT
-CG1		CT		C3		C1		C	1	C3	CT
-CG2		CT		C3		C1		C	1	C3	CT
-OXT		O		O		O		O	1	O"	O
-H		H		-		-		-	-	HN	H
-HA		HC		-		-		-	-	HC	H1
-HB		HC		-		-		-	-	HC	HC
-1HG1		HC		-		-		-	-	HC	HC
-2HG1		HC		-		-		-	-	HC	HC
-3HG1		HC		-		-		-	-	HC	HC
-1HG2		HC		-		-		-	-	HC	HC
-2HG2		HC		-		-		-	-	HC	HC
-3HG2		HC		-		-		-	-	HC	HC
-1H		 H			-		-		-	-	H	HM
-2H		 H			-		-		-	-	H	HM
-3H		 H			-		-		-	-	H	HM
+# column 4: ENCAD atomtype
+# column 5: AMBER95 atomtype
+N    N    N    N1   N
+CA   CT   CH   C1   CT
+C    C    C    AO   C
+O    O    O    OA   O
+CB   CT   CH   C1   CT
+CG1  CT   C3   C3   CT
+CG2  CT   C3   C3   CT
+OXT  O    O    O"   O
+H    H    -    HN   H
+HA   HC   -    HC   H1
+HB   HC   -    HC   HC
+1HG1 HC   -    HC   HC
+2HG1 HC   -    HC   HC
+3HG1 HC   -    HC   HC
+1HG2 HC   -    HC   HC
+2HG2 HC   -    HC   HC
+3HG2 HC   -    HC   HC
+1H   H    -    H    HM
+2H   H    -    H    HM
+3H   H    -    H    HM
