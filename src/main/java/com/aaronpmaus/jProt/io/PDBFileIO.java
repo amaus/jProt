@@ -24,11 +24,23 @@ public class PDBFileIO{
      * Method to read in a PDB file and return a Protein
      * @param fileName the name of the PDB file
      * @return a Protein built from that file
+     * @throws FileNotFoundException if the file can not be read from
     */
     public Protein readInPDBFile(String fileName) throws FileNotFoundException{
         Scanner in = new Scanner(new File(fileName));
-        PolypeptideChain chain = new PolypeptideChain();
+        PolypeptideChain currentChain = null;
         boolean firstAtomOfChain = true;
+        int currentResidueID = -1;
+        int resSeq = -1;
+        String resName = null;
+        ArrayList<Atom> residueAtoms = null;
+        Protein protein = new Protein();
+
+        // bookkeeping to make sure that the number of chains that has
+        // been instantiated is the same number that has been added
+        // by the time the whole PDB is read in. This is because some malformed
+        // PDBs leave off the final TER record. GRRR
+        int numChainsInstantiated = 0;
         while(in.hasNextLine()){
             String line = in.nextLine();
             if(line.length() < 80){
@@ -37,12 +49,68 @@ public class PDBFileIO{
             String recordName = line.substring(0,6).trim();
             switch(recordName){
                 case "ATOM":
-                    Atom atom = parseAtomLine(line);
+                    // if currentResidueID is -1, then this is the first atom
+                    // of the first residue in this chain. Get the chainID
+                    // and build the chain
+                    if(currentResidueID == -1){
+                        String chainID = line.substring(21,22).trim();
+                        currentChain = new PolypeptideChain(chainID);
+                        numChainsInstantiated++;
+                    }
+                    // what residue does this Atom belong to?
+                    resSeq = Integer.parseInt(line.substring(22,26).trim());
+                    resName = line.substring(17,20).trim();
+                    // if this is a new residue number,
+                    if(resSeq != currentResidueID){
+                        // and if this isn't the first atom of the first residue
+                        if(currentResidueID != -1){
+                            // build a new residue from the atoms read in and
+                            // add it to the chain
+                            Residue res = new Residue(resName, resSeq, residueAtoms);
+                            currentChain.addResidue(res);
+                        }
+                        // save the new residue number
+                        currentResidueID = resSeq;
+                        // create an empty ArrayList to hold this residue's
+                        // atoms
+                        residueAtoms = new ArrayList<Atom>();
+                        // build this atom and add it to the list
+                        Atom atom = parseAtomLine(line);
+                        residueAtoms.add(atom);
+
+                    } else { // this atom belongs to the same residue as prev
+                        // build the atom and add it to the list
+                        Atom atom = parseAtomLine(line);
+                        residueAtoms.add(atom);
+                    }
                     //chain.addAtom(atom);
                     break;
+                case "TER":
+                    // end of a chain
+                    // add last residue to this chain
+                    Residue res = new Residue(resName, resSeq, residueAtoms);
+                    currentChain.addResidue(res);
+                    // add this chain to the protein
+                    protein.addChain(currentChain);
+                    // reset the currentResidueID back to -1 to indicate
+                    // that no residues have been read in for the current chain
+                    currentResidueID = -1;
+                    break;
+                case "END":
+                    // if the number of chains in the protein don't match the number of
+                    // chains instantiated, then we need to add the last chain to the
+                    // protein
+                    if(protein.getNumChains() != numChainsInstantiated){
+                        // add the last residue to the last chain
+                        res = new Residue(resName, resSeq, residueAtoms);
+                        currentChain.addResidue(res);
+                        // and add the last chain to the protein
+                        protein.addChain(currentChain);
+                    }
             }
         }
-        return null;
+
+        return protein;
     }
 
     private Atom parseAtomLine(String line){

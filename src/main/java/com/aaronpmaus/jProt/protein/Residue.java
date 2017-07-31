@@ -2,6 +2,13 @@ package com.aaronpmaus.jProt.protein;
 
 import com.aaronpmaus.jMath.graph.*;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Collection;
+import java.util.Scanner;
+import java.io.FileNotFoundException;
+import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
 
 /**
  * This class represents in general an AminoAcid.
@@ -37,18 +44,27 @@ public class Residue{
                     {"CYS","C","Cysteine"},       {"MET","M","Methionine"},
                     {"ASN","N","Asparagine"},     {"GLN","Q","Glutamine"}};
 
+    /**
+     * A constructor for a residue that builds a default residue of this type
+     * @param threeLetterID the three letter name of the residue to builds
+     * @param residueID the numeric ID of the residue to build
+    */
     public Residue(String threeLetterID, int residueID){
         this(threeLetterID,residueID,null);
     }
     /**
      * A constructor for an amino acid.
      * @param threeLetterID the one letter ID of the amino acid to build.
+     * @param residueID the numeric residue ID of the residue being built.
+     * @param atoms the atoms in this residue
     */
     public Residue(String threeLetterID, int residueID, Collection<Atom> atoms){
         this.threeLetterID = threeLetterID;
         this.oneLetterID = Residue.lookUpOneLetterName(this.threeLetterID);
         this.name = Residue.lookUpFullName(this.threeLetterID);
         this.residueID = residueID;
+        this.atoms = new HashMap<String, Atom>();
+        this.bonds = new HashSet<Bond>();
         initializeAminoAcid(this.threeLetterID+".dat", atoms);
     }
 
@@ -77,23 +93,6 @@ public class Residue{
         return this.bonds;
     }
 
-    private void initializeAminoAcid(String dataFileName, Collection<Atom> atoms){
-        this.residueComplete = true;
-        // if atoms is null, build amino acid from default values
-        if(atoms == null){
-
-        } else {
-            // use the atoms passed in
-            for(Atom a: atoms){
-                this.atoms.put(a.getName(), a);
-            }
-            residueComplete = addBond("N","CA",1) & residueComplete;
-            residueComplete = addBond("CA","CB",1) & residueComplete;
-            residueComplete = addBond("CA","C",1) & residueComplete;
-            residueComplete = addBond("C","O",2) & residueComplete;
-        }
-    }
-
     // For Initializing all Residues:
     // use the atoms passed in. add all to hashMap and create all bonds.
     // What to do if any atoms are missing? Easy solution: treat it
@@ -103,60 +102,63 @@ public class Residue{
     // Umm, flag this residue as incomplete. Then have the protein
     // constructor resolve all incomplete residues after they've all
     // been added?
-    private void initializeAlanine(Collection<Atom> atoms){
+    private void initializeAminoAcid(String dataFileName, Collection<Atom> atoms){
         this.residueComplete = true;
         // if atoms is null, build amino acid from default values
         if(atoms == null){
 
         } else {
+            if(atoms.isEmpty()){
+                throw new IllegalArgumentException("Collection of Atoms must not be empty");
+            }
             // use the atoms passed in
             for(Atom a: atoms){
-                this.atoms.put(a.getName(), a);
+                this.atoms.put(a.getAtomName(), a);
             }
-            residueComplete = addBond("N","CA",1) & residueComplete;
-            residueComplete = addBond("CA","CB",1) & residueComplete;
-            residueComplete = addBond("CA","C",1) & residueComplete;
-            residueComplete = addBond("C","O",2) & residueComplete;
+            // read in residue data file. use it to add all main bonds.
+            // Then add all hydrogens
+            InputStream stream = Residue.class.getResourceAsStream(dataFileName);
+            Scanner in = new Scanner(stream);
+            boolean readingInMainBonds = false;
+            boolean readingInHydrogens = false;
+            while(in.hasNext()){
+                String line = in.nextLine().trim();
+                //System.out.println(line);
+                String firstChar = line.substring(0,1);
+                if(line.equals("!main bonds")){
+                    readingInMainBonds = true;
+                }
+                if(line.equals("!hydrogens")){
+                    readingInMainBonds = false;
+                    readingInHydrogens = true;
+                }
+                if((!firstChar.equals("!")) && readingInMainBonds){
+                    String[] tokens = line.trim().split(" ");
+                    String atomOne = tokens[0];
+                    String atomTwo = tokens[1];
+                    // TODO specify single or double bond depending on
+                    // atoms and residue
+                    if(atomTwo.equals("OXT")){
+                        addBond(atomOne, atomTwo);
+                    } else {
+                        residueComplete = addBond(atomOne, atomTwo)
+                                            & residueComplete;
+                    }
+                }
+                if((!firstChar.equals("!")) && readingInHydrogens){
+                    String[] tokens = line.trim().split(" ");
+                    String atomOne = tokens[0];
+                    String atomTwo = tokens[1];
+                    // TODO specify single or double bond depending on
+                    // atoms and residue
+                    addBond(atomOne, atomTwo);
+                }
+            }
         }
-
     }
 
-    private void initializeGlycine(Collection<Atom> atoms){
-        this.residueComplete = true;
-        // if atoms is null, build amino acid from default values
-        if(atoms == null){
-
-        } else {
-            // use the atoms passed in
-            for(Atom a: atoms){
-                this.atoms.put(a.getName(), a);
-            }
-            residueComplete = addBond("N","CA",1) & residueComplete;
-            residueComplete = addBond("CA","C",1) & residueComplete;
-            residueComplete = addBond("C","O",2) & residueComplete;
-        }
-
-    }
-
-    private void initializeIsoluecine(Collection<Atom> atoms){
-        this.residueComplete = true;
-        // if atoms is null, build amino acid from default values
-        if(atoms == null){
-
-        } else {
-            // use the atoms passed in
-            for(Atom a: atoms){
-                this.atoms.put(a.getName(), a);
-            }
-            residueComplete = addBond("N","CA",1) & residueComplete;
-            residueComplete = addBond("CA","CB",1) & residueComplete;
-            residueComplete = addBond("CB","CG1",1) & residueComplete;
-            residueComplete = addBond("CB","CG2",1) & residueComplete;
-            residueComplete = addBond("CG1","CD1",1) & residueComplete;
-            residueComplete = addBond("CA","C",1) & residueComplete;
-            residueComplete = addBond("C","O",2) & residueComplete;
-        }
-
+    private boolean addBond(String atomNameOne, String atomNameTwo){
+        return addBond(atomNameOne, atomNameTwo,1);
     }
 
     private boolean addBond(String atomNameOne, String atomNameTwo, int bondStrength){
@@ -213,5 +215,13 @@ public class Residue{
             }
         }
         throw new IllegalArgumentException(threeLetterName + ": not a valid residue name.");
+    }
+
+    /**
+     * Returns the number of Atoms in this Residue
+     * @return the number of Atoms in this Residue
+    */
+    public int getNumAtoms(){
+        return this.atoms.size();
     }
 }

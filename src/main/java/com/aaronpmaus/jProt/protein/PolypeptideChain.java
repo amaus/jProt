@@ -3,6 +3,8 @@ package com.aaronpmaus.jProt.protein;
 import com.aaronpmaus.jMath.graph.*;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.Collection;
+
 /**
  * A PolypeptideChain is a single chain of amino acids
  * @author Aaron Maus aaron@aaronpmaus.com
@@ -18,12 +20,13 @@ public class PolypeptideChain extends Molecule{
 
     /**
      * A constructor for a PolypeptideChain.
+     * @param chainID the letter ID of this chain
     */
-    public PolypeptideChain(){
+    public PolypeptideChain(String chainID){
         super();
         residues = new ArrayList<Residue>();
-        residueIDLookUpTable = new ArrayList<Integer>();
-        chainID = "A";
+        residueIndexLookupTable = new HashMap<Integer,Integer>();
+        this.chainID = chainID;
     }
 
     /**
@@ -34,10 +37,14 @@ public class PolypeptideChain extends Molecule{
         return this.chainID;
     }
 
+    /**
+     * Add a residue to this chain
+     * @param residue the residue to add
+    */
     public void addResidue(Residue residue){
         int residueIndex = residues.size();
         residues.add(residue);
-        residueIndexLookupTable.put(residue.getResidueID(), residueIndex)
+        residueIndexLookupTable.put(residue.getResidueID(), residueIndex);
         Collection<Bond> bonds = residue.getBonds();
         for(Bond b : bonds){
             this.addBond(b); // inherited from Molecule
@@ -46,14 +53,14 @@ public class PolypeptideChain extends Molecule{
         // preceeding this residue's ID - exists, then add a bond between it's
         // C and this residue's N.
         if(this.containsResidue(residue.getResidueID()-1)){
-            Residue prevResidue = getResidue(residue.getResidueID()-1)
+            Residue prevResidue = getResidue(residue.getResidueID()-1);
             this.addBond(new Bond(prevResidue.getAtom("C"), residue.getAtom("N"), 1));
         }
         // if the next residue - the residue with the residueID immediately
         // after this residue's ID - exists, then add a bond between this
         // residue's C and its N.
         if(this.containsResidue(residue.getResidueID()+1)){
-            Residue nextResidue = getResidue(residue.getResidueID()+1)
+            Residue nextResidue = getResidue(residue.getResidueID()+1);
             this.addBond(new Bond(residue.getAtom("C"), nextResidue.getAtom("N"), 1));
         }
     }
@@ -73,10 +80,31 @@ public class PolypeptideChain extends Molecule{
 
     /**
      * Checks if there is a residue with the given ID in this PolypeptideChain
+     * @param residueID the numeric residue ID of the residue to check for.
      * @return true if there is a residue with the given ID in this
      *         PolypeptideChain, false otherwise
     */
     public boolean containsResidue(int residueID){
         return residueIndexLookupTable.containsKey(residueID);
+    }
+
+    /**
+     * Returns the number of residues in this PolypeptideChain
+     * @return the  number of residues in this PolypeptideChain
+    */
+    public int getNumResidues(){
+        return residues.size();
+    }
+
+    /**
+     * Returns the number of Atoms in this PolypeptideChain
+     * @return the number of Atoms in this PolypeptideChain
+    */
+    public int getNumAtoms(){
+        int numAtoms = 0;
+        for(Residue res : this.residues){
+            numAtoms += res.getNumAtoms();
+        }
+        return numAtoms;
     }
 }
