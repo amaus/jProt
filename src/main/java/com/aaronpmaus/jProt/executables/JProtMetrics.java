@@ -51,37 +51,39 @@ public class JProtMetrics{
             System.out.println("              -a, --angular-distance");
             System.out.println("              \tcalculate the angular distance.");
             System.out.println("              --pdbs");
-            System.out.println("              \tuse pdb files to specify the structures rather than distance matrix files");
+            System.out.println("              \tuse pdb files to specify the structures rather than distance");
+            System.out.println("              \tmatrix files");
             System.out.println("              --mol1-f fname");
-            System.out.println("              \tthe file containing the distance matrix for molecule one. This file is csv.");
-            System.out.println("              \tThe first row contains the residue IDs. The rest of the file contains the");
-            System.out.println("              \tcarbon alpha distance matrix. Each row contains that residues distances to");
-            System.out.println("              \tevery other residue. Only the upper right hand side will be used.");
+            System.out.println("              \tif the --pdbs flag has been specified, this file must be a");
+            System.out.println("              \tPDB file that conforms to the PDB file format version 3.30.");
+            System.out.println("              \totherwise, the file should contain the distance matrix for");
+            System.out.println("              \tmolecule one in csv. The first row contains the residue IDs.");
+            System.out.println("              \tThe rest of the file contains the carbon alpha distance");
+            System.out.println("              \tmatrix. Each row contains that residues distances to every");
+            System.out.println("              \tother residue. Only the upper right hand side will be used.");
             System.out.println("              --mol2-f fname");
-            System.out.println("              \tthe file containing the distance matrix for molecule two. The format is the");
-            System.out.println("              \tsame as mol1-f.");
-            System.out.println("              --diff-f fname");
-            System.out.println("              \tthe file containing the differences matrix for the molecules. The format is the");
-            System.out.println("              \tsame as mol1-f.");
+            System.out.println("              \tthe file for molecule two. The format is the same as mol1-f.");
             System.out.println("              --ls, --local-similarity");
-            System.out.println("              \tfind the local similarity regions of the structures. These are the sets of");
-            System.out.println("              \tresidues that are internally consistent, that is, all residues within the set");
-            System.out.println("              \tare the same distance apart (within a threshold t, default 2.0 angstroms) in");
-            System.out.println("              \tboth structures. This in effect find the regions of the structures that are");
-            System.out.println("              \tthe same in both structures but that may oriented differently between them.");
-            System.out.println("              \tThis prints to the screen a pymol script to select and color these regions of");
-            System.out.println("              \tsimilarity.");
+            System.out.println("              \tfind the regions of local similarity between the structures.");
+            System.out.println("              \tThese are the sets of residues that are internally");
+            System.out.println("              \tconsistent, that is, the intra structure distances between");
+            System.out.println("              \tall residues are the same (within a threshold t, default 2.0");
+            System.out.println("              \tangstroms) in both structures. A pymol script to select and");
+            System.out.println("              \tcolor these regions is printed to the screen.");
             System.out.println("              --ls_t d");
-            System.out.println("              \tset the threshold used to determine the regions of similarity to d angstroms");
+            System.out.println("              \tset the threshold used to determine the regions of");
+            System.out.println("              \tsimilarity to d angstroms");
             System.out.println("              --gdt");
-            System.out.println("              \tGlobal Distance Test: finds the largest region of similarity between the structures");
-            System.out.println("              \tunder increading thresholds. It prints out a pymol script to select and color these");
-            System.out.println("              \tregions and prints out the number and percent of residues within each region along");
-            System.out.println("              \twith the average of the percents. By default the thresholds are {2.0, 4.0, 8.0}");
+            System.out.println("              \tGlobal Distance Test: finds the largest region of similarity");
+            System.out.println("              \tbetween the structures under increading thresholds. It");
+            System.out.println("              \tprints out a pymol script to select and color these regions");
+            System.out.println("              \tand prints out the number and percent of residues within");
+            System.out.println("              \teach region along with the average of the percents. By");
+            System.out.println("              \tdefault the thresholds are {1.0, 2.0, 4.0, 8.0}");
             System.out.println("              --gdt-ha");
-            System.out.println("              \tGlobal Distance Test - High Accuracy: the same as gdt except with thresholds:");
-            System.out.println("              \t{1.0,2.0,4.0}. Warning, this may take a LONG time to run depending on the");
-            System.out.println("              \tstructures.");
+            System.out.println("              \tGlobal Distance Test - High Accuracy: the same as gdt except");
+            System.out.println("              \twith thresholds: {0.5, 1.0, 2.0, 4.0}. Warning, this may");
+            System.out.println("              \ttake a LONG time to run depending on the structures.");
             System.exit(1);
         } else {
             if(args.contains("-a") || args.contains("--angular-distance")){ //set set runAngularDistance flag to true
@@ -120,10 +122,6 @@ public class JProtMetrics{
                 System.out.println("Both mol1-f and mol2-f are required arguments. Rerun the command passing them both in.");
                 System.exit(1);
             }*/
-            if(args.contains("--diff-f")){
-                differencesFileName = args.getValue("--diff-f");
-                diffFileProvided = true;
-            }
         }
 
         try {
