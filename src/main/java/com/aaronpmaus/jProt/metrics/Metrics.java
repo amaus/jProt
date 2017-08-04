@@ -234,7 +234,7 @@ public class Metrics{
     private Vector buildVector(Double[][] matrix){
         int numRes = getNumResidues();
         int numValues = ((numRes - 1)*numRes)/2;
-        double[] vals = new double[numValues];
+        Double[] vals = new Double[numValues];
         int counter = 0;
         for(int i = 0; i < matrix.length; i++){
             for(int j = i+1; j < matrix[i].length; j++){
