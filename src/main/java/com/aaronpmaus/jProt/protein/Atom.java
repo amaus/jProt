@@ -46,7 +46,7 @@ public class Atom implements Comparable<Atom> {
     */
     public Atom(String atomName, int serialNumber, double occupancy,
                 double tempFactor, double charge){
-        this(atomName, serialNumber, occupancy, tempFactor, charge, 0, 0, 0);
+        this(atomName, serialNumber, occupancy, tempFactor, charge, "0.0", "0.0", "0.0");
     }
 
     /**
@@ -69,15 +69,13 @@ public class Atom implements Comparable<Atom> {
      * @since 0.6.0
     */
     public Atom(String atomName, int serialNumber, double occupancy,
-                double tempFactor, double charge, double x, double y, double z){
+                double tempFactor, double charge, String x, String y, String z){
         itsCoordinates = new Vector(x,y,z);
         this.atomName = atomName.toUpperCase();
         this.charge = 0;
         this.serialNumber = serialNumber;
         this.occupancy = occupancy;
         this.tempFactor = tempFactor;
-
-        //UndirectedGraph<String, DefaultEdge> stringGraph = new SimpleGraph<String, DefaultEdge>(DefaultEdge.class);
 
         // set the mass and radius depending on the element
         if(this.atomName.charAt(0) == 'H'){
@@ -197,18 +195,6 @@ public class Atom implements Comparable<Atom> {
     */
     public double distance(Atom otherAtom) {
         return getCoordinates().distance(otherAtom.getCoordinates());
-    }
-
-    /**
-     * Changes the location of this atoms coordinates to be those specified.
-     * TODO change this to transform and have this class implement Transformable
-     * @param x    The x coordinate to move this atom to.
-     * @param y    The y coordinate to move this atom to.
-     * @param z    The z coordinate to move this atom to.
-     * @since 0.1.0
-    */
-    public void moveTo(double x, double y, double z) {
-        getCoordinates().moveTo(x, y, z);
     }
 
     @Override

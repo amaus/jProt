@@ -50,9 +50,9 @@ public class Molecule {
         for(Node<Atom> n: atomsList){
             Atom a = n.get();
             this.mass += a.getMass();
-            comX += a.getMass()*a.getCoordinates().getValue(0);
-            comY += a.getMass()*a.getCoordinates().getValue(1);
-            comZ += a.getMass()*a.getCoordinates().getValue(2);
+            comX += a.getMass()*a.getCoordinates().getValue(0).doubleValue();
+            comY += a.getMass()*a.getCoordinates().getValue(1).doubleValue();
+            comZ += a.getMass()*a.getCoordinates().getValue(2).doubleValue();
         }
         this.centerOfMass = new Vector(comX/mass, comY/mass, comZ/mass);
     }

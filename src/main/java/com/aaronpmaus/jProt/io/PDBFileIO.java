@@ -124,9 +124,9 @@ public class PDBFileIO{
         String chainID = line.substring(21,22).trim();
         int resSeq = Integer.parseInt(line.substring(22,26).trim());
         String iCode = line.substring(26,27).trim(); // code for insertion of residues
-        double x = Double.parseDouble(line.substring(30,38).trim());
-        double y = Double.parseDouble(line.substring(38,46).trim());
-        double z = Double.parseDouble(line.substring(46,54).trim());
+        String x = line.substring(30,38).trim();
+        String y = line.substring(38,46).trim();
+        String z = line.substring(46,54).trim();
 
         // make sure there is a value for occupancy. if so, assign.
         // else, default value of -1.0.
