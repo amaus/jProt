@@ -3,13 +3,13 @@ package com.aaronpmaus.jProt.protein;
 import com.aaronpmaus.jMath.graph.*;
 import java.util.HashMap;
 import java.util.ArrayList;
+
 /**
  * A Protein has one or more PolypeptideChains
  * @author Aaron Maus aaron@aaronpmaus.com
  * @version 0.6.0
  * @since 0.6.0
 */
-
 public class Protein {
     private ArrayList<PolypeptideChain> chains;
     private String pdbName;
@@ -81,7 +81,7 @@ public class Protein {
     */
     public int getNumResidues(){
         int numResidues = 0;
-        for(PolypeptideChain chain : chains){
+        for(PolypeptideChain chain : this.chains){
             numResidues += chain.getNumResidues();
         }
         return numResidues;
@@ -93,10 +93,24 @@ public class Protein {
     */
     public int getNumAtoms(){
         int numAtoms = 0;
-        for(PolypeptideChain chain : chains){
+        for(PolypeptideChain chain : this.chains){
             numAtoms += chain.getNumAtoms();
         }
         return numAtoms;
+    }
+
+    /**
+     * Return the sequence of this Protein in the form of a String of the single letter
+     * residue names.
+     *
+     * @return a String containing the single letter residue names with no spaces
+    */
+    public String getSequence(){
+      String seq = "";
+      for(PolypeptideChain chain : this.chains){
+        seq += chain.getSequence();
+      }
+      return seq;
     }
 
     /**

@@ -23,8 +23,8 @@ import java.net.URL;
 
 public class Residue{
     private final String name;
-    private final String threeLetterID;
-    private final String oneLetterID;
+    private final String threeLetterName;
+    private final String oneLetterName;
     private final int residueID;
     private boolean residueComplete = true;
 
@@ -52,20 +52,21 @@ public class Residue{
     public Residue(String threeLetterID, int residueID){
         this(threeLetterID,residueID,null);
     }
+
     /**
      * A constructor for an amino acid.
-     * @param threeLetterID the one letter ID of the amino acid to build.
+     * @param threeLetterName the one letter ID of the amino acid to build.
      * @param residueID the numeric residue ID of the residue being built.
      * @param atoms the atoms in this residue
     */
-    public Residue(String threeLetterID, int residueID, Collection<Atom> atoms){
-        this.threeLetterID = threeLetterID;
-        this.oneLetterID = Residue.lookUpOneLetterName(this.threeLetterID);
-        this.name = Residue.lookUpFullName(this.threeLetterID);
+    public Residue(String threeLetterName, int residueID, Collection<Atom> atoms){
+        this.threeLetterName = threeLetterName;
+        this.oneLetterName = Residue.lookUpOneLetterName(this.threeLetterName);
+        this.name = Residue.lookUpFullName(this.threeLetterName);
         this.residueID = residueID;
         this.atoms = new HashMap<String, Atom>();
         this.bonds = new HashSet<Bond>();
-        initializeAminoAcid(this.threeLetterID+".dat", atoms);
+        initializeAminoAcid(this.threeLetterName+".dat", atoms);
     }
 
     /**
@@ -78,11 +79,39 @@ public class Residue{
     }
 
     /**
-     * get the residue ID of this residue
-     * @return the residue ID of this residue
+    * Return the numeric residue ID of this residue
+    *
+    * @return the residue ID of this residue
     */
     public int getResidueID(){
         return this.residueID;
+    }
+
+    /**
+    * Return the single letter residue name of this residue
+    *
+    * @return the single letter residue name of this residue
+    */
+    public String getOneLetterName(){
+        return this.oneLetterName;
+    }
+
+    /**
+    * Return the three letter residue name of this residue
+    *
+    * @return the three letter residue name of this residue
+    */
+    public String getThreeLetterName(){
+        return this.threeLetterName;
+    }
+
+    /**
+    * Return the full name of this residue
+    *
+    * @return the full name of this residue
+    */
+    public String getName(){
+      return this.name;
     }
 
     /**
@@ -223,5 +252,13 @@ public class Residue{
     */
     public int getNumAtoms(){
         return this.atoms.size();
+    }
+
+    public String toString(){
+      String str = "";
+      str += getName() + "\n";
+      str += getOneLetterName() + "\n";
+      str += getResidueID() + "\n";
+      return str;
     }
 }

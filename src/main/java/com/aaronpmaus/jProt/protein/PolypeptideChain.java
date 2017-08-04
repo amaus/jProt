@@ -146,6 +146,20 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>{
     }
 
     /**
+     * Return the sequence of this PolypeptideChain in the form of a String of the single letter
+     * residue names.
+     *
+     * @return a String containing the single letter residue names with no spaces
+    */
+    public String getSequence(){
+      String seq = "";
+      for(Residue res : this){
+        seq += res.getOneLetterName();
+      }
+      return seq;
+    }
+
+    /**
      * {@inheritDoc}
     */
     @Override
