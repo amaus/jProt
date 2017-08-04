@@ -3,8 +3,11 @@ package com.aaronpmaus.jProt.io;
 import com.aaronpmaus.jProt.protein.*;
 import java.util.ArrayList;
 import java.util.Scanner;
+
+import java.io.FileInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 /**
  * Provides the ability to read in and write out PDB Files
@@ -21,13 +24,25 @@ public class PDBFileIO{
     }
 
     /**
-     * Method to read in a PDB file and return a Protein
-     * @param fileName the name of the PDB file
-     * @return a Protein built from that file
-     * @throws FileNotFoundException if the file can not be read from
+    * Read in a PDB file and return a Protein
+    *
+    * @param fileName the name of the PDB file
+    * @throws FileNotFoundException if the file can not be read from
+    * @return a Protein built from that file
     */
     public Protein readInPDBFile(String fileName) throws FileNotFoundException{
-        Scanner in = new Scanner(new File(fileName));
+      return readInPDBFile(new FileInputStream(new File(fileName)), fileName);
+    }
+
+    /**
+    * Read in a PDB file and return a Protein
+    *
+    * @param inputStream the inputStream to read from
+    * @param fileName the name of the PDB file
+    * @return a Protein built from that file
+    */
+    public Protein readInPDBFile(InputStream inputStream, String fileName){
+        Scanner in = new Scanner(inputStream);
         PolypeptideChain currentChain = null;
         boolean firstAtomOfChain = true;
         int currentResidueID = -1;
@@ -61,6 +76,8 @@ public class PDBFileIO{
                         numChainsInstantiated++;
                     }
                     // what residue does this Atom belong to?
+                    int prevResID = resSeq;
+                    String prevResName = resName;
                     resSeq = Integer.parseInt(line.substring(22,26).trim());
                     resName = line.substring(17,20).trim();
                     // if this is a new residue number,
@@ -69,7 +86,7 @@ public class PDBFileIO{
                         if(currentResidueID != -1){
                             // build a new residue from the atoms read in and
                             // add it to the chain
-                            Residue res = new Residue(resName, resSeq, residueAtoms);
+                            Residue res = new Residue(prevResName, prevResID, residueAtoms);
                             currentChain.addResidue(res);
                         }
                         // save the new residue number
