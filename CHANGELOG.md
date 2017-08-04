@@ -20,10 +20,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Internal Change: changed contains(String flag) in CommandLineParser to no
   longer split on colons. The proper format for arguments if `-flag value`
+- JProtMetrics can now read in two PDBs to specify the proteins to be compared
 ### Deprecated
 [None]
 ### Removed
-[None]
+- Atom#moveTo() method
 ### Fixed
 - Dates in CHANGELOG to better conform to ISO 8601
 ### Security
