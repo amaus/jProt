@@ -11,12 +11,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Comments in build.gradle to explain Semantic Versioning.
 - Comments in build.gradle to explain gradle build and install usage.
 - class Residue
+- Residue data files in main resources. These files specify atom bonds and
+  alternate atom type IDs for various energy functions.
 - class Bond
 - class EncadParameters
 - class Molecule
 - class PolypeptideChain
 - class Protein
-- class PDBFileIO
+- class PDBFileIO with initial ability to read in PDBs. It does not fill in
+  missing atoms, build disulfide bonds, or use any of the data outside of the
+  ATOM records yet, but it can build a protein with all chains, residues, and
+  atoms specified in the file. It can not write proteins back out to PDB yet.
+- stubbed test classes TestProtein TestPolypeptideChain along with
+  resource file 1rop.pdb
 ### Changed
 - Internal Change: changed contains(String flag) in CommandLineParser to no
   longer split on colons. The proper format for arguments if `-flag value`
