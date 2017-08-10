@@ -9,6 +9,9 @@ import java.io.InputStream;
 /**
 * A SequenceAligner can be used to align Protein, DNA, or RNA sequences.
 *
+* It is designed as a class with only static methods. An individual alignment is completely
+* self-contained so there need be no state to this class.
+*
 * It uses the Needleman-Wuncsh algorithm with an affine gap penalty. The default values for the gap
 * penalty are -10 to start a gap and -2 to extend it. The similarity scores matchMatrix used in the
 * BLOSUM62 matrix.
@@ -17,16 +20,13 @@ import java.io.InputStream;
 * @since 0.10.0
 */
 public class SequenceAligner{
-  private Cell[][] matchMatrix;
-  private Cell[][] xGapMatrix;
-  private Cell[][] yGapMatrix;
-  private int gapExtendPenalty = -2; //-2
-  private int gapStartPenalty = -10; //-10
+  private static int gapExtendPenalty = -2; //-2
+  private static int gapStartPenalty = -10; //-10
 
   /**
   * Calculate and return an alignment of the two protein sequences.
   *
-  * The sequences must contain only valid capital single letter IDs.
+  * The sequences must not be empty and must contain only valid capital single letter IDs.
   * These are the standard IDs for the standard 20 amino acids plus:
   * - B: Aspartic Acid or Asparagine
   * - Z: Glutamic Acid or Glutamine
@@ -39,8 +39,10 @@ public class SequenceAligner{
   * @param seq2 the other sequence to align
   * @return an array of String where the 0th String is the alignment of seq1 and the 1st String
   *         is the alignment of seq2
+  * @throws IllegalArgumentException throws IllegalArgumentException if either of the sequences are
+  *     not valid protein sequences or if either of either of the sequences is empty
   */
-  public String[] alignProteinSequences(String seq1, String seq2){
+  public static String[] alignProteinSequences(String seq1, String seq2){
     validateProteinSequence(seq1);
     validateProteinSequence(seq2);
 
@@ -57,10 +59,12 @@ public class SequenceAligner{
   * @param seq2 the other sequence to align
   * @return an array of String where the 0th String is the alignment of seq1 and the 1st String
   *         is the alignment of seq2
+  * @throws IllegalArgumentException throws IllegalArgumentException if either of the sequences are
+  *     not valid DNA sequences or if either of either of the sequences is empty
   */
-  public String[] alignDnaSequences(String seq1, String seq2){
-    validateDnaSequence(seq1);
-    validateDnaSequence(seq2);
+  public static String[] alignDNASequences(String seq1, String seq2){
+    validateDNASequence(seq1);
+    validateDNASequence(seq2);
 
     ScoringMatrix scoringMatrix = new ScoringMatrix("DNA.txt");
     return align(seq1, seq2, scoringMatrix);
@@ -75,10 +79,12 @@ public class SequenceAligner{
   * @param seq2 the other sequence to align
   * @return an array of String where the 0th String is the alignment of seq1 and the 1st String
   *     is the alignment of seq2
+  * @throws IllegalArgumentException throws IllegalArgumentException if either of the sequences are
+  *     not valid RNA sequences or if either of either of the sequences is empty
   */
-  public String[] alignRnaSequences(String seq1, String seq2){
-    validateRnaSequence(seq1);
-    validateRnaSequence(seq2);
+  public static String[] alignRNASequences(String seq1, String seq2){
+    validateRNASequence(seq1);
+    validateRNASequence(seq2);
 
     ScoringMatrix scoringMatrix = new ScoringMatrix("RNA.txt");
     return align(seq1, seq2, scoringMatrix);
@@ -97,20 +103,29 @@ public class SequenceAligner{
   * @return an array of String where the 0th String is the alignment of upSeq and the 1st String
   *     is the alignment of leftSeq
   */
-  private String[] align(String upSeq, String leftSeq, ScoringMatrix scoringMatrix){
+  private static String[] align(String upSeq, String leftSeq, ScoringMatrix scoringMatrix){
+    if(upSeq.length() == 0 || leftSeq.length() == 0){
+      throw new IllegalArgumentException("Sequences must not be empty.\n"
+          + "seq1: |" + upSeq + "|\n"
+          + "seq2: |" + leftSeq + "|\n");
+    }
     // seq2 goes across the top and so determines the number of columns.
     // seq1 goes down the side and likewise determines the number of rows.
     int numRows = leftSeq.length() + 1;
     int numCols = upSeq.length() + 1;
 
-    matchMatrix = new Cell[numRows][numCols];
-    xGapMatrix = new Cell[numRows][numCols];
-    yGapMatrix = new Cell[numRows][numCols];
+    // These matrices will be used by several helper methods below and could be made instance
+    // variables to save from having to pass them around, but since an instance of this class is
+    // designed to be able to be used to align many sequence pairs, the working data of an
+    // individual alignment should not be part of the state of this class
+    Cell[][] matchMatrix = new Cell[numRows][numCols];
+    Cell[][] xGapMatrix = new Cell[numRows][numCols];
+    Cell[][] yGapMatrix = new Cell[numRows][numCols];
 
     // initialize all Cells in first row and column;
-    initializeScoresMatrices(leftSeq, upSeq);
+    initializeScoresMatrices(leftSeq, upSeq, matchMatrix, xGapMatrix, yGapMatrix);
     // fill in values for all remaining scores
-    calculateMatrixValues(scoringMatrix, leftSeq, upSeq);
+    calculateMatrixValues(scoringMatrix, leftSeq, upSeq, matchMatrix, xGapMatrix, yGapMatrix);
 
     // the traceback needs to start at the bottom right cell with the largest value. Compare
     // the bottom right cell of all three matrices to find the largest.
@@ -161,7 +176,10 @@ public class SequenceAligner{
   * @param leftSeq the sequence that goes down the left side of the scores matrices
   * @param upSeq the sequence that goes across the top of the scores matrices
   */
-  private void initializeScoresMatrices(String leftSeq, String upSeq){
+  private static void initializeScoresMatrices(String leftSeq, String upSeq,
+                                        Cell[][] matchMatrix,
+                                        Cell[][] xGapMatrix,
+                                        Cell[][] yGapMatrix){
     matchMatrix[0][0] = new Cell(0,null,null,1); // top left corner is 0 with no traceback
     xGapMatrix[0][0] = new Cell(0,null,null,2); // the 4th parameter indicates which matrix this
     yGapMatrix[0][0] = new Cell(0,null,null,3); // cell is in.
@@ -213,18 +231,21 @@ public class SequenceAligner{
   * @param leftSeq the sequence that goes down the left side of the scores matrices
   * @param upSeq the sequence that goes across the top of the scores matrices
   */
-  private void calculateMatrixValues(ScoringMatrix scoringMatrix,
-                                        String leftSeq, String upSeq){
+  private static void calculateMatrixValues(ScoringMatrix scoringMatrix,
+                                        String leftSeq, String upSeq,
+                                        Cell[][] matchMatrix,
+                                        Cell[][] xGapMatrix,
+                                        Cell[][] yGapMatrix){
     int numRows = matchMatrix.length;
     int numCols = matchMatrix[0].length;
     for(int i = 1; i < numRows; i++){
       for(int j = 1; j < numCols; j++){
         // Calculate xGapMatrix value
-        calculateXGapValue(i, j, leftSeq.charAt(i-1), upSeq.charAt(j-1));
+        calculateXGapValue(i, j, leftSeq.charAt(i-1), upSeq.charAt(j-1), matchMatrix, xGapMatrix, yGapMatrix);
         // Calculate yGapMatrix value
-        calculateYGapValue(i, j, leftSeq.charAt(i-1), upSeq.charAt(j-1));
+        calculateYGapValue(i, j, leftSeq.charAt(i-1), upSeq.charAt(j-1), matchMatrix, xGapMatrix, yGapMatrix);
         // Calculate matchMatrix value
-        calculateMatchValue(i, j, leftSeq.charAt(i-1), upSeq.charAt(j-1), scoringMatrix);
+        calculateMatchValue(i, j, leftSeq.charAt(i-1), upSeq.charAt(j-1), scoringMatrix, matchMatrix, xGapMatrix, yGapMatrix);
       }
     }
   }
@@ -246,9 +267,12 @@ public class SequenceAligner{
   * @param scoringMatrix the matrix to use to get the score of a match between leftSeqChar and
   *   upSeqChar
   */
-  private void calculateMatchValue(int i, int j,
+  private static void calculateMatchValue(int i, int j,
                                    Character leftSeqChar, Character upSeqChar,
-                                   ScoringMatrix scoringMatrix){
+                                   ScoringMatrix scoringMatrix,
+                                   Cell[][] matchMatrix,
+                                   Cell[][] xGapMatrix,
+                                   Cell[][] yGapMatrix){
     // calculate score from diagonal, up, and left
     // match between x and y
     int matchScore = scoringMatrix.getSimilarityScore(leftSeqChar, upSeqChar);
@@ -288,7 +312,8 @@ public class SequenceAligner{
   * @param leftSeqChar the character in the left sequence at this row
   * @param upSeqChar the character in the up sequence at this col
   */
-  private void calculateXGapValue(int i, int j, Character leftSeqChar, Character upSeqChar){
+  private static void calculateXGapValue(int i, int j, Character leftSeqChar, Character upSeqChar,
+                                  Cell[][] matchMatrix, Cell[][] xGapMatrix, Cell[][] yGapMatrix){
     int matchVal = getGapStartPenalty() + getGapExtendPenalty() + matchMatrix[i][j-1].getValue();
     int xVal = getGapExtendPenalty() + xGapMatrix[i][j-1].getValue();
     int yVal = getGapStartPenalty() + getGapExtendPenalty() + yGapMatrix[i][j-1].getValue();
@@ -319,7 +344,8 @@ public class SequenceAligner{
   * @param leftSeqChar the character in the left sequence at this row
   * @param upSeqChar the character in the up sequence at this col
   */
-  private void calculateYGapValue(int i, int j, Character leftSeqChar, Character upSeqChar){
+  private static void calculateYGapValue(int i, int j, Character leftSeqChar, Character upSeqChar,
+                                  Cell[][] matchMatrix, Cell[][] xGapMatrix, Cell[][] yGapMatrix){
     int matchVal = getGapStartPenalty() + getGapExtendPenalty() + matchMatrix[i-1][j].getValue();
     int xVal = getGapStartPenalty() + getGapExtendPenalty() + xGapMatrix[i-1][j].getValue();
     int yVal = getGapExtendPenalty() + yGapMatrix[i-1][j].getValue();
@@ -345,7 +371,7 @@ public class SequenceAligner{
   * @return an array of String where the 0th String is the alignment of the left seq String
   *         is the alignment of right seq
   */
-  private String[] traceBackOptimalAlignments(Cell start){
+  private static String[] traceBackOptimalAlignments(Cell start){
     String seq1 = "";
     String seq2 = "";
     Cell current = start;
@@ -380,7 +406,7 @@ public class SequenceAligner{
   * @param c third int
   * @return the mac of these three ints
   */
-  private int max(int a, int b, int c){
+  private static int max(int a, int b, int c){
     int max = a;
     if(b > max){
       max = b;
@@ -406,7 +432,7 @@ public class SequenceAligner{
   * @param seq the sequence to check
   * @throws IllegalArgumentException if the sequence is invalid
   */
-  private void validateProteinSequence(String seq){
+  private static void validateProteinSequence(String seq){
     ArrayList<Character> validCharacters = new ArrayList<Character>();
     validCharacters.add('A');
     validCharacters.add('R');
@@ -443,10 +469,12 @@ public class SequenceAligner{
   /**
   * Verify that the seq passed in is a valid DNA sequence.
   *
+  * A valid DNA sequence can only contain G A T C
+  *
   * @param seq the sequence to check
   * @throws IllegalArgumentException if the sequence is invalid
   */
-  private void validateDnaSequence(String seq){
+  private static void validateDNASequence(String seq){
     ArrayList<Character> validCharacters = new ArrayList<Character>();
     validCharacters.add('G');
     validCharacters.add('A');
@@ -455,19 +483,21 @@ public class SequenceAligner{
 
     for(Character nucleotide : seq.toCharArray()){
       if(!validCharacters.contains(nucleotide)){
-        throw new IllegalArgumentException("Seq invalid. " + nucleotide + " not a valid nucleotide."
+        throw new IllegalArgumentException("Seq invalid. " + nucleotide + " not a valid DNA base."
             + "\n only G A T C allowed.");
       }
     }
   }
 
   /**
-  * Verify that the seq passed in is a valid DNA sequence.
+  * Verify that the seq passed in is a valid RNA sequence.
+  *
+  * A valid RNA sequence can only contain G A U C
   *
   * @param seq the sequence to check
   * @throws IllegalArgumentException if the sequence is invalid
   */
-  private void validateRnaSequence(String seq){
+  private static void validateRNASequence(String seq){
     ArrayList<Character> validCharacters = new ArrayList<Character>();
     validCharacters.add('G');
     validCharacters.add('A');
@@ -476,8 +506,8 @@ public class SequenceAligner{
 
     for(Character nucleotide : seq.toCharArray()){
       if(!validCharacters.contains(nucleotide)){
-        throw new IllegalArgumentException("Seq invalid. " + nucleotide + " not a valid nucleotide."
-            + "\n only G A T C allowed.");
+        throw new IllegalArgumentException("Seq invalid. " + nucleotide + " not a valid RNA base."
+            + "\n only G A U C allowed.");
       }
     }
   }
@@ -487,8 +517,8 @@ public class SequenceAligner{
   *
   * @return the gap start penalty
   */
-  public int getGapStartPenalty(){
-    return this.gapStartPenalty;
+  public static int getGapStartPenalty(){
+    return SequenceAligner.gapStartPenalty;
   }
 
   /**
@@ -497,8 +527,8 @@ public class SequenceAligner{
   *
   * @return the gap extend penalty
   */
-  public int getGapExtendPenalty(){
-    return this.gapExtendPenalty;
+  public static int getGapExtendPenalty(){
+    return SequenceAligner.gapExtendPenalty;
   }
 
   /**
@@ -507,11 +537,11 @@ public class SequenceAligner{
   *
   * @param penalty the value to set the gap extend penalty to
   */
-  public void setGapExtendPenalty(int penalty){
+  public static void setGapExtendPenalty(int penalty){
     if(penalty > 0){
       throw new IllegalArgumentException("Gap Extend Penalty must be less than or equal 0.");
     }
-    this.gapExtendPenalty = penalty;
+    SequenceAligner.gapExtendPenalty = penalty;
   }
 
   /**
@@ -520,11 +550,11 @@ public class SequenceAligner{
   *
   * @param penalty the value to set the gap start penalty to
   */
-  public void setGapStartPenalty(int penalty){
+  public static void setGapStartPenalty(int penalty){
     if(penalty > 0){
       throw new IllegalArgumentException("Gap Start Penalty must be less than or equal 0.");
     }
-    this.gapStartPenalty = penalty;
+    SequenceAligner.gapStartPenalty = penalty;
   }
 
   /**
@@ -538,7 +568,7 @@ public class SequenceAligner{
   * @param leftSeq the sequence that goes down the left side of the scores matrices
   * @param upSeq the sequence that goes across the top of the scores matrices
   */
-  private void printMatrix(Cell[][] mat, String leftSeq, String upSeq){
+  private static void printMatrix(Cell[][] mat, String leftSeq, String upSeq){
     System.out.printf("%12s","");
     for(Character c : upSeq.toCharArray()){
       System.out.printf("%6s", c);
@@ -561,7 +591,7 @@ public class SequenceAligner{
   * This private inner class Cell allows for elements of the matrices to have their values
   * but also pointers to other cells so that the traceback can be performed.
   */
-  private class Cell {
+  private static class Cell {
     private Cell diag = null;
     private Cell up = null;
     private Cell left = null;
@@ -707,7 +737,7 @@ public class SequenceAligner{
   * This class provides the ability to read in a Matches Scores Matrix, such as any BLOSUM matrix,
   * and be queried given sequence characters to find out their match value.
   */
-  private class ScoringMatrix {
+  private static class ScoringMatrix {
     private ArrayList<Character> ids;
     private int[][] scores;
 

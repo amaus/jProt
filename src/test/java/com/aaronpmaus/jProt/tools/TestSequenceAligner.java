@@ -24,38 +24,113 @@ import org.junit.rules.ExpectedException;
 */
 
 public class TestSequenceAligner{
+  String[] alignment;
+  String seq1;
+  String seq2;
+
+  @Rule
+  public final ExpectedException exception = ExpectedException.none();
 
   @Test
-  public void testAlign(){
-    String sequence = "MTKQEKTALNMARFIRSQTLTLLEKLNELDADEQADICESLHDHADELYRSCLARF";
-    String seq1 = "MTKQ";
-    String seq2 = "MTAKQ";
-    SequenceAligner aligner = new SequenceAligner();
-    String[] alignment = aligner.alignProteinSequences(seq1,seq2);
-    System.out.println(alignment[0]);
-    System.out.println(alignment[1]);
-    alignment = aligner.alignProteinSequences(seq1,seq1);
-    System.out.println(alignment[0]);
-    System.out.println(alignment[1]);
-
+  public void testDifferentCharacterMatchAlignment(){
     seq1 = "SHAKE";
     seq2 = "SPEARE";
-    alignment = aligner.alignProteinSequences(seq1,seq2);
-    System.out.println(alignment[0]);
-    System.out.println(alignment[1]);
+    alignment = SequenceAligner.alignProteinSequences(seq1,seq2);
+    // The H should align with the E because histidine is more similar to Glutamic Acid than
+    // Proline. Lysine and Arginine are also similar enough for the K and R to align.
+    assertEquals(alignment[0], "S-HAKE");
+    assertEquals(alignment[1], "SPEARE");
+  }
 
-    seq1 = "ATGGCGT";
-    seq2 = "ATGAGT";
-    alignment = aligner.alignNucleotideSequences(seq1,seq2);
-    System.out.println(alignment[0]);
-    System.out.println(alignment[1]);
+  @Test
+  public void testSameSequenceAlignment(){
+    seq1 = "IAMSTARSTT";
+    seq2 = "IAMSTARSTT";
+    alignment = SequenceAligner.alignProteinSequences(seq1,seq2);
+    assertEquals(alignment[0], "IAMSTARSTT");
+    assertEquals(alignment[1], "IAMSTARSTT");
+  }
 
-    seq1 = "AAAGAATTCA";
-    seq2 = "AAATCA";
-    alignment = aligner.alignNucleotideSequences(seq1,seq2);
-    System.out.println(alignment[0]);
-    System.out.println(alignment[1]);
+  @Test
+  public void testInvalidProteinSequenceExpectException(){
+    seq1 = "IAMSTARSTUFF";
+    seq2 = "IAMSTARSTFF";
+    exception.expect(IllegalArgumentException.class);
+    SequenceAligner.alignProteinSequences(seq1,seq2);
+  }
 
+  @Test
+  public void testInvalidDNASequenceExpectException(){
+    seq1 = "GAUUACA";
+    seq2 = "GAUUACA";
+    exception.expect(IllegalArgumentException.class);
+    SequenceAligner.alignDNASequences(seq1,seq2);
+  }
 
+  @Test
+  public void testInvalidRNASequenceExpectException(){
+    seq1 = "GATTACA";
+    seq2 = "GATTACA";
+    exception.expect(IllegalArgumentException.class);
+    SequenceAligner.alignRNASequences(seq1,seq2);
+  }
+
+  @Test
+  public void testEmptySequenceExpectException(){
+    seq1 = "";
+    seq2 = "MT";
+    exception.expect(IllegalArgumentException.class);
+    SequenceAligner.alignProteinSequences(seq1,seq2);
+  }
+
+  @Test
+  public void testSingleGapInMiddle(){
+    seq1 = "MTKQ";
+    seq2 = "MTAKQ";
+    alignment = SequenceAligner.alignProteinSequences(seq1,seq2);
+    assertEquals(alignment[0], "MT-KQ");
+    assertEquals(alignment[1], "MTAKQ");
+
+    seq1 = "MTAKQ";
+    seq2 = "MTKQ";
+    alignment = SequenceAligner.alignProteinSequences(seq1,seq2);
+    assertEquals(alignment[0], "MTAKQ");
+    assertEquals(alignment[1], "MT-KQ");
+  }
+
+  @Test
+  public void testGapAtStartAndEnd(){
+    seq1 = "M";
+    seq2 = "MT";
+    alignment = SequenceAligner.alignProteinSequences(seq1,seq2);
+    assertEquals(alignment[0], "M-");
+    assertEquals(alignment[1], "MT");
+
+    seq1 = "MT";
+    seq2 = "M";
+    alignment = SequenceAligner.alignProteinSequences(seq1,seq2);
+    assertEquals(alignment[0], "MT");
+    assertEquals(alignment[1], "M-");
+
+    seq1 = "T";
+    seq2 = "MT";
+    alignment = SequenceAligner.alignProteinSequences(seq1,seq2);
+    assertEquals(alignment[0], "-T");
+    assertEquals(alignment[1], "MT");
+
+    seq1 = "MT";
+    seq2 = "T";
+    alignment = SequenceAligner.alignProteinSequences(seq1,seq2);
+    assertEquals(alignment[0], "MT");
+    assertEquals(alignment[1], "-T");
+  }
+
+  @Test
+  public void testAlignmentSingleGapExpected(){
+    seq1 = "AAATCA";
+    seq2 = "AAAGAATTCA";
+    alignment = SequenceAligner.alignDNASequences(seq1,seq2);
+    assertEquals(alignment[0], "AAA----TCA");
+    assertEquals(alignment[1], "AAAGAATTCA");
   }
 }
