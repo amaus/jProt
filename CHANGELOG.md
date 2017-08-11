@@ -24,10 +24,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   atoms specified in the file. It can not write proteins back out to PDB yet.
 - stubbed test classes TestProtein TestPolypeptideChain along with
   resource file 1rop.pdb
+- SequenceAligner class that can align Protein, DNA, or RNA sequences using the
+  Needleman-Wuncsh algorithm with Affine Gap Penalties.
+  - Resource files for the Match score matrices, BLOSUM62, DNA, and RNA. Other
+    BLOSUM matrices (and PAM) can be added in the future. The DNA and RNA
+    matrices are naive and can certainly be improved.
+  - junit tests for SequenceAligner
 ### Changed
 - Internal Change: changed contains(String flag) in CommandLineParser to no
   longer split on colons. The proper format for arguments if `-flag value`
-- JProtMetrics can now read in two PDBs to specify the proteins to be compared
+- JProtMetrics can now read in two PDBs to specify the proteins to be compared.
+  It will perform a sequence alignment and perform the comparison on the
+  residues that were aligned.
 ### Deprecated
 [None]
 ### Removed
