@@ -36,7 +36,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - JProtMetrics can now read in two PDBs to specify the proteins to be compared.
   It will perform a sequence alignment and perform the comparison on the
   residues that were aligned.
+- Move the usage info for JProtMetrics into a resources file. JProtMetrics reads
+  that file in to display usage. All executable will handle usage info this way.
+  This design makes editing the usage and handling formatting much easier.
 ### Deprecated
+- JProtMetrics usage ability to take in CA Distance Matrices. In the future,
+  it will only be able to work with PDBs as input.
 [None]
 ### Removed
 - Atom#moveTo() method
