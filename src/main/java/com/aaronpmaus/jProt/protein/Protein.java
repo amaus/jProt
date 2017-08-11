@@ -136,7 +136,7 @@ import java.util.Arrays;
    * @param mask an array of boolean containing as many values as there are residues, each
    *  indicating whether to include that residue in the distance matrix.
    * @return a 2D array of Double containing the CA distances
-   * @since 0.10.0
+   * @since 0.6.0
    */
    public Double[][] calculateCarbonAlphaDistanceMatrix(boolean[] mask){
      ArrayList<Residue> residues = new ArrayList<Residue>();

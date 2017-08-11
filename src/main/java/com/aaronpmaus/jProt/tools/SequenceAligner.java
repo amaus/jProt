@@ -16,8 +16,8 @@ import java.io.InputStream;
 * penalty are -10 to start a gap and -2 to extend it. The similarity scores matchMatrix used in the
 * BLOSUM62 matrix.
 *
-* @version 0.10.0
-* @since 0.10.0
+* @version 0.6.0
+* @since 0.6.0
 */
 public class SequenceAligner{
   private static int gapExtendPenalty = -2; //-2
