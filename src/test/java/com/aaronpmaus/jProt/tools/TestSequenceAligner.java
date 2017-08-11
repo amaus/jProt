@@ -11,6 +11,8 @@ import org.junit.AfterClass;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 
+import java.util.Arrays;
+
 /*
  * @Test flags a method as a test method.
  * @Before indicates that a method will be run before every
@@ -132,5 +134,21 @@ public class TestSequenceAligner{
     alignment = SequenceAligner.alignDNASequences(seq1,seq2);
     assertEquals(alignment[0], "AAA----TCA");
     assertEquals(alignment[1], "AAAGAATTCA");
+  }
+
+  @Test
+  public void testGetSequenceMatchMasks(){
+    boolean[][] masks = SequenceAligner.getSequenceMatchMasks("AA-EYE","AAP-E-");
+    boolean[] mask0 = {true, true, false, true, false};
+    boolean[] mask1 = {true, true, false, true};
+    assertTrue(Arrays.equals(masks[0],mask0));
+    assertTrue(Arrays.equals(masks[1],mask1));
+    seq1 = "AAA----TCA";
+    seq2 = "AAAGAATTCA";
+    masks = SequenceAligner.getSequenceMatchMasks(seq1,seq2);
+    boolean[] mask2 = {true, true, true, true, true, true};
+    boolean[] mask3 = {true, true, true, false, false, false, false, true, true, true};
+    assertTrue(Arrays.equals(masks[0],mask2));
+    assertTrue(Arrays.equals(masks[1],mask3));
   }
 }

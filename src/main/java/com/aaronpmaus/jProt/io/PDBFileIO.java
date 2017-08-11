@@ -51,7 +51,7 @@ public class PDBFileIO{
         ArrayList<Atom> residueAtoms = null;
         String[] fileNameParts = fileName.split("\\.");
         String fileBase = fileNameParts[0];
-        System.out.println("reading in PDB: " + fileBase);
+        //System.out.println("reading in PDB: " + fileBase);
         Protein protein = new Protein(fileBase);
 
         // bookkeeping to make sure that the number of chains that has

@@ -91,6 +91,80 @@ public class SequenceAligner{
   }
 
   /**
+  * Get a mask for each alignment string indicating the matches in its alignment to the other.
+  *
+  * The alignment strings are those produced by the alignment methods above and must be the
+  * same length.
+  *
+  * The size of the mask is the number of elements in that alignment string exluding gaps. The
+  * idea is to return a mask for the original sequence indicating which parts of it were able to
+  * find a match in the other sequence.
+  *
+  * @param alignmentSequenceOne the top sequence in the alignment. Can contain element ids and gaps
+  * @param alignmentSequenceTwo the bottom sequence in the alignment. Can contain element ids and
+  *   gaps
+  * @return a array containing 2 arrays of booleans. The first is the mask for sequenceOne, and
+  *   the second the mask for sequenceTwo
+  */
+  public static boolean[][] getSequenceMatchMasks(String alignmentSequenceOne,
+    String alignmentSequenceTwo){
+    boolean[][] masks = new boolean[2][];
+    masks[0] = getMask(alignmentSequenceOne, alignmentSequenceTwo);
+    masks[1] = getMask(alignmentSequenceTwo, alignmentSequenceOne);
+    return masks;
+  }
+
+  /**
+  * From the alignment Strings seq1 and seq2, get a mask for all the elements in seq1 that
+  * have a match in seq2. The elements are the original elements in the sequence that produced
+  * seq1 alignment - that is, ignore all gaps in seq1
+  *
+  * given an alignment, for example:
+  * AA-EYE
+  * AAP-E-
+  * we want to perform a comparison where there are matches.
+  * The masks should be as long as their corresponding protein sequences, and include true
+  * everywhere there is a match and false otherwise.
+  *
+  * In the case above, we are expecting
+  * TTFTF
+  * because AA have matches, E does not, Y does, and E again doesn't
+  *
+  * If we wanted to find the mask for the bottom sequence, that is for the case:
+  * AAP-E-
+  * AA-EYE
+  * It would be:
+  * TTFT
+  *
+  */
+  private static boolean[] getMask(String seq1, String seq2){
+    int seq1Length = 0; // the length of seq1 with no gaps
+    for(char c : seq1.toCharArray()){
+      if(c != '-'){
+        seq1Length++;
+      }
+    }
+    boolean[] mask = new boolean[seq1Length];
+    int maskIndex = 0;
+    for(int alignmentIndex = 0; alignmentIndex < seq1.length(); alignmentIndex++){
+      char seq1Char = seq1.charAt(alignmentIndex);
+      char seq2Char = seq2.charAt(alignmentIndex);
+      if((seq1.charAt(alignmentIndex) != '-')
+          && (seq2.charAt(alignmentIndex) != '-')){
+        mask[maskIndex] = true;
+        maskIndex++;
+      } else if((seq1.charAt(alignmentIndex) != '-')
+          && (seq2.charAt(alignmentIndex) == '-')){
+        mask[maskIndex] = false;
+        maskIndex++;
+      } else if(seq1.charAt(alignmentIndex) == '-'){
+        // ignore gaps in prot1;
+      }
+    }
+    return mask;
+  }
+
+  /**
   * A private helper method to perform the alignment given the two sequences and a scoringMatrix
   * for matches.
   *
