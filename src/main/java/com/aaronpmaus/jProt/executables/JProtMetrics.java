@@ -67,7 +67,7 @@ public class JProtMetrics{
             System.out.println("                  find the regions of local similarity between the structures.");
             System.out.println("                  These are the sets of residues that are internally");
             System.out.println("                  consistent, that is, the intra structure distances between");
-            System.out.println("                  all residues are the same (within a threshold t, default 2.0");
+            System.out.println("                  all residues are the same (within a threshold t, default 1.0");
             System.out.println("                  angstroms) in both structures. A pymol script to select and");
             System.out.println("                  color these regions is printed to the screen.");
             System.out.println("              --ls_t d");
