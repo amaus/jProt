@@ -75,11 +75,9 @@ public class Atom implements Comparable<Atom> {
     this.atomName = atomName.toUpperCase();
     this.charge = charge;
     // If the serialNumber is -1, then this atom was built from one of the default amino acids.
-    // Assign the serianNumber to be be the max serial number + 1 and increment the max serial
-    // number
+    // Assign the serianNumber to be be the max serial number + 1
     if(serialNumber == -1){
       this.serialNumber = Atom.maxSerialNum+1;
-      Atom.maxSerialNum++;
     } else {
       this.serialNumber = serialNumber;
     }
