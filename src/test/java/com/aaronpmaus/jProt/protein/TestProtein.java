@@ -28,21 +28,34 @@ import java.io.InputStream;
 
 public class TestProtein{
   private Protein rop;
+  private Protein m2j;
 
   @Before
   public void setup(){
     PDBFileIO pdb = new PDBFileIO();
     InputStream stream = TestProtein.class.getResourceAsStream("1rop.pdb");
     rop = pdb.readInPDBFile(stream, "1rop.pdb");
+
+    pdb = new PDBFileIO();
+    stream = TestProtein.class.getResourceAsStream("5m2j.pdb");
+    m2j = pdb.readInPDBFile(stream, "5m2j.pdb");
   }
 
   @Test
   public void testSequence(){
     PolypeptideChain chain = rop.getChain("A");
-    System.out.println(chain.getResidue(1));
+    //System.out.println(chain.getResidue(1));
     String sequence = "MTKQEKTALNMARFIRSQTLTLLEKLNELDADEQADICESLHDHADELYRSCLARF";
-    System.out.println(rop.getSequence());
+    //System.out.println(rop.getSequence());
     assertTrue((rop.getSequence()).equals(sequence));
     assertTrue(rop.getNumAtoms() == 447);
+
+    chain = m2j.getChain("A");
+    sequence = "SDKPVAHVVANPQAEGQLQWLNRRANALLANGVELRDNQLVVPSEGLYLIYSQVLFKGQGCPSTHVLLTHTISRIAVSYQTKVNLLSAIKSPCQPWYEPIYLGGVFQLEKGDRLSAEINRPDYLDFAESGQVYFGIIAL";
+    assertTrue(chain.getSequence().equals(sequence));
+
+    chain = m2j.getChain("D");
+    sequence = "QVQLVESGGGLVQPGGSLRLSCAASGFTFSNYWMYWVRQAPGKGLEWVSEINTNGLITKYPDSVKGRFTISRDNAKNTLYLQMNSLKPEDTALYYCARSPSGFNRGQGTQVTVSS";
+    assertTrue(chain.getSequence().equals(sequence));
   }
 }
