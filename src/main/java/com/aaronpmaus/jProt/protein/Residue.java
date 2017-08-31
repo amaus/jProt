@@ -34,7 +34,7 @@ public class Residue{
   private HashMap<String, Atom> atoms;
   private HashSet<Bond> bonds;
 
-  private static String[][] resNameLookupTable = {
+  private static String[][] resNames = {
     {"ALA","A","Alanine"},        {"GLY","G","Glycine"},
     {"ILE","I","Isoleucine"},     {"LEU","L","Leucine"},
     {"PRO","P","Proline"},        {"VAL","V","Valine"},
@@ -210,9 +210,9 @@ public class Residue{
   */
   public static String lookUpOneLetterName(String threeLetterName){
     threeLetterName = threeLetterName.toUpperCase();
-    for(String[] pair: resNameLookupTable){
-      if(pair[0].equals(threeLetterName)){
-        return pair[1];
+    for(String[] triplet: resNames){
+      if(triplet[0].equals(threeLetterName)){
+        return triplet[1];
       }
     }
     throw new IllegalArgumentException(threeLetterName + ": not a valid residue name.");
@@ -226,9 +226,9 @@ public class Residue{
   */
   public static String lookUpThreeLetterName(String oneLetterName){
     oneLetterName = oneLetterName.toUpperCase();
-    for(String[] pair: resNameLookupTable){
-      if(pair[1].equals(oneLetterName)){
-        return pair[0];
+    for(String[] triplet: resNames){
+      if(triplet[1].equals(oneLetterName)){
+        return triplet[0];
       }
     }
     throw new IllegalArgumentException(oneLetterName + ": not a valid residue name.");
@@ -242,9 +242,9 @@ public class Residue{
   */
   public static String lookUpFullName(String threeLetterName){
     threeLetterName = threeLetterName.toUpperCase();
-    for(String[] pair: resNameLookupTable){
-      if(pair[0].equals(threeLetterName)){
-        return pair[2];
+    for(String[] triplet: resNames){
+      if(triplet[0].equals(threeLetterName)){
+        return triplet[2];
       }
     }
     throw new IllegalArgumentException(threeLetterName + ": not a valid residue name.");
