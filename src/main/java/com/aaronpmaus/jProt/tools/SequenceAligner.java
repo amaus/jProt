@@ -168,7 +168,9 @@ public class SequenceAligner{
   * A private helper method to perform the alignment given the two sequences and a scoringMatrix
   * for matches.
   *
-  * This method uses the Needleman-Wuncsh algorithm.
+  * This method uses the Needleman-Wuncsh algorithm. It's implementation was derived from
+  * information on Carl Kingsford's Gap Penalties slides
+  * {@link http://www.cs.cmu.edu/~ckingsf/bioinfo-lectures/gaps.pdf}.
   *
   * @param upSeq the sequence that goes across the top of the dynamically generated matrices
   * @param leftSeq the sequence that goes down the left side of the dynamically generated matrices
