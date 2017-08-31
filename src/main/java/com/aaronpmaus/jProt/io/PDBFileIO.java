@@ -82,56 +82,95 @@ public class PDBFileIO{
 
   private Protein buildProtein(String fileBase){
     Protein protein = new Protein(fileBase);
-    Collection<String> chains = getListOfChains();
-    for(String chainID : chains){
+    Collection<String> chainIDs = getListOfChainIDs();
+    for(String chainID : chainIDs){
+
       PolypeptideChain chain = new PolypeptideChain(chainID);
-      // get a list of all atoms in that chain
-      Collection<AtomRecord> atoms = getAtomsInChain(chainID);
-      // build HashMap of residues
-      HashMap<Integer, ArrayList<AtomRecord>> residues =
-          new HashMap<Integer, ArrayList<AtomRecord>>();
-      // add all atom records to their respective atom lists in the map.
-      for(AtomRecord rec : atoms){
-        // if the arraylist for the residue is already built, add the record to it.
-        int resID = rec.getResSeq();
-        if(residues.containsKey(resID)){
-          residues.get(resID).add(rec);
-        } else { //otherwise, build the arraylist and add the record to it.
-          residues.put(resID, new ArrayList<AtomRecord>());
-          residues.get(resID).add(rec);
-        }
-      }
-      // for every residue atoms list in the map
-      for(ArrayList<AtomRecord> residueAtomRecords : residues.values()){
+      // get a list of all the atomRecords that have chainID
+      Collection<AtomRecord> chainAtomRecords = getAtomsInChain(chainID);
+
+      HashMap<Integer, ArrayList<AtomRecord>> residueRecordsLists =
+          sortAtomRecordsIntoResiduesLists(chainAtomRecords);
+
+      // for every residue's list of AtomRecords, build a list of the atoms in that residue from the
+      // AtomRecords. Use that list to construct and add that new residue with those atoms to the
+      // chain.
+      for(ArrayList<AtomRecord> residueAtomRecords : residueRecordsLists.values()){
         String resName = residueAtomRecords.get(0).getResName();
         int resSeq = residueAtomRecords.get(0).getResSeq();
-        ArrayList<Atom> residueAtoms = new ArrayList<Atom>();
-        for(AtomRecord rec : residueAtomRecords){
-          residueAtoms.add(constructAtom(rec));
-        }
+
+        Collection<Atom> residueAtoms = constructAtomsInResidue(residueAtomRecords);
+
         chain.addResidue(new Residue(resName, resSeq, residueAtoms));
       }
       protein.addChain(chain);
     }
+
+    // Now that the protein is constructed, perform any postprocessing such as adding disulfide
+    // bonds
+
     return protein;
   }
 
-  private Collection<AtomRecord> getAtomsInChain(String chain){
+  /**
+  * Build HashMap of the lists of AtomRecords for each residue
+  * the key is the residueID, the value is an ArrayList holding all the atomRecords for
+  * that residue.
+  */
+  private HashMap<Integer, ArrayList<AtomRecord>> sortAtomRecordsIntoResiduesLists(
+      Collection<AtomRecord> atomRecords){
+
+    HashMap<Integer, ArrayList<AtomRecord>> residueRecordsLists =
+        new HashMap<Integer, ArrayList<AtomRecord>>();
+    // add all atom records to their respective residue atomRecords lists.
+    // At this point, the residueRecordsLists is empty. After this loop, it will
+    // contain an arrayList of atomRecords for every residueID.
+    for(AtomRecord rec : atomRecords){
+      int resID = rec.getResSeq();
+      // if the arraylist for the residue already exists, add the record to it.
+      if(residueRecordsLists.containsKey(resID)){
+        residueRecordsLists.get(resID).add(rec);
+      } else { //otherwise, build the arraylist and add the record to it.
+        residueRecordsLists.put(resID, new ArrayList<AtomRecord>());
+        residueRecordsLists.get(resID).add(rec);
+      }
+    }
+    return residueRecordsLists;
+  }
+
+  /**
+  * From a Collection of Atom Records, build and return a collection of those Atoms.
+  */
+  private Collection<Atom> constructAtomsInResidue(Collection<AtomRecord> residueAtomRecords){
+    ArrayList<Atom> residueAtoms = new ArrayList<Atom>();
+    for(AtomRecord rec : residueAtomRecords){
+      residueAtoms.add(constructAtom(rec));
+    }
+    return residueAtoms;
+  }
+
+  /**
+  * From the list of all AtomRecords in the pdb, return a list of those with the given chainID.
+  */
+  private Collection<AtomRecord> getAtomsInChain(String chainID){
     ArrayList<AtomRecord> atoms = new ArrayList<AtomRecord>();
     for(AtomRecord rec : this.atomRecords){
-      if(rec.getChainID().equals(chain)){
+      if(rec.getChainID().equals(chainID)){
         atoms.add(rec);
       }
     }
     return atoms;
   }
 
-  private Collection<String> getListOfChains(){
-    HashSet<String> chains = new HashSet<String>();
+  /**
+  * Get a list all the chainIDs in this PDB.
+  */
+  private Collection<String> getListOfChainIDs(){
+    HashSet<String> chainIDs = new HashSet<String>();
     for(AtomRecord rec : this.atomRecords){
-      chains.add(rec.getChainID());
+      chainIDs.add(rec.getChainID());
     }
-    return chains;
+    return chainIDs;
   }
 
   private AtomRecord parseAtomLine(String line){
