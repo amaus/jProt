@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.Collection;
 import java.util.Scanner;
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
+import java.util.Iterator;
 
 import java.io.FileNotFoundException;
 import java.io.File;
@@ -14,16 +16,13 @@ import java.io.InputStream;
 import java.net.URL;
 
 /**
-* This class represents in general an AminoAcid.
-*
-* An AminoAcid consists of a collection of Atoms bonded together
-* is a particular way.
+* An AminoAcid consists of a collection of Atoms bonded together in a particular way.
 *
 * @author Aaron Maus aaron@aaronpmaus.com
 * @version 0.6.0
 * @since 0.6.0
 */
-public class Residue{
+public class Residue implements Iterable<Atom>{
   private final String name;
   private final String threeLetterName;
   private final String oneLetterName;
@@ -78,7 +77,12 @@ public class Residue{
   * @return the Atom in this residue with that name
   */
   public Atom getAtom(String atomName){
-    return atoms.get(atomName);
+    Atom atom = atoms.get(atomName);
+    if(atom == null){
+      throw new NoSuchElementException("No atom of name " + atomName
+          + " in residue " + getResidueID() +": " +getThreeLetterName());
+    }
+    return atom;
   }
 
   /**
@@ -167,15 +171,14 @@ public class Residue{
         }
         if((!firstChar.equals("!")) && readingInMainBonds){
           String[] tokens = line.trim().split(" ");
-          String atomOne = tokens[0];
-          String atomTwo = tokens[1];
+          String atomOne = tokens[0].trim();
+          String atomTwo = tokens[1].trim();
           // TODO specify single or double bond depending on
           // atoms and residue
           if(atomTwo.equals("OXT")){
             addBond(atomOne, atomTwo);
           } else {
-            residueComplete = addBond(atomOne, atomTwo)
-            & residueComplete;
+            residueComplete = addBond(atomOne, atomTwo) & residueComplete;
           }
         }
         if((!firstChar.equals("!")) && readingInHydrogens){
@@ -263,6 +266,14 @@ public class Residue{
     str += getName() + "\n";
     str += getOneLetterName() + "\n";
     str += getResidueID() + "\n";
+    str += "Atoms:\n";
+    for(Atom atom : this){
+      str += atom.getAtomName()+"\n";
+    }
     return str;
+  }
+
+  public Iterator<Atom> iterator(){
+    return this.atoms.values().iterator();
   }
 }

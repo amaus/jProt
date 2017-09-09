@@ -72,7 +72,7 @@ public class Atom implements Comparable<Atom> {
   public Atom(String atomName, int serialNumber, double occupancy,
   double tempFactor, double charge, String x, String y, String z){
     this.itsCoordinates = new Vector(x,y,z);
-    this.atomName = atomName.toUpperCase();
+    this.atomName = atomName.toUpperCase().trim();
     this.charge = charge;
     // If the serialNumber is -1, then this atom was built from one of the default amino acids.
     // Assign the serianNumber to be be the max serial number + 1

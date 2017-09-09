@@ -13,7 +13,18 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 /**
-* Provides the ability to read in and write out PDB Files
+* Provides the ability to read in and write out PDB Files. Every protein has its own
+* instance of PDBFileIO, even proteins that aren't read in from a PDB, but are built from
+* sequence data alone. Those proteins will need the ability to write themselves out to file.
+* <p>
+* Example Usage:
+* <p>
+* To build a protein from a pdb file:
+* {@code
+* PDBFileIO pdbIO = new PDBFileIO(pdbInputStream, pdbFileName);
+* Protein prot = new Protein(pdbInputStream, proteinName);
+* To build a protein from sequence data:
+* {@code Protein prot = new Protein(new FastaFileIO(fastaInputStream), proteinName);}
 * @author Aaron Maus aaron@aaronpmaus.com
 * @version 0.6.0
 * @since 0.6.0
@@ -22,11 +33,20 @@ public class PDBFileIO{
   private ArrayList<String> fileLines;
   private ArrayList<SSBondRecord> ssBonds;
   private ArrayList<AtomRecord> atomRecords;
+  private HashMap<String,ArrayList<AtomRecord>> defaultResidues;
+  private InputStream pdbInputStream;
+
+  public PDBFileIO(InputStream pdbInputStream){
+    this();
+    this.pdbInputStream = pdbInputStream;
+  }
 
   public PDBFileIO(){
     fileLines = new ArrayList<String>();
     ssBonds = new ArrayList<SSBondRecord>();
     atomRecords = new ArrayList<AtomRecord>();
+    defaultResidues = readInDefaultResidues();
+    this.pdbInputStream = pdbInputStream;
   }
 
   /**
@@ -87,10 +107,10 @@ public class PDBFileIO{
 
       PolypeptideChain chain = new PolypeptideChain(chainID);
       // get a list of all the atomRecords that have chainID
-      Collection<AtomRecord> chainAtomRecords = getAtomsInChain(chainID);
+      Collection<AtomRecord> chainAtomRecords = getAtomRecordsInChain(chainID);
 
       HashMap<Integer, ArrayList<AtomRecord>> residueRecordsLists =
-          sortAtomRecordsIntoResiduesLists(chainAtomRecords);
+          getResidueRecordsLists(chainAtomRecords);
 
       // for every residue's list of AtomRecords, build a list of the atoms in that residue from the
       // AtomRecords. Use that list to construct and add that new residue with those atoms to the
@@ -108,16 +128,16 @@ public class PDBFileIO{
 
     // Now that the protein is constructed, perform any postprocessing such as adding disulfide
     // bonds
-
+    addDisulfideBonds(protein);
     return protein;
   }
 
   /**
-  * Build HashMap of the lists of AtomRecords for each residue
+  * Build HashMap of the lists of AtomRecords for each residue in a chain.
   * the key is the residueID, the value is an ArrayList holding all the atomRecords for
   * that residue.
   */
-  private HashMap<Integer, ArrayList<AtomRecord>> sortAtomRecordsIntoResiduesLists(
+  private HashMap<Integer, ArrayList<AtomRecord>> getResidueRecordsLists(
       Collection<AtomRecord> atomRecords){
 
     HashMap<Integer, ArrayList<AtomRecord>> residueRecordsLists =
@@ -139,6 +159,45 @@ public class PDBFileIO{
   }
 
   /**
+  * Build HashMap of the lists of AtomRecords for each of the default residues.
+  *
+  * The key is the residue name, the value is an ArrayList holding all the atomRecords for
+  * that residue.
+  */
+  private HashMap<String, ArrayList<AtomRecord>> buildDefaultResiduesLists(
+      ArrayList<AtomRecord> list){
+
+    HashMap<String, ArrayList<AtomRecord>> defaultResiduesLists =
+        new HashMap<String, ArrayList<AtomRecord>>();
+
+    for(AtomRecord rec : list){
+      String resThreeLetterID = rec.getResName();
+
+      if(defaultResiduesLists.containsKey(resThreeLetterID)){
+        defaultResiduesLists.get(resThreeLetterID).add(rec);
+      } else { //otherwise, build the arraylist and add the record to it.
+        defaultResiduesLists.put(resThreeLetterID, new ArrayList<AtomRecord>());
+        defaultResiduesLists.get(resThreeLetterID).add(rec);
+      }
+    }
+    return defaultResiduesLists;
+  }
+
+  /**
+  * Return all the atom records for a defaultResidue with all atomSerialNumber resID fields
+  * set to -1.
+  * @param residueThreeLetterID a three letter ID of a residue in all caps.
+  * @return an ArrayList containing all the atomRecords for that residue. includes hydrogens.
+  * @throws IllegalArgumentException if the three letter ID is not a valid ID.
+  */
+  public ArrayList<AtomRecord> getDefaultResidueRecords(String residueThreeLetterID){
+    if(defaultResidues.containsKey(residueThreeLetterID.toUpperCase())){
+      return defaultResidues.get(residueThreeLetterID.toUpperCase());
+    }
+    throw new IllegalArgumentException(residueThreeLetterID + " not a valid residue name.");
+  }
+
+  /**
   * From a Collection of Atom Records, build and return a collection of those Atoms.
   */
   private Collection<Atom> constructAtomsInResidue(Collection<AtomRecord> residueAtomRecords){
@@ -152,7 +211,7 @@ public class PDBFileIO{
   /**
   * From the list of all AtomRecords in the pdb, return a list of those with the given chainID.
   */
-  private Collection<AtomRecord> getAtomsInChain(String chainID){
+  private Collection<AtomRecord> getAtomRecordsInChain(String chainID){
     ArrayList<AtomRecord> atoms = new ArrayList<AtomRecord>();
     for(AtomRecord rec : this.atomRecords){
       if(rec.getChainID().equals(chainID)){
@@ -171,6 +230,36 @@ public class PDBFileIO{
       chainIDs.add(rec.getChainID());
     }
     return chainIDs;
+  }
+
+  private HashMap<String, ArrayList<AtomRecord>> readInDefaultResidues(){
+    InputStream stream = PDBFileIO.class.getResourceAsStream("residues.pdb");
+    Scanner in = new Scanner(stream);
+    ArrayList<AtomRecord> allResAtomRecords = new ArrayList<AtomRecord>();
+    while(in.hasNextLine()){
+      String line = in.nextLine();
+      if(line.length() < 80){
+        line = padRight(line);
+      }
+      String recordName = line.substring(0,6).trim();
+      allResAtomRecords.add(parseAtomLine(line));
+    }
+
+    return buildDefaultResiduesLists(allResAtomRecords);
+  }
+
+  private void addDisulfideBonds(Protein protein){
+    for(SSBondRecord ssBondRec: ssBonds){
+      String chainID1 = ssBondRec.getChainID1();
+      String chainID2 = ssBondRec.getChainID2();
+      int resID1 = ssBondRec.getResID1();
+      int resID2 = ssBondRec.getResID2();
+      protein.addDisulfideBond(chainID1, resID1, chainID2, resID2);
+    }
+  }
+
+  private String padRight(String line){
+    return String.format("%1$-" + (80-line.length()) + "s", line);
   }
 
   private AtomRecord parseAtomLine(String line){
@@ -225,12 +314,9 @@ public class PDBFileIO{
     return new SSBondRecord(chainID1, resID1, chainID2, resID2);
   }
 
-  private String padRight(String line){
-    return String.format("%1$-" + (80-line.length()) + "s", line);
-  }
 
   /**
-  * Private Inner Class SSBondRecord
+  * Private Inner Class for SSBondRecords
   */
   private class SSBondRecord{
     private String chainID1;

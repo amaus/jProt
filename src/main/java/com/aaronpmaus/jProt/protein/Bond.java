@@ -1,8 +1,6 @@
 package com.aaronpmaus.jProt.protein;
 import java.lang.IllegalArgumentException;
 
-// make this an Observer of the atoms in it? That way if one of them
-// is moved, the bond will atomatically update its distance and energy?
 /**
  * Class Bond to represent an atomic bond.
  * @author Aarom Maus aaron@aaronpmaus.com
@@ -12,8 +10,6 @@ import java.lang.IllegalArgumentException;
 public class Bond {
     private Atom a1;
     private Atom a2;
-    private double bondLength;
-    private double energy;
     private int bondStrength; // single, double, triple bond, etc.
 
     /**
@@ -45,8 +41,6 @@ public class Bond {
             throw new IllegalArgumentException("Atoms added to a bond must be different.");
         }
         this.bondStrength = bondStrength;
-        this.bondLength = a1.distance(a2);
-        this.energy = calculateEnergy();
     }
 
     /**
@@ -54,7 +48,7 @@ public class Bond {
      * @return the length of the bond in Angstroms.
     */
     public double getBondLength(){
-        return this.bondLength;
+        return this.getAtomOne().distance(this.getAtomTwo());
     }
 
     /**
@@ -72,7 +66,7 @@ public class Bond {
      * @return the potential energy of this bond.
     */
     public double getEnergy(){
-        return this.energy;
+        return this.calculateEnergy();
     }
 
     /**
@@ -144,4 +138,8 @@ public class Bond {
         return false;
     }
 
+    @Override
+    public String toString(){
+      return getAtomOne().getAtomName() + " - " + getAtomTwo().getAtomName();
+    }
 }
