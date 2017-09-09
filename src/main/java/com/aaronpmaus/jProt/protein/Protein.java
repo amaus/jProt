@@ -26,21 +26,15 @@ public class Protein {
   private PDBFileIO pdbIO;
 
   /**
-  * @param pdbName the PDB filename base.
-  */
-  public Protein(String pdbName){
-    this.chains = new ArrayList<PolypeptideChain>();
-    this.atoms = new UndirectedGraph<Atom>();
-    this.disulfideBonds = new ArrayList<Bond>();
-    this.pdbName = pdbName;
-  }
-
-  /**
+  * Construct a protein from an input stream pointing to a pdb file.
   * @param pdbFileInputStream an InputStream pointing to a pdb file
   * @param pdbName the PDB filename base.
   */
   public Protein(InputStream pdbFileInputStream, String pdbName){
-    this(pdbName);
+    this.chains = new ArrayList<PolypeptideChain>();
+    this.atoms = new UndirectedGraph<Atom>();
+    this.disulfideBonds = new ArrayList<Bond>();
+    this.pdbName = pdbName;
     this.pdbIO = new PDBFileIO(pdbFileInputStream);
     buildProteinFromPDB();
   }
