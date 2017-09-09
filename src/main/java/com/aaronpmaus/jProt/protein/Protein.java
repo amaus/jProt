@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.Collection;
 
 import java.io.InputStream;
 
@@ -25,7 +26,7 @@ public class Protein {
   private PDBFileIO pdbIO;
 
   /**
-  * @param pdbName the name of this protein, preferable the PDB filename base.
+  * @param pdbName the PDB filename base.
   */
   public Protein(String pdbName){
     this.chains = new ArrayList<PolypeptideChain>();
@@ -36,11 +37,12 @@ public class Protein {
 
   /**
   * @param pdbFileInputStream an InputStream pointing to a pdb file
-  * @param pdbName the name of this protein, preferable the PDB filename base.
+  * @param pdbName the PDB filename base.
   */
   public Protein(InputStream pdbFileInputStream, String pdbName){
     this(pdbName);
     this.pdbIO = new PDBFileIO(pdbFileInputStream);
+    buildProteinFromPDB();
   }
 
   /**
@@ -308,4 +310,46 @@ public class Protein {
   }
 
   //*************** File IO Helper Methods *******************//
+  private void buildProteinFromPDB(){
+    Collection<String> chainIDs = this.pdbIO.getListOfChainIDs();
+    for(String chainID : chainIDs){
+
+      PolypeptideChain chain = new PolypeptideChain(chainID);
+      // get a list of all the atomRecords that have chainID
+      Collection<AtomRecord> chainAtomRecords = this.pdbIO.getAtomRecordsInChain(chainID);
+
+      HashMap<Integer, ArrayList<AtomRecord>> residueRecordsLists =
+          this.pdbIO.getResidueRecordsLists(chainAtomRecords);
+
+      // for every residue's list of AtomRecords, build a list of the atoms in that residue from the
+      // AtomRecords. Use that list to construct and add that new residue with those atoms to the
+      // chain.
+      for(ArrayList<AtomRecord> residueAtomRecords : residueRecordsLists.values()){
+        String resName = residueAtomRecords.get(0).getResName();
+        int resSeq = residueAtomRecords.get(0).getResSeq();
+
+        Collection<Atom> residueAtoms = constructAtomsInResidue(residueAtomRecords);
+
+        chain.addResidue(new Residue(resName, resSeq, residueAtoms));
+      }
+      this.addChain(chain);
+    }
+  }
+
+  /**
+  * From a Collection of Atom Records, build and return a collection of those Atoms.
+  */
+  private Collection<Atom> constructAtomsInResidue(Collection<AtomRecord> residueAtomRecords){
+    ArrayList<Atom> residueAtoms = new ArrayList<Atom>();
+    for(AtomRecord rec : residueAtomRecords){
+      residueAtoms.add(constructAtom(rec));
+    }
+    return residueAtoms;
+  }
+
+  private Atom constructAtom(AtomRecord rec){
+    return new Atom(rec.getAtomName(), rec.getSerial(), rec.getOccupancy(),
+        rec.getTempFactor(), rec.getCharge(),
+        rec.getX(), rec.getY(), rec.getZ());
+  }
 }

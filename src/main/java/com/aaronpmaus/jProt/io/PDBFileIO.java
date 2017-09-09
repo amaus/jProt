@@ -20,9 +20,7 @@ import java.io.InputStream;
 * Example Usage:
 * <p>
 * To build a protein from a pdb file:
-* {@code
-* PDBFileIO pdbIO = new PDBFileIO(pdbInputStream, pdbFileName);
-* Protein prot = new Protein(pdbInputStream, proteinName);
+* {@code Protein prot = new Protein(pdbInputStream, proteinName);}
 * To build a protein from sequence data:
 * {@code Protein prot = new Protein(new FastaFileIO(fastaInputStream), proteinName);}
 * @author Aaron Maus aaron@aaronpmaus.com
@@ -37,16 +35,12 @@ public class PDBFileIO{
   private InputStream pdbInputStream;
 
   public PDBFileIO(InputStream pdbInputStream){
-    this();
-    this.pdbInputStream = pdbInputStream;
-  }
-
-  public PDBFileIO(){
     fileLines = new ArrayList<String>();
     ssBonds = new ArrayList<SSBondRecord>();
     atomRecords = new ArrayList<AtomRecord>();
     defaultResidues = readInDefaultResidues();
     this.pdbInputStream = pdbInputStream;
+    readInPDBFile(pdbInputStream);
   }
 
   /**
@@ -54,10 +48,9 @@ public class PDBFileIO{
   *
   * @param fileName the name of the PDB file
   * @throws FileNotFoundException if the file can not be read from
-  * @return a Protein built from that file
   */
-  public Protein readInPDBFile(String fileName) throws FileNotFoundException{
-    return readInPDBFile(new FileInputStream(new File(fileName)), fileName);
+  private void readInPDBFile(String fileName) throws FileNotFoundException{
+    readInPDBFile(new FileInputStream(new File(fileName)));
   }
 
   /**
@@ -65,12 +58,9 @@ public class PDBFileIO{
   *
   * @param inputStream the inputStream to read from
   * @param fileName the name of the PDB file
-  * @return a Protein built from that file
   */
-  public Protein readInPDBFile(InputStream inputStream, String fileName){
+  private void readInPDBFile(InputStream inputStream){
     Scanner in = new Scanner(inputStream);
-    String[] fileNameParts = fileName.split("\\.");
-    String fileBase = fileNameParts[0];
 
     while(in.hasNextLine()){
       String line = in.nextLine();
@@ -91,53 +81,15 @@ public class PDBFileIO{
           break;
       }
     }
-    return buildProtein(fileBase);
+    //return buildProtein(fileBase);
   }
 
-  private Atom constructAtom(AtomRecord rec){
-    return new Atom(rec.getAtomName(), rec.getSerial(), rec.getOccupancy(),
-                    rec.getTempFactor(), rec.getCharge(),
-                    rec.getX(), rec.getY(), rec.getZ());
-  }
-
-  private Protein buildProtein(String fileBase){
-    Protein protein = new Protein(fileBase);
-    Collection<String> chainIDs = getListOfChainIDs();
-    for(String chainID : chainIDs){
-
-      PolypeptideChain chain = new PolypeptideChain(chainID);
-      // get a list of all the atomRecords that have chainID
-      Collection<AtomRecord> chainAtomRecords = getAtomRecordsInChain(chainID);
-
-      HashMap<Integer, ArrayList<AtomRecord>> residueRecordsLists =
-          getResidueRecordsLists(chainAtomRecords);
-
-      // for every residue's list of AtomRecords, build a list of the atoms in that residue from the
-      // AtomRecords. Use that list to construct and add that new residue with those atoms to the
-      // chain.
-      for(ArrayList<AtomRecord> residueAtomRecords : residueRecordsLists.values()){
-        String resName = residueAtomRecords.get(0).getResName();
-        int resSeq = residueAtomRecords.get(0).getResSeq();
-
-        Collection<Atom> residueAtoms = constructAtomsInResidue(residueAtomRecords);
-
-        chain.addResidue(new Residue(resName, resSeq, residueAtoms));
-      }
-      protein.addChain(chain);
-    }
-
-    // Now that the protein is constructed, perform any postprocessing such as adding disulfide
-    // bonds
-    addDisulfideBonds(protein);
-    return protein;
-  }
-
-  /**
+  /*
   * Build HashMap of the lists of AtomRecords for each residue in a chain.
   * the key is the residueID, the value is an ArrayList holding all the atomRecords for
   * that residue.
   */
-  private HashMap<Integer, ArrayList<AtomRecord>> getResidueRecordsLists(
+  public HashMap<Integer, ArrayList<AtomRecord>> getResidueRecordsLists(
       Collection<AtomRecord> atomRecords){
 
     HashMap<Integer, ArrayList<AtomRecord>> residueRecordsLists =
@@ -197,21 +149,13 @@ public class PDBFileIO{
     throw new IllegalArgumentException(residueThreeLetterID + " not a valid residue name.");
   }
 
-  /**
-  * From a Collection of Atom Records, build and return a collection of those Atoms.
-  */
-  private Collection<Atom> constructAtomsInResidue(Collection<AtomRecord> residueAtomRecords){
-    ArrayList<Atom> residueAtoms = new ArrayList<Atom>();
-    for(AtomRecord rec : residueAtomRecords){
-      residueAtoms.add(constructAtom(rec));
-    }
-    return residueAtoms;
-  }
 
   /**
   * From the list of all AtomRecords in the pdb, return a list of those with the given chainID.
+  * @param chainID a chainID that must be present in the PDB
+  * @return a collection of all the AtomRecords that contain that chainID
   */
-  private Collection<AtomRecord> getAtomRecordsInChain(String chainID){
+  public Collection<AtomRecord> getAtomRecordsInChain(String chainID){
     ArrayList<AtomRecord> atoms = new ArrayList<AtomRecord>();
     for(AtomRecord rec : this.atomRecords){
       if(rec.getChainID().equals(chainID)){
@@ -223,8 +167,9 @@ public class PDBFileIO{
 
   /**
   * Get a list all the chainIDs in this PDB.
+  * @return a list of all the chainIDs in this PDB.
   */
-  private Collection<String> getListOfChainIDs(){
+  public Collection<String> getListOfChainIDs(){
     HashSet<String> chainIDs = new HashSet<String>();
     for(AtomRecord rec : this.atomRecords){
       chainIDs.add(rec.getChainID());
@@ -312,85 +257,6 @@ public class PDBFileIO{
     String chainID2 = line.substring(29,30).trim();
     int resID2 = Integer.parseInt(line.substring(31,35).trim());
     return new SSBondRecord(chainID1, resID1, chainID2, resID2);
-  }
-
-
-  /**
-  * Private Inner Class for SSBondRecords
-  */
-  private class SSBondRecord{
-    private String chainID1;
-    private int resID1;
-    private String chainID2;
-    private int resID2;
-
-    public SSBondRecord(String chainID1, int resID1, String chainID2, int resID2){
-      this.chainID1 = chainID1;
-      this.resID1 = resID1;
-      this.chainID2 = chainID2;
-      this.resID2 = resID2;
-    }
-    public String getChainID1(){ return this.chainID1; }
-    public String getChainID2(){ return this.chainID2; }
-    public int getResID1(){ return this.resID1; }
-    public int getResID2(){ return this.resID2; }
-
-  }
-
-  /**
-  * Private Inner Class AtomRecord
-  */
-  private class AtomRecord{
-    private int serial;
-    private String atomName;
-    private String altLoc;
-    private String resName;
-    private String chainID;
-    private int resSeq;
-    private String iCode;
-    private String x;
-    private String y;
-    private String z;
-    private double occupancy;
-    private double tempFactor;
-    private String element;
-    private double charge;
-
-    public AtomRecord(int serial, String atomName, String altLoc,
-                      String resName, String chainID, int resSeq,
-                      String iCode, String x, String y, String z,
-                      double occupancy, double tempFactor,
-                      String element, double charge){
-      this.serial = serial;
-      this.atomName = atomName;
-      this.altLoc = altLoc;
-      this.resName = resName;
-      this.chainID = chainID;
-      this.resSeq = resSeq;
-      this.iCode = iCode;
-      this.x = x;
-      this.y = y;
-      this.z = z;
-      this.occupancy = occupancy;
-      this.tempFactor = tempFactor;
-      this.element = element;
-      this.charge = charge;
-    }
-    public int getSerial(){ return this.serial; }
-    public String getAtomName(){ return this.atomName; }
-    public String getAltLoc(){ return this.altLoc; }
-    public String getResName(){ return this.resName; }
-    public String getChainID(){ return this.chainID; }
-    public int getResSeq(){ return this.resSeq; }
-    public String getICode(){ return this.iCode; }
-    public String getX(){ return this.x; }
-    public String getY(){ return this.y; }
-    public String getZ(){ return this.z; }
-    public double getOccupancy(){ return this.occupancy; }
-    public double getTempFactor(){ return this.tempFactor; }
-    public String getElement(){ return this.element; }
-    public double getCharge(){ return this.charge; }
-
   }
 
 }

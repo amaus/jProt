@@ -33,12 +33,12 @@ public class TestProtein{
   @Before
   public void setup(){
     InputStream stream = TestProtein.class.getResourceAsStream("1rop.pdb");
-    PDBFileIO pdb = new PDBFileIO(stream);
-    rop = pdb.readInPDBFile(stream, "1rop.pdb");
+    //PDBFileIO pdb = new PDBFileIO(stream);
+    rop = new Protein(stream, "1rop.pdb");
 
     stream = TestProtein.class.getResourceAsStream("5m2j.pdb");
-    pdb = new PDBFileIO(stream);
-    m2j = pdb.readInPDBFile(stream, "5m2j.pdb");
+    //pdb = new PDBFileIO(stream);
+    m2j = new Protein(stream, "5m2j.pdb");
   }
 
   @Test

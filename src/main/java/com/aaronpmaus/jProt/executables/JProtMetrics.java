@@ -6,7 +6,9 @@ import com.aaronpmaus.jProt.io.*;
 import com.aaronpmaus.jMath.graph.*;
 
 import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.File;
 
 import java.util.Scanner;
 import java.util.ArrayList;
@@ -30,8 +32,8 @@ public class JProtMetrics{
   private static boolean useCSVs = false;
   private static double localSimilarityThreshold = 1.0;
   private static double[] gdtThresholds;
-  private static String mol1FileName;
-  private static String mol2FileName;
+  private static String mol1FilePath;
+  private static String mol2FilePath;
   private static String differencesFileName;
   private static boolean diffFileProvided = false;
   private static boolean mol1FileProvided = false;
@@ -79,11 +81,11 @@ public class JProtMetrics{
         localSimilarityThreshold = Double.parseDouble(args.getValue("--ls-t"));
       }
       if(args.contains("--mol1-f")){
-        mol1FileName = args.getValue("--mol1-f");
+        mol1FilePath = args.getValue("--mol1-f");
         mol1FileProvided = true;
       }
       if(args.contains("--mol2-f")){
-        mol2FileName = args.getValue("--mol2-f");
+        mol2FilePath = args.getValue("--mol2-f");
         mol2FileProvided = true;
       }
     }
@@ -91,11 +93,15 @@ public class JProtMetrics{
     try {
       theTool = null;
       if(mol1FileProvided && mol2FileProvided){
-        String[] mol1FileParts = mol1FileName.split("\\.");
-        String[] mol2FileParts = mol2FileName.split("\\.");
-        String mol1Ext = mol1FileParts[mol1FileParts.length - 1].trim().toLowerCase();
-        String mol2Ext = mol2FileParts[mol2FileParts.length - 1].trim().toLowerCase();
-        
+        File mol1File = new File(mol1FilePath);
+        File mol2File = new File(mol2FilePath);
+        String mol1FileName = mol1File.getName();
+        String mol2FileName = mol2File.getName();
+        String mol1Ext = mol1FileName.substring(mol1FileName.length()-3);
+        String mol2Ext = mol2FileName.substring(mol2FileName.length()-3);
+        String mol1Base = mol1FileName.substring(0,mol1FileName.length()-4);
+        String mol2Base = mol2FileName.substring(0,mol2FileName.length()-4);
+
         if(mol1Ext.equals("pdb") && mol2Ext.equals("pdb")){
           usePDBs = true;
         } else if(mol1Ext.equals("csv") && mol2Ext.equals("csv")){
@@ -108,9 +114,11 @@ public class JProtMetrics{
         }
 
         if(usePDBs){
-          PDBFileIO pdb = new PDBFileIO();
-          Protein prot1 = pdb.readInPDBFile(mol1FileName);
-          Protein prot2 = pdb.readInPDBFile(mol2FileName);
+          //PDBFileIO pdb = new PDBFileIO();
+          //Protein prot1 = pdb.readInPDBFile(mol1FileName);
+          Protein prot1 = new Protein(new FileInputStream(mol1FileName),mol1Base);
+          Protein prot2 = new Protein(new FileInputStream(mol2FileName),mol2Base);
+          //Protein prot2 = pdb.readInPDBFile(mol2FileName);
           theTool = new Metrics(prot1, prot2);
         } else if(useCSVs){
           theTool = new Metrics(mol1FileName, mol2FileName);
