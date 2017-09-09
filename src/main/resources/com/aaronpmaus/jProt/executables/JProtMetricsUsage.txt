@@ -1,0 +1,42 @@
+Usage: AngularDistanceJProt [<options>] <mol1-f fname> <mol2-f fname>
+  options :
+      -h
+          Display the usage file.
+      -a, --angular-distance
+          Calculate and print the angular distance.
+      --pdbs
+          use pdb files to specify the structures rather than distance
+          matrix files
+      --mol1-f fname
+          This file must either be a PDB file or a csv file. If it is a
+          PDB file it must end in the .pdb extension and conform to the
+          PDB File Format Version 3.30. otherwise, the file should
+          contain the distance matrix for If the file provided is csv,
+          it must end in the .csv extension. The first row must contain
+          the residue IDs and the rest of the file contains all pairwise
+          distances between those residues.  Each row contains that
+          residues distances to every other residue.
+      --mol2-f fname
+          The file for molecule two. The format is the same as mol1-f.
+      --ls, --local-similarity
+          Find the regions of local similarity between the structures
+          using  a default threshold of 1.0 angstroms. These are the
+          sets of residues that are internally consistent, that is, the
+          intra structure distances between all residues are the same
+          (that is their distance is under the default threshold of 1.0
+          angstroms) in both structures. A pymol script to select and
+          color these regions is printed to the screen.
+      --ls-t d
+          Find the regions of local similarity between the structures
+          using the threshold d specified.
+      --gdt
+          Global Distance Test: Iteratively find the largest regions of
+          similarity between the two structures under increasing
+          thresholds. Print out a pymol script that selects and colors
+          these regions and prints out the number and percent of
+          residues within each region along with the average of the
+          percents. The default thresholds are {1.0, 2.0, 4.0, 8.0}.
+      --gdt-ha
+          Global Distance Test - High Accuracy: the same as gdt except
+          with thresholds: {0.5, 1.0, 2.0, 4.0}. Warning: This may take
+          a long time to run depending on the structures.
