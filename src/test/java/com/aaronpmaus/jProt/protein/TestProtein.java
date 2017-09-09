@@ -32,12 +32,12 @@ public class TestProtein{
 
   @Before
   public void setup(){
-    PDBFileIO pdb = new PDBFileIO();
     InputStream stream = TestProtein.class.getResourceAsStream("1rop.pdb");
+    PDBFileIO pdb = new PDBFileIO(stream);
     rop = pdb.readInPDBFile(stream, "1rop.pdb");
 
-    pdb = new PDBFileIO();
     stream = TestProtein.class.getResourceAsStream("5m2j.pdb");
+    pdb = new PDBFileIO(stream);
     m2j = pdb.readInPDBFile(stream, "5m2j.pdb");
   }
 
@@ -57,5 +57,24 @@ public class TestProtein{
     chain = m2j.getChain("D");
     sequence = "QVQLVESGGGLVQPGGSLRLSCAASGFTFSNYWMYWVRQAPGKGLEWVSEINTNGLITKYPDSVKGRFTISRDNAKNTLYLQMNSLKPEDTALYYCARSPSGFNRGQGTQVTVSS";
     assertTrue(chain.getSequence().equals(sequence));
+  }
+
+  @Test
+  public void testBondSeparation(){
+    System.out.println(m2j.getChain("A").getResidue(9));
+    PolypeptideChain chainA = m2j.getChain("A");
+    Residue ser = chainA.getResidue(9);
+    for(Atom atom : ser){
+      System.out.printf("%s: %b\n",atom.getAtomName(), m2j.contains(atom));
+    }
+    System.out.println("Printing bonds");
+    for(Bond bond : ser.getBonds()){
+      System.out.println(bond);
+    }
+    System.out.println("Printing bonds");
+
+    Atom atomOne = m2j.getChain("A").getResidue(9).getAtom("N");
+    Atom atomTwo = m2j.getChain("A").getResidue(9).getAtom("C");
+    assertEquals(m2j.getBondSeparation(atomOne, atomTwo), 2);
   }
 }
