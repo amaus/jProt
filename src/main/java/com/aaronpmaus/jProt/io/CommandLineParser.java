@@ -65,14 +65,15 @@ public class CommandLineParser{
   }
 
   /**
-  * returns the value for the given flag.
+  * Return the value for the given flag.
   * @param flag the flag to get the value of
-  * @return the value for that flag
+  * @return the trimmed value for that flag, that is, excluding all white space before
+  *   and after the value.
   * @throws InvalidParameterException if the flag is not in the cmd line args
   * @since 0.3.0
   */
   public String getValue(String flag) throws InvalidParameterException {
-    return args.get( getIndex(flag)+1 );
+    return args.get( getIndex(flag)+1 ).trim();
   }
   /*
   public String getValue(String flag) throws InvalidParameterException {
