@@ -19,8 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - class PolypeptideChain
 - class Protein
 - class PDBFileIO with initial ability to read in PDBs. It does not fill in
-  missing atoms, build disulfide bonds, or use any of the data outside of the
-  ATOM records yet, but it can build a protein with all chains, residues, and
+  missing atoms, but it can build a protein with all chains, residues, and
   atoms specified in the file. It can not write proteins back out to PDB yet.
 - stubbed test classes TestProtein TestPolypeptideChain along with
   resource file 1rop.pdb

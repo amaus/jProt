@@ -193,6 +193,10 @@ public class PDBFileIO{
     return buildDefaultResiduesLists(allResAtomRecords);
   }
 
+  public Collection<SSBondRecord> getSSBondRecords(){
+    return new ArrayList<SSBondRecord>(this.ssBonds);
+  }
+
   private void addDisulfideBonds(Protein protein){
     for(SSBondRecord ssBondRec: ssBonds){
       String chainID1 = ssBondRec.getChainID1();

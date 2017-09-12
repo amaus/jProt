@@ -328,7 +328,20 @@ public class Protein {
       }
       this.addChain(chain);
     }
+
+    addDisulfideBonds();
   }
+
+  private void addDisulfideBonds(){
+    for(SSBondRecord ssBondRec: this.pdbIO.getSSBondRecords()){
+      String chainID1 = ssBondRec.getChainID1();
+      String chainID2 = ssBondRec.getChainID2();
+      int resID1 = ssBondRec.getResID1();
+      int resID2 = ssBondRec.getResID2();
+      this.addDisulfideBond(chainID1, resID1, chainID2, resID2);
+    }
+  }
+
 
   /**
   * From a Collection of Atom Records, build and return a collection of those Atoms.
