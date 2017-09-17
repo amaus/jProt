@@ -30,6 +30,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     BLOSUM matrices (and PAM) can be added in the future. The DNA and RNA
     matrices are naive and can certainly be improved.
   - junit tests for SequenceAligner
+- Add PMF Classes
+  - PMFFileIO to handle reading and writing from the encad PMF format
+  - PotentialOfMeanForce to represent a PMF with getters and setters for
+    its various information. Includes methods to get and set the
+    energy functions.
 ### Changed
 - Internal Change: changed contains(String flag) in CommandLineParser to no
   longer split on colons. The proper format for arguments if `-flag value`
