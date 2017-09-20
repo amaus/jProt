@@ -1,6 +1,7 @@
 package com.aaronpmaus.jProt.protein;
 
 import com.aaronpmaus.jMath.graph.*;
+import com.aaronpmaus.jProt.io.PDBFileIO;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,6 +29,8 @@ public class Residue implements Iterable<Atom>{
   private final String oneLetterName;
   private final int residueID;
   private boolean residueComplete = true;
+  private static int maxResidueID = 0;
+  //private static HashMap<String, Residue> defaultResidues = PDBFileIO.getDefaultResidues();
 
   // valid keys are the atomNames: CA, CB, CD, CD1, CD2, CE, C, O, N, etc...
   private HashMap<String, Atom> atoms;
@@ -52,7 +55,7 @@ public class Residue implements Iterable<Atom>{
   * @param residueID the numeric ID of the residue to build
   */
   public Residue(String threeLetterID, int residueID){
-    this(threeLetterID,residueID,null);
+    this(threeLetterID, residueID, PDBFileIO.getDefaultResidueAtoms(threeLetterID));
   }
 
   /**
@@ -62,10 +65,16 @@ public class Residue implements Iterable<Atom>{
   * @param atoms the atoms in this residue
   */
   public Residue(String threeLetterName, int residueID, Collection<Atom> atoms){
+    //System.out.printf("Constructing residue %d-%s\n",residueID,threeLetterName);
     this.threeLetterName = threeLetterName;
     this.oneLetterName = Residue.lookUpOneLetterName(this.threeLetterName);
     this.name = Residue.lookUpFullName(this.threeLetterName);
-    this.residueID = residueID;
+    if(residueID == -1){
+      this.residueID = Residue.maxResidueID + 1;
+    } else {
+      this.residueID = residueID;
+    }
+    Residue.maxResidueID = Math.max(this.residueID, Residue.maxResidueID);
     this.atoms = new HashMap<String, Atom>();
     this.bonds = new HashSet<Bond>();
     initializeAminoAcid(this.threeLetterName+".dat", atoms);
@@ -124,7 +133,7 @@ public class Residue implements Iterable<Atom>{
   /**
   * Get a Collection of the covalent bonds in this residue
   *
-  * @return a {@code HashSet<Bond>} of the bonds in this residue
+  * @return the bonds in this residue
   */
   public Collection<Bond> getBonds(){
     return new ArrayList<Bond>(this.bonds);
@@ -150,6 +159,7 @@ public class Residue implements Iterable<Atom>{
       }
       // use the atoms passed in
       for(Atom a: atoms){
+        //System.out.printf("Adding %s to residue atoms\n",a.getAtomName());
         this.atoms.put(a.getAtomName(), a);
       }
       // read in residue data file. use it to add all main bonds.
@@ -169,10 +179,19 @@ public class Residue implements Iterable<Atom>{
           readingInMainBonds = false;
           readingInHydrogens = true;
         }
+        if(line.equals("!defined dihedral angles")){
+          readingInMainBonds = false;
+          readingInHydrogens = false;
+        }
+        if(line.equals("!atom types")){
+          readingInMainBonds = false;
+          readingInHydrogens = false;
+        }
         if((!firstChar.equals("!")) && readingInMainBonds){
-          String[] tokens = line.trim().split(" ");
+          String[] tokens = line.trim().split("\\s+");
           String atomOne = tokens[0].trim();
           String atomTwo = tokens[1].trim();
+          //System.out.printf("[%s-%s]\n",atomOne, atomTwo);
           // TODO specify single or double bond depending on
           // atoms and residue
           if(atomTwo.equals("OXT")){
@@ -182,7 +201,7 @@ public class Residue implements Iterable<Atom>{
           }
         }
         if((!firstChar.equals("!")) && readingInHydrogens){
-          String[] tokens = line.trim().split(" ");
+          String[] tokens = line.trim().split("\\s+");
           String atomOne = tokens[0];
           String atomTwo = tokens[1];
           // TODO specify single or double bond depending on
@@ -198,6 +217,9 @@ public class Residue implements Iterable<Atom>{
   }
 
   private boolean addBond(String atomNameOne, String atomNameTwo, int bondStrength){
+    //System.out.printf("Adding Bond [%s-%s]\n",atomNameOne, atomNameTwo);
+    //System.out.printf("residue.contains(%s): %b\n", atomNameOne,this.atoms.containsKey(atomNameOne));
+    //System.out.printf("residue.contains(%s): %b\n", atomNameTwo,this.atoms.containsKey(atomNameTwo));
     if(this.atoms.containsKey(atomNameOne) && this.atoms.containsKey(atomNameTwo)){
       this.bonds.add(new Bond(getAtom(atomNameOne), getAtom(atomNameTwo), bondStrength));
       return true;
@@ -261,6 +283,7 @@ public class Residue implements Iterable<Atom>{
     return this.atoms.size();
   }
 
+  @Override
   public String toString(){
     String str = "";
     str += getName() + "\n";
@@ -273,6 +296,11 @@ public class Residue implements Iterable<Atom>{
     return str;
   }
 
+  private Collection<Atom> getAtoms(){
+    return this.atoms.values();
+  }
+
+  @Override
   public Iterator<Atom> iterator(){
     return this.atoms.values().iterator();
   }

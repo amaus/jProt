@@ -36,6 +36,7 @@ public class Atom implements Comparable<Atom> {
   *
   * @param atomName   The String representation of the atom. One
   * of "CA", "CB", "CG", "O", "C", "NH1", etc...
+  * @param element the element of this atom, H, C, N, O, or S
   * @param serialNumber The Serial Number for this Atom.
   * @param occupancy the Occupancy for this Atom.
   * @param tempFactor the Temperature Factor for this Atom.
@@ -44,9 +45,9 @@ public class Atom implements Comparable<Atom> {
   *                                  the allowed elements.
   * @since 0.6.0
   */
-  public Atom(String atomName, int serialNumber, double occupancy,
+  public Atom(String atomName, String element, int serialNumber, double occupancy,
   double tempFactor, double charge){
-    this(atomName, serialNumber, occupancy, tempFactor, charge, "0.0", "0.0", "0.0");
+    this(atomName, element, serialNumber, occupancy, tempFactor, charge, "0.0", "0.0", "0.0");
   }
 
   /**
@@ -58,6 +59,7 @@ public class Atom implements Comparable<Atom> {
   *
   * @param atomName   The String representation of the atom. One
   * of "CA", "CB", "CG", "O", "C", "NH1", etc...
+  * @param element the element of this atom, H, C, N, O, or S
   * @param serialNumber The Serial Number for this Atom.
   * @param occupancy the Occupancy for this Atom.
   * @param tempFactor the Temperature Factor for this Atom.
@@ -69,10 +71,11 @@ public class Atom implements Comparable<Atom> {
   *                                  the allowed elements.
   * @since 0.6.0
   */
-  public Atom(String atomName, int serialNumber, double occupancy,
+  public Atom(String atomName, String element, int serialNumber, double occupancy,
   double tempFactor, double charge, String x, String y, String z){
     this.itsCoordinates = new Vector(x,y,z);
     this.atomName = atomName.toUpperCase().trim();
+    this.element = element.toUpperCase().trim();
     this.charge = charge;
     // If the serialNumber is -1, then this atom was built from one of the default amino acids.
     // Assign the serianNumber to be be the max serial number + 1
@@ -86,26 +89,21 @@ public class Atom implements Comparable<Atom> {
     this.tempFactor = tempFactor;
 
     // set the mass and radius depending on the element
-    if(this.atomName.charAt(0) == 'H'){
+    if(this.element.charAt(0) == 'H'){
       this.mass = 1.008;
       this.radius = 1.10;
-      this.element = "H";
-    } else if(this.atomName.charAt(0) == 'C'){
+    } else if(this.element.charAt(0) == 'C'){
       this.mass = 12.011;
       this.radius = 1.85;
-      this.element = "C";
-    } else if(this.atomName.charAt(0) == 'N'){
+    } else if(this.element.charAt(0) == 'N'){
       this.mass = 14.007;
       this.radius = 1.65;
-      this.element = "N";
-    } else if(this.atomName.charAt(0) == 'O'){
+    } else if(this.element.charAt(0) == 'O'){
       this.mass = 15.999;
       this.radius = 1.60;
-      this.element = "O";
-    } else if(this.atomName.charAt(0) == 'S'){
+    } else if(this.element.charAt(0) == 'S'){
       this.mass = 32.064;
       this.radius = 1.85;
-      this.element = "S";
     } else { // must be one of the above. otherwise, throw exception
       throw new IllegalArgumentException("Atom() invalid element type. Must be H, C, N, O, or S.");
     }
