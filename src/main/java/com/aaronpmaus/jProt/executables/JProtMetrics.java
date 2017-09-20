@@ -116,8 +116,8 @@ public class JProtMetrics{
         if(usePDBs){
           //PDBFileIO pdb = new PDBFileIO();
           //Protein prot1 = pdb.readInPDBFile(mol1FileName);
-          Protein prot1 = new Protein(new FileInputStream(mol1FileName),mol1Base);
-          Protein prot2 = new Protein(new FileInputStream(mol2FileName),mol2Base);
+          Protein prot1 = new PDBFileIO().readInPDBFile(new FileInputStream(mol1FileName),mol1Base);
+          Protein prot2 = new PDBFileIO().readInPDBFile(new FileInputStream(mol2FileName),mol2Base);
           //Protein prot2 = pdb.readInPDBFile(mol2FileName);
           theTool = new Metrics(prot1, prot2);
         } else if(useCSVs){

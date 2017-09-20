@@ -26,17 +26,24 @@ public class Protein {
   private PDBFileIO pdbIO;
 
   /**
-  * Construct a protein from an input stream pointing to a pdb file.
-  * @param pdbFileInputStream an InputStream pointing to a pdb file
-  * @param pdbName the PDB filename base.
+  * Create an instance of a Protein. All chains will then have to be added to this instance.
+  * @param pdbFileNameBase the PDB filename base (the part before the extension).
+  * @param pdbIO a PDBFileIO instance that this protein can use to write out to file
   */
-  public Protein(InputStream pdbFileInputStream, String pdbName){
+  public Protein(String pdbFileNameBase, PDBFileIO pdbIO){
     this.chains = new ArrayList<PolypeptideChain>();
     this.atoms = new UndirectedGraph<Atom>();
     this.disulfideBonds = new ArrayList<Bond>();
-    this.pdbName = pdbName;
-    this.pdbIO = new PDBFileIO(pdbFileInputStream);
-    buildProteinFromPDB();
+    this.pdbName = pdbFileNameBase;
+    this.pdbIO = pdbIO;
+  }
+
+  /**
+  * Create an instance of a Protein. All chains will then have to be added to this instance.
+  * @param pdbFileNameBase the PDB filename base (the part before the extension).
+  */
+  public Protein(String pdbFileNameBase){
+    this(pdbFileNameBase, new PDBFileIO());
   }
 
   /**
@@ -53,6 +60,7 @@ public class Protein {
   */
   public void addChain(PolypeptideChain chain){
     this.chains.add(chain);
+    Collection<Bond> bonds = chain.getBonds();
     for(Bond bond : chain.getBonds()){
       atoms.addEdge(bond.getAtomOne(), bond.getAtomTwo());
     }
@@ -132,10 +140,7 @@ public class Protein {
   * @return the collection of atoms starting with atomStart and ending with atomEnd or an empty
   * collection if no path exists.
   */
-  public List<Atom> getShortestPath(Atom atomStart, Atom atomEnd){
-    System.out.printf("%s\n%s",atomStart, atomEnd);
-    System.out.println(atoms.contains(atomStart));
-    System.out.println(atoms.contains(atomEnd));
+  private List<Atom> getShortestPath(Atom atomStart, Atom atomEnd){
     LinkedList<Atom> list = new LinkedList<Atom>();
     for(Node<Atom> n : this.atoms.shortestPath(atomStart, atomEnd)){
       list.add(n.get());
@@ -290,8 +295,7 @@ public class Protein {
   }
 
   /**
-  * Returns the residue IDs of all the residues in the chain with the
-  * chainID provided as an argument
+  * Return the residue IDs of all the residues from the chain specified
   * @param chainID the letter ID of the chain to get the residue IDs from
   * @return an array of Integers holding the residue IDs
   */
@@ -299,64 +303,13 @@ public class Protein {
     return getChain(chainID).getResidueIDs();
   }
 
-  public boolean contains(Atom atom){
+  /**
+  * @param atom the atom to check if it is in this protein
+  * @return true if this protein contains the atom
+  */
+  private boolean contains(Atom atom){
     return this.atoms.contains(atom);
   }
 
-  //*************** File IO Helper Methods *******************//
-  private void buildProteinFromPDB(){
-    Collection<String> chainIDs = this.pdbIO.getListOfChainIDs();
-    for(String chainID : chainIDs){
 
-      PolypeptideChain chain = new PolypeptideChain(chainID);
-      // get a list of all the atomRecords that have chainID
-      Collection<AtomRecord> chainAtomRecords = this.pdbIO.getAtomRecordsInChain(chainID);
-
-      HashMap<Integer, ArrayList<AtomRecord>> residueRecordsLists =
-          this.pdbIO.getResidueRecordsLists(chainAtomRecords);
-
-      // for every residue's list of AtomRecords, build a list of the atoms in that residue from the
-      // AtomRecords. Use that list to construct and add that new residue with those atoms to the
-      // chain.
-      for(ArrayList<AtomRecord> residueAtomRecords : residueRecordsLists.values()){
-        String resName = residueAtomRecords.get(0).getResName();
-        int resSeq = residueAtomRecords.get(0).getResSeq();
-
-        Collection<Atom> residueAtoms = constructAtomsInResidue(residueAtomRecords);
-
-        chain.addResidue(new Residue(resName, resSeq, residueAtoms));
-      }
-      this.addChain(chain);
-    }
-
-    addDisulfideBonds();
-  }
-
-  private void addDisulfideBonds(){
-    for(SSBondRecord ssBondRec: this.pdbIO.getSSBondRecords()){
-      String chainID1 = ssBondRec.getChainID1();
-      String chainID2 = ssBondRec.getChainID2();
-      int resID1 = ssBondRec.getResID1();
-      int resID2 = ssBondRec.getResID2();
-      this.addDisulfideBond(chainID1, resID1, chainID2, resID2);
-    }
-  }
-
-
-  /**
-  * From a Collection of Atom Records, build and return a collection of those Atoms.
-  */
-  private Collection<Atom> constructAtomsInResidue(Collection<AtomRecord> residueAtomRecords){
-    ArrayList<Atom> residueAtoms = new ArrayList<Atom>();
-    for(AtomRecord rec : residueAtomRecords){
-      residueAtoms.add(constructAtom(rec));
-    }
-    return residueAtoms;
-  }
-
-  private Atom constructAtom(AtomRecord rec){
-    return new Atom(rec.getAtomName(), rec.getSerial(), rec.getOccupancy(),
-        rec.getTempFactor(), rec.getCharge(),
-        rec.getX(), rec.getY(), rec.getZ());
-  }
 }

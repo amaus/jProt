@@ -34,11 +34,11 @@ public class TestProtein{
   public void setup(){
     InputStream stream = TestProtein.class.getResourceAsStream("1rop.pdb");
     //PDBFileIO pdb = new PDBFileIO(stream);
-    rop = new Protein(stream, "1rop.pdb");
+    rop = new PDBFileIO().readInPDBFile(stream, "1rop");
 
     stream = TestProtein.class.getResourceAsStream("5m2j.pdb");
     //pdb = new PDBFileIO(stream);
-    m2j = new Protein(stream, "5m2j.pdb");
+    m2j = new PDBFileIO().readInPDBFile(stream, "5m2j");
   }
 
   @Test
@@ -61,20 +61,33 @@ public class TestProtein{
 
   @Test
   public void testBondSeparation(){
-    System.out.println(m2j.getChain("A").getResidue(9));
     PolypeptideChain chainA = m2j.getChain("A");
     Residue ser = chainA.getResidue(9);
-    for(Atom atom : ser){
-      System.out.printf("%s: %b\n",atom.getAtomName(), m2j.contains(atom));
-    }
-    System.out.println("Printing bonds");
-    for(Bond bond : ser.getBonds()){
-      System.out.println(bond);
-    }
-    System.out.println("Printing bonds");
+    Residue cys69 = chainA.getResidue(69);
+    Residue cys101 = chainA.getResidue(101);
 
-    Atom atomOne = m2j.getChain("A").getResidue(9).getAtom("N");
-    Atom atomTwo = m2j.getChain("A").getResidue(9).getAtom("C");
+    Atom atomOne = ser.getAtom("N");
+    Atom atomTwo = ser.getAtom("C");
     assertEquals(m2j.getBondSeparation(atomOne, atomTwo), 2);
+
+    atomOne = cys69.getAtom("SG");
+    atomTwo = cys101.getAtom("SG");
+    assertEquals(m2j.getBondSeparation(atomOne, atomTwo), 1);
+
+    atomOne = cys69.getAtom("CB");
+    atomTwo = cys101.getAtom("CB");
+    assertEquals(m2j.getBondSeparation(atomOne, atomTwo), 3);
+
+    Residue one = chainA.getResidue(10);
+    Residue two = chainA.getResidue(11);
+    atomOne = one.getAtom("O");
+    atomTwo = two.getAtom("N");
+    assertEquals(m2j.getBondSeparation(atomOne, atomTwo), 2);
+
+    one = chainA.getResidue(10);
+    two = chainA.getResidue(12);
+    atomOne = one.getAtom("C");
+    atomTwo = two.getAtom("C");
+    assertEquals(m2j.getBondSeparation(atomOne, atomTwo), 6);
   }
 }
