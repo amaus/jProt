@@ -3,7 +3,7 @@
 This is a library for dealing with Protein structures.
 
 * Protein Comparison
-* Anything else we decide to add
+* Anything else that may be useful
 
 ## Installation
 
