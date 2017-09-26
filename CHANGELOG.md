@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Comments in build.gradle to explain Semantic Versioning.
 - Comments in build.gradle to explain gradle build and install usage.
 - class Residue
+  - JUnit test class for Residue. It tests the construction of several default
+    residues.
 - Residue data files in main resources. These files specify atom bonds and
   alternate atom type IDs for various energy functions.
 - class Bond
@@ -46,6 +48,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Atom#moveTo() method
 ### Fixed
 - Dates in CHANGELOG to better conform to ISO 8601
+- Javadoc generation to include links to standard java APIs
 ### Security
 [None]
 
