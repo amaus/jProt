@@ -184,13 +184,8 @@ public class Residue implements Iterable<Atom>{
 
   // For Initializing all Residues:
   // use the atoms passed in. add all to hashMap and create all bonds.
-  // What to do if any atoms are missing? Easy solution: treat it
-  // as a missing residue. Throw an exception if missing any atoms.
-  // then the client will have to ignore this residue.
-  // Hard Solution: fill in the missing atoms. remember, no clashes.
-  // Umm, flag this residue as incomplete. Then have the protein
-  // constructor resolve all incomplete residues after they've all
-  // been added?
+  // What to do about missing atoms? Flag this residue as incomplete. Then have the protein
+  // constructor resolve all incomplete residues after they've all been added.
   private void initializeAminoAcid(String dataFileName, Collection<Atom> atoms){
     this.residueComplete = true;
     // if atoms is null, build amino acid from default values
