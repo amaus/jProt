@@ -97,6 +97,13 @@ public class Bond {
         return false;
     }
 
+    public boolean containsHydrogen(){
+      if(getAtomOne().getElement().equals("H") || getAtomTwo().getElement().equals("H")){
+        return true;
+      }
+      return false;
+    }
+
     /**
      * A private helper method to calculate the energy of this bond.
      * @return the energy of this bond in kcal/mol

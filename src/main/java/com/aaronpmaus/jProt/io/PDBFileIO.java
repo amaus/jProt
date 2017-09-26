@@ -89,7 +89,6 @@ public class PDBFileIO{
       if(line.length() < 80){
         line = padRight(line);
       }
-      String recordName = line.substring(0,6).trim();
       allResAtomRecords.add(parseAtomLine(line));
     }
     in.close();
@@ -203,7 +202,7 @@ public class PDBFileIO{
   }
 
   private static String padRight(String line){
-    return String.format("%1$-" + (80-line.length()) + "s", line);
+    return String.format("%-" + 80 + "s", line);
   }
 
   private static AtomRecord parseAtomLine(String line){
@@ -278,14 +277,26 @@ public class PDBFileIO{
         int resSeq = residueAtomRecords.get(0).getResSeq();
 
         Collection<Atom> residueAtoms = constructAtoms(residueAtomRecords);
-
-        chain.addResidue(new Residue(resName, resSeq, residueAtoms));
+        Residue res = new Residue(resName, resSeq, residueAtoms);
+        if(containsCarboxylOxygen(residueAtoms)){
+          res.setAsCarboxylTerminus();
+        }
+        chain.addResidue(res);
       }
       protein.addChain(chain);
     }
 
     addDisulfideBonds(protein);
     return protein;
+  }
+
+  private boolean containsCarboxylOxygen(Collection<Atom> atoms){
+    for(Atom a: atoms){
+      if(a.getAtomName().equals("OXT")){
+        return true;
+      }
+    }
+    return false;
   }
 
   private void addDisulfideBonds(Protein protein){

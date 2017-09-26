@@ -123,8 +123,8 @@ public class Metrics{
       i++;
     }
 
-    this.alphaStrucID = prot1.getPDBName();
-    this.betaStrucID = prot2.getPDBName();
+    this.alphaStrucID = prot1.getProteinName();
+    this.betaStrucID = prot2.getProteinName();
     // build the distance matrices out of the residues that were aligned
     this.alphaDistancesMatrix = prot1.calculateCarbonAlphaDistanceMatrix(prot1Mask);
     this.betaDistancesMatrix = prot2.calculateCarbonAlphaDistanceMatrix(prot2Mask);

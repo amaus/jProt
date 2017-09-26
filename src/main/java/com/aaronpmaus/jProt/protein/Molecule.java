@@ -3,8 +3,10 @@ package com.aaronpmaus.jProt.protein;
 import com.aaronpmaus.jMath.*;
 import com.aaronpmaus.jMath.graph.*;
 import com.aaronpmaus.jMath.linearAlgebra.*;
+
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 
 /**
 * This class represents a Molecule. It can be used for Amino Acids,
@@ -14,17 +16,14 @@ import java.util.HashSet;
 * @since 0.6.0
 */
 public class Molecule {
-  private double mass;
-  private Vector centerOfMass;
   private HashSet<Bond> covalentBonds;
   private HashSet<Atom> atoms;
 
   public Molecule(){
     this.atoms = new HashSet<Atom>();
     this.covalentBonds = new HashSet<Bond>();
-    this.mass = 0.0;
-    this.centerOfMass = new Vector(0.0, 0.0, 0.0);
   }
+
   /**
   * A constructor for a molecule. Takes a Collection of Bonds and builds
   * the Molecule from that.
@@ -39,21 +38,6 @@ public class Molecule {
       atoms.add(b.getAtomOne());
       atoms.add(b.getAtomTwo());
     }
-    calcCenterOfMass();
-  }
-
-  private void calcCenterOfMass(){
-    double comX = 0.0;
-    double comY = 0.0;
-    double comZ = 0.0;
-    this.mass = 0.0;
-    for(Atom a: atoms){
-      this.mass += a.getMass();
-      comX += a.getMass() * a.getCoordinates().getValue(0).doubleValue();
-      comY += a.getMass() * a.getCoordinates().getValue(1).doubleValue();
-      comZ += a.getMass() * a.getCoordinates().getValue(2).doubleValue();
-    }
-    this.centerOfMass = new Vector(comX/mass, comY/mass, comZ/mass);
   }
 
   /**
@@ -61,15 +45,29 @@ public class Molecule {
   * @return the mass of this molecule
   */
   public double getMass(){
-    return this.mass;
+    double mass = 0.0;
+    for(Atom a: atoms){
+      mass += a.getMass();
+    }
+    return mass;
   }
 
   /**
-  * A query to get the center of mass of this molecule
+  * Calculate and return the center of mass of this molecule
   * @return a Vector holding the coordinates of the center of mass
   */
   public Vector getCenterOfMass(){
-    return this.centerOfMass;
+    double comX = 0.0;
+    double comY = 0.0;
+    double comZ = 0.0;
+    double mass = 0.0;
+    for(Atom a: atoms){
+      mass += a.getMass();
+      comX += a.getMass() * a.getCoordinates().getValue(0).doubleValue();
+      comY += a.getMass() * a.getCoordinates().getValue(1).doubleValue();
+      comZ += a.getMass() * a.getCoordinates().getValue(2).doubleValue();
+    }
+    return new Vector(comX/mass, comY/mass, comZ/mass);
   }
 
   /**
@@ -81,7 +79,25 @@ public class Molecule {
     atoms.add(bond.getAtomOne());
     atoms.add(bond.getAtomTwo());
     this.covalentBonds.add(bond);
-    calcCenterOfMass();
+  }
+
+  /**
+  * Remove from this molecule any hydrogen atoms and any bonds that contain
+  * a hydrogen.
+  */
+  protected void removeHydrogens(){
+    Iterator<Atom> atomIterator = atoms.iterator();
+    while(atomIterator.hasNext()){
+      if(atomIterator.next().getElement().equals("H")){
+        atomIterator.remove();
+      }
+    }
+    Iterator<Bond> bondIterator = covalentBonds.iterator();
+    while(bondIterator.hasNext()){
+      if(bondIterator.next().containsHydrogen()){
+        bondIterator.remove();
+      }
+    }
   }
 
   /**
@@ -96,7 +112,6 @@ public class Molecule {
   }
 
   /**
-  * Returns a String Representation of this Molecule.
   * @return a String representation of this molecule
   */
   @Override

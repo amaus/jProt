@@ -9,49 +9,69 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Collection;
+import java.util.Iterator;
 
 import java.io.InputStream;
 
 /**
-* A Protein has one or more PolypeptideChains
-* @author Aaron Maus aaron@aaronpmaus.com
+* A Protein is composed of PolypeptideChains which are composed of Residues. Proteins can either be
+* constructed from PDB files or they can be constructed residue by residue ab initio style. <p>
+*
+* To read in a Protein from a PDB file:
+* <br>
+* {@code Protein prot = PDBFileIO.readInPDBFile(streamToFile, proteinName)}
+* <br>
+* To build a Protein from sequence data (TODO implement this):
+* <br>
+* {@code Protein prot = new Protein(proteinName, fastaSequence)}
+* <p>
+*
+* A protein by default has hydrogen atoms disabled. They can be enabled via the {@code
+* enableHydrogens()} method. When {@code enableHydrogens()} is called, all hydrogens read in from
+* the pdb structure will be added to the protein. TODO: Automatically build all hydrogens when when
+* a protein is constructed so that when they are enabled, all hydrogens in the structure are added
+* to the protein. Hydrogens can also be disabled with the method {@code disableHydrogens()}.
+* <p>
 * @version 0.6.0
 * @since 0.6.0
 */
-public class Protein {
+public class Protein implements Iterable<PolypeptideChain>{
   private ArrayList<PolypeptideChain> chains;
-  private String pdbName;
+  private String proteinName;
   private ArrayList<Bond> disulfideBonds;
   private UndirectedGraph<Atom> atoms;
   private PDBFileIO pdbIO;
+  private boolean hydrogensEnabled = false;
 
   /**
   * Create an instance of a Protein. All chains will then have to be added to this instance.
-  * @param pdbFileNameBase the PDB filename base (the part before the extension).
+  * @param proteinName the name of the protein, recommended: the PDB filename base (the part before
+  * the extension).
   * @param pdbIO a PDBFileIO instance that this protein can use to write out to file
   */
-  public Protein(String pdbFileNameBase, PDBFileIO pdbIO){
+  public Protein(String proteinName, PDBFileIO pdbIO){
     this.chains = new ArrayList<PolypeptideChain>();
     this.atoms = new UndirectedGraph<Atom>();
     this.disulfideBonds = new ArrayList<Bond>();
-    this.pdbName = pdbFileNameBase;
+    this.proteinName = proteinName;
     this.pdbIO = pdbIO;
   }
 
   /**
   * Create an instance of a Protein. All chains will then have to be added to this instance.
-  * @param pdbFileNameBase the PDB filename base (the part before the extension).
+  * @param proteinName the name of the protein, recommended: the PDB filename base (the part before
+  * the extension).
   */
-  public Protein(String pdbFileNameBase){
-    this(pdbFileNameBase, new PDBFileIO());
+  public Protein(String proteinName){
+    this(proteinName, new PDBFileIO());
   }
 
   /**
   * Return the name of the PDB file for this Protein
   * @return the name of the PDB file without the .pdb extension.
   */
-  public String getPDBName(){
-    return this.pdbName;
+  public String getProteinName(){
+    return this.proteinName;
   }
 
   /**
@@ -60,6 +80,10 @@ public class Protein {
   */
   public void addChain(PolypeptideChain chain){
     this.chains.add(chain);
+    addToProteinGraph(chain);
+  }
+
+  private void addToProteinGraph(PolypeptideChain chain){
     Collection<Bond> bonds = chain.getBonds();
     for(Bond bond : chain.getBonds()){
       atoms.addEdge(bond.getAtomOne(), bond.getAtomTwo());
@@ -311,5 +335,41 @@ public class Protein {
     return this.atoms.contains(atom);
   }
 
+  public void enableHydrogens(){
+    // set the hydrogensEnabled flag in Protein (instance variable)
+    this.hydrogensEnabled = true;
+    // set the hydrogensEnabled flag in Residue (static variable)
+    Residue.enableHydrogens();
+    // tell every chain to enable hydrogens, then rebuild the atoms graph
+    // getting all the bonds from each chain
+    this.atoms = new UndirectedGraph<Atom>();
+    for(PolypeptideChain chain : this){
+      chain.enableHydrogens();
+      addToProteinGraph(chain);
+    }
+  }
+
+  public void disableHydrogens(){
+    // set the hydrogensEnabled flag in Protein (instance variable)
+    this.hydrogensEnabled = false;
+    // set the hydrogensEnabled flag in Residue (static variable)
+    Residue.disableHydrogens();
+    // tell every chain to enable hydrogens, then rebuild the atoms graph
+    // getting all the bonds from each chain
+    this.atoms = new UndirectedGraph<Atom>();
+    for(PolypeptideChain chain : this){
+      chain.disableHydrogens();
+      addToProteinGraph(chain);
+    }
+  }
+
+  public boolean hydrogensEnables(){
+    return this.hydrogensEnabled;
+  }
+
+  @Override
+  public Iterator<PolypeptideChain> iterator(){
+    return this.chains.iterator();
+  }
 
 }
