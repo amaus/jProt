@@ -75,29 +75,26 @@ public class Molecule {
   * already added. It will also add the bond if it hasn't been added.
   * @param bond the bond to add
   */
-  protected void addBond(Bond bond){
+  public void addBond(Bond bond){
     atoms.add(bond.getAtomOne());
     atoms.add(bond.getAtomTwo());
     this.covalentBonds.add(bond);
   }
 
   /**
-  * Remove from this molecule any hydrogen atoms and any bonds that contain
-  * a hydrogen.
+  * Remove the bond from this molecule if it exists.
+  * @param bond a bond to remove from this molecule
   */
-  protected void removeHydrogens(){
-    Iterator<Atom> atomIterator = atoms.iterator();
-    while(atomIterator.hasNext()){
-      if(atomIterator.next().getElement().equals("H")){
-        atomIterator.remove();
-      }
-    }
-    Iterator<Bond> bondIterator = covalentBonds.iterator();
-    while(bondIterator.hasNext()){
-      if(bondIterator.next().containsHydrogen()){
-        bondIterator.remove();
-      }
-    }
+  public void removeBond(Bond bond){
+    this.covalentBonds.remove(bond);
+  }
+
+  /**
+  * Remove the atom from this molecule if it exists.
+  * @param atom an atom to remove from this molecule
+  */
+  public void removeAtom(Atom atom){
+    this.atoms.remove(atom);
   }
 
   /**

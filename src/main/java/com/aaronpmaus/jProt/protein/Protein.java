@@ -338,8 +338,6 @@ public class Protein implements Iterable<PolypeptideChain>{
   public void enableHydrogens(){
     // set the hydrogensEnabled flag in Protein (instance variable)
     this.hydrogensEnabled = true;
-    // set the hydrogensEnabled flag in Residue (static variable)
-    Residue.enableHydrogens();
     // tell every chain to enable hydrogens, then rebuild the atoms graph
     // getting all the bonds from each chain
     this.atoms = new UndirectedGraph<Atom>();
@@ -352,8 +350,6 @@ public class Protein implements Iterable<PolypeptideChain>{
   public void disableHydrogens(){
     // set the hydrogensEnabled flag in Protein (instance variable)
     this.hydrogensEnabled = false;
-    // set the hydrogensEnabled flag in Residue (static variable)
-    Residue.disableHydrogens();
     // tell every chain to enable hydrogens, then rebuild the atoms graph
     // getting all the bonds from each chain
     this.atoms = new UndirectedGraph<Atom>();

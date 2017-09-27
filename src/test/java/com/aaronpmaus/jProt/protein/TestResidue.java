@@ -76,14 +76,14 @@ public class TestResidue{
     assertFalse(res.contains("2HB"));
     assertFalse(res.contains("3HB"));
 
-    Residue.enableHydrogens();
+    res.enableHydrogens();
     assertEquals(res.getNumAtoms(), 11);
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
     assertTrue(res.contains("1HB"));
     assertTrue(res.contains("2HB"));
     assertTrue(res.contains("3HB"));
-    Residue.disableHydrogens();
+    res.disableHydrogens();
 
     for(Bond bond : res.getBonds()){
       assertFalse(bond.containsHydrogen());
@@ -121,7 +121,7 @@ public class TestResidue{
     assertFalse(res.contains("2HB"));
     assertFalse(res.contains("1HG"));
 
-    Residue.enableHydrogens();
+    res.enableHydrogens();
     assertEquals(res.getNumAtoms(), 25);
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -136,7 +136,7 @@ public class TestResidue{
     assertTrue(res.contains("2HH1"));
     assertTrue(res.contains("1HH2"));
     assertTrue(res.contains("2HH2"));
-    Residue.disableHydrogens();
+    res.disableHydrogens();
 
     for(Bond bond : res.getBonds()){
       assertFalse(bond.containsHydrogen());
@@ -171,7 +171,7 @@ public class TestResidue{
     assertFalse(res.contains("2HB"));
     assertFalse(res.contains("3HB"));
 
-    Residue.enableHydrogens();
+    res.enableHydrogens();
     assertEquals(res.getNumAtoms(), 20);
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -184,7 +184,7 @@ public class TestResidue{
     assertTrue(res.contains("1HD1"));
     assertTrue(res.contains("2HD1"));
     assertTrue(res.contains("3HD1"));
-    Residue.disableHydrogens();
+    res.disableHydrogens();
 
     for(Bond bond : res.getBonds()){
       assertFalse(bond.containsHydrogen());
@@ -216,7 +216,7 @@ public class TestResidue{
     assertFalse(res.contains("2HB"));
     assertFalse(res.contains("3HB"));
 
-    Residue.enableHydrogens();
+    res.enableHydrogens();
     assertEquals(res.getNumAtoms(), 15);
     assertFalse(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -226,7 +226,7 @@ public class TestResidue{
     assertTrue(res.contains("2HG"));
     assertTrue(res.contains("1HD"));
     assertTrue(res.contains("2HD"));
-    Residue.disableHydrogens();
+    res.disableHydrogens();
 
     for(Bond bond : res.getBonds()){
       assertFalse(bond.containsHydrogen());

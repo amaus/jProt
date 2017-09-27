@@ -32,7 +32,7 @@ public class Residue implements Iterable<Atom>{
   private final int residueID;
   private boolean residueComplete = true;
   private static int maxResidueID = 0;
-  private static boolean hydrogensEnabled = false;
+  private boolean hydrogensEnabled = false;
 
   // valid keys are the atomNames: CA, CB, CD, CD1, CD2, CE, C, O, N, etc...
   private HashMap<String, Atom> heavyAtoms;
@@ -86,100 +86,6 @@ public class Residue implements Iterable<Atom>{
     this.hydrogens = new HashMap<String, Atom>();
     this.bondsToHydrogens = new HashSet<Bond>();
     initializeAminoAcid(this.threeLetterName+".dat", atoms);
-  }
-
-  /**
-  * gets an atom by its name. C, CA, CB, CD, etc...
-  * @param atomName the name of the atom, C, CA, CB, CD, etc...
-  * @return the Atom in this residue with that name
-  */
-  public Atom getAtom(String atomName){
-    Atom atom = this.heavyAtoms.get(atomName);
-    if(Residue.hydrogensEnabled() && atom == null){
-      atom = this.hydrogens.get(atomName);
-    }
-    if(atom == null){
-      throw new NoSuchElementException("No atom of name " + atomName
-          + " in residue " + getResidueID() +": " +getThreeLetterName());
-    }
-    return atom;
-  }
-
-  /**
-  * @param atomName the name of an Atom to check for. These names are formatted as the name
-  * field in the Atom record of the PDB File Format.
-  * @return true if this Residue contains an Atom with this name
-  */
-  public boolean contains(String atomName){
-    if(this.heavyAtoms.containsKey(atomName)){
-      return true;
-    }
-    if(Residue.hydrogensEnabled() && this.hydrogens.containsKey(atomName)){
-      return true;
-    }
-    return false;
-  }
-
-  /**
-  * Return the numeric residue ID of this residue
-  *
-  * @return the residue ID of this residue
-  */
-  public int getResidueID(){
-    return this.residueID;
-  }
-
-  /**
-  * Return the single letter residue name of this residue
-  *
-  * @return the single letter residue name of this residue
-  */
-  public String getOneLetterName(){
-    return this.oneLetterName;
-  }
-
-  /**
-  * Return the three letter residue name of this residue
-  *
-  * @return the three letter residue name of this residue
-  */
-  public String getThreeLetterName(){
-    return this.threeLetterName;
-  }
-
-  /**
-  * Return the full name of this residue
-  *
-  * @return the full name of this residue
-  */
-  public String getName(){
-    return this.name;
-  }
-
-  /**
-  * Get a Collection of the covalent bonds in this residue
-  *
-  * @return the bonds in this residue
-  */
-  public Collection<Bond> getBonds(){
-    ArrayList<Bond> bonds = new ArrayList<Bond>(this.bonds);
-    if(Residue.hydrogensEnabled()){
-      bonds.addAll(this.bondsToHydrogens);
-    }
-    return bonds;
-  }
-
-  /**
-  * Set this Residue as the Carboxyl Terminus. This adds the OXT atom to this residue.
-  */
-  public void setAsCarboxylTerminus(){
-    if(carboxylOxygen != null){
-      this.heavyAtoms.put(carboxylOxygen.getAtomName(), carboxylOxygen);
-      if(contains("C")){
-        Atom carbon = getAtom("C");
-        this.bonds.add(new Bond(carbon, carboxylOxygen, 1));
-      }
-    }
   }
 
   // For Initializing all Residues:
@@ -256,6 +162,168 @@ public class Residue implements Iterable<Atom>{
     }
   }
 
+  /**
+  * gets an atom by its name. C, CA, CB, CD, etc...
+  * @param atomName the name of the atom, C, CA, CB, CD, etc...
+  * @return the Atom in this residue with that name
+  */
+  public Atom getAtom(String atomName){
+    Atom atom = this.heavyAtoms.get(atomName);
+    if(this.hydrogensEnabled() && atom == null){
+      atom = this.hydrogens.get(atomName);
+    }
+    if(atom == null){
+      throw new NoSuchElementException("No atom of name " + atomName
+          + " in residue " + getResidueID() +": " +getThreeLetterName());
+    }
+    return atom;
+  }
+
+  /**
+  * @param atomName the name of an Atom to check for. These names are formatted as the name
+  * field in the Atom record of the PDB File Format.
+  * @return true if this Residue contains an Atom with this name
+  */
+  public boolean contains(String atomName){
+    if(this.heavyAtoms.containsKey(atomName)){
+      return true;
+    }
+    if(this.hydrogensEnabled() && this.hydrogens.containsKey(atomName)){
+      return true;
+    }
+    return false;
+  }
+
+  /**
+  * Return the numeric residue ID of this residue
+  *
+  * @return the residue ID of this residue
+  */
+  public int getResidueID(){
+    return this.residueID;
+  }
+
+  /**
+  * Return the single letter residue name of this residue
+  *
+  * @return the single letter residue name of this residue
+  */
+  public String getOneLetterName(){
+    return this.oneLetterName;
+  }
+
+  /**
+  * Return the three letter residue name of this residue
+  *
+  * @return the three letter residue name of this residue
+  */
+  public String getThreeLetterName(){
+    return this.threeLetterName;
+  }
+
+  /**
+  * Return the full name of this residue
+  *
+  * @return the full name of this residue
+  */
+  public String getName(){
+    return this.name;
+  }
+
+  /**
+  * Get a Collection of the covalent bonds in this residue
+  *
+  * @return the bonds in this residue
+  */
+  public Collection<Bond> getBonds(){
+    ArrayList<Bond> bonds = new ArrayList<Bond>(this.bonds);
+    if(this.hydrogensEnabled()){
+      bonds.addAll(getBondsToHydrogens());
+    }
+    return bonds;
+  }
+
+  /**
+  * Return a Collection of the Bonds to hydrogens in this residue. It will return these bonds
+  * whether hydrogens are enabled or not.
+  *
+  * @return a {@code Collection<Bond>} containing all bonds with a hydrogen
+  */
+  public Collection<Bond> getBondsToHydrogens(){
+    return new ArrayList<Bond>(this.bondsToHydrogens);
+  }
+
+  /**
+  * @return a {@code Collection<Atom>} containing all the atoms in this residue. If hydrogens are
+  * enabled, it will include the hydrogens
+  */
+  public Collection<Atom> getAtoms(){
+    ArrayList<Atom> atoms = new ArrayList<Atom>(this.heavyAtoms.values());
+    if(this.hydrogensEnabled()){
+      atoms.addAll(this.getHydrogens());
+    }
+    return atoms;
+  }
+
+  /**
+  * Return all the hydrogens in this residue whether they are enabled or not.
+  * @return a {@code Collection<Atom>} containing the hydrogens in this residue
+  */
+  public Collection<Atom> getHydrogens(){
+    return new ArrayList<Atom>(this.hydrogens.values());
+  }
+
+  /**
+  * Return the number of Atoms in this Residue. This includes all heavy atoms and hydrogens.
+  * @return the number of Atoms in this Residue
+  */
+  public int getNumAtoms(){
+    int numAtoms = getNumHeavyAtoms();
+    if(this.hydrogensEnabled()){
+      numAtoms += getNumHydrogens();
+    }
+    return numAtoms;
+  }
+
+  /**
+  * Return the number of Heavy Atoms in this Residue.
+  * @return the number of Heavy Atoms in this Residue
+  */
+  public int getNumHeavyAtoms(){
+    return this.heavyAtoms.size();
+  }
+
+  /**
+  * Return the number of Hydrogens in this Residue.
+  * @return the number of Hydrogens in this Residue
+  */
+  public int getNumHydrogens(){
+    return this.hydrogens.size();
+  }
+
+  /**
+  * Check if this residue is missing any of it's heavy atoms - non hydrogen atoms.
+  * This is useful after a protein has been read in from PDB to know which residues have
+  * missing atoms.
+  * @return true if this residue is missing any of its heavy atoms.
+  */
+  public boolean isMissingAtoms(){
+    return !(this.residueComplete);
+  }
+
+  /**
+  * Set this Residue as the Carboxyl Terminus. This adds the OXT atom to this residue.
+  */
+  public void setAsCarboxylTerminus(){
+    if(carboxylOxygen != null){
+      this.heavyAtoms.put(carboxylOxygen.getAtomName(), carboxylOxygen);
+      if(contains("C")){
+        Atom carbon = getAtom("C");
+        this.bonds.add(new Bond(carbon, carboxylOxygen, 1));
+      }
+    }
+  }
+
   private boolean addBond(String atomNameOne, String atomNameTwo){
     return addBond(atomNameOne, atomNameTwo,1);
   }
@@ -323,67 +391,19 @@ public class Residue implements Iterable<Atom>{
   }
 
   /**
-  * Return the number of Atoms in this Residue. This includes all heavy atoms and hydrogens.
-  * @return the number of Atoms in this Residue
+  * Enable Hydrogens for this Residue. The methods {@code getAtoms()} and  {@code getBonds()} will
+  * now return Collections which include Hydrogens and Bonds containing hydrogens respectively.
   */
-  public int getNumAtoms(){
-    int numAtoms = getNumHeavyAtoms();
-    if(Residue.hydrogensEnabled()){
-      numAtoms += getNumHydrogens();
-    }
-    return numAtoms;
+  public void enableHydrogens(){
+    this.hydrogensEnabled = true;
   }
 
-  /**
-  * Return the number of Heavy Atoms in this Residue.
-  * @return the number of Heavy Atoms in this Residue
-  */
-  public int getNumHeavyAtoms(){
-    return this.heavyAtoms.size();
+  public void disableHydrogens(){
+    this.hydrogensEnabled = false;
   }
 
-  /**
-  * Return the number of Hydrogens in this Residue.
-  * @return the number of Hydrogens in this Residue
-  */
-  public int getNumHydrogens(){
-    return this.hydrogens.size();
-  }
-
-  /**
-  * Check if this residue is missing any of it's heavy atoms - non hydrogen atoms.
-  * This is useful after a protein has been read in from PDB to know which residues have
-  * missing atoms.
-  * @return true if this residue is missing any of its heavy atoms.
-  */
-  public boolean isMissingAtoms(){
-    return !(this.residueComplete);
-  }
-
-  private Collection<Atom> getAtoms(){
-    ArrayList<Atom> atoms = new ArrayList<Atom>(this.heavyAtoms.values());
-    if(Residue.hydrogensEnabled()){
-      atoms.addAll(this.hydrogens.values());
-    }
-    return atoms;
-  }
-
-  /**
-  * This package private method is intended to be called by Protein when it enables or disables
-  * hydrogens. This toggle changes the way the methods to return the atoms and bonds in this
-  * residue behave. If hydrogens are enabled, these methods will return all atoms and bonds,
-  * including those with hydrogens. Otherwise, they will only return the heavy atom atoms and bonds.
-  */
-  static void enableHydrogens(){
-    Residue.hydrogensEnabled = true;
-  }
-
-  static void disableHydrogens(){
-    Residue.hydrogensEnabled = false;
-  }
-
-  static boolean hydrogensEnabled(){
-    return Residue.hydrogensEnabled;
+  public boolean hydrogensEnabled(){
+    return this.hydrogensEnabled;
   }
 
   @Override

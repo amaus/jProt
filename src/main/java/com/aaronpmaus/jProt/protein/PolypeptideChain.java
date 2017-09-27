@@ -171,18 +171,11 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>{
   * Add hydrogens to this PolypeptideChain.
   */
   public void enableHydrogens(){
-    // The hydrogensEnabled state in Residue must be unchanged by this method.
-    boolean previousHydrogensState = Residue.hydrogensEnabled();
-    // enable hydrogens for all residues
-    Residue.enableHydrogens();
     // for each residue in this chain, get add all its bonds (now containing hydrogens) to
     // this chain.
     for(Residue residue : this){
+      residue.enableHydrogens();
       addBondsFromResidue(residue);
-    }
-    // if hydrogens were previously disabled, set it back to that state
-    if(previousHydrogensState == false){
-      Residue.disableHydrogens();
     }
   }
 
@@ -190,13 +183,14 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>{
   * Remove all hydrogens from this chain.
   */
   public void disableHydrogens(){
-    // The hydrogensEnabled state in Residue must be unchanged by this method.
-    boolean previousHydrogensState = Residue.hydrogensEnabled();
-    Residue.disableHydrogens();
-    this.removeHydrogens();
-    // if hydrogens were previously enabled, set it back to that state
-    if(previousHydrogensState == true){
-      Residue.enableHydrogens();
+    for(Residue residue : this){
+      for(Bond bond : residue.getBondsToHydrogens()){
+        this.removeBond(bond); // from superclass Molecule
+      }
+      for(Atom hydrogen : residue.getHydrogens()){
+        this.removeAtom(hydrogen); // from superclass Molecule
+      }
+      residue.disableHydrogens();
     }
   }
   /**
