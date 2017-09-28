@@ -65,13 +65,22 @@ public class Residue implements Iterable<Atom>{
   }
 
   /**
+  * Construct a default residue
+  * @param oneLetterName the one letter name of the residue
+  * @param residueID the numeric ID of the residue to build
+  */
+  public Residue(char oneLetterName, int residueID){
+    this(lookUpThreeLetterName(String.format("%c",oneLetterName)),residueID);
+  }
+
+  /**
   * A constructor for an amino acid.
   * @param threeLetterName the one letter ID of the amino acid to build.
   * @param residueID the numeric residue ID of the residue being built.
   * @param atoms the atoms in this residue
   */
   public Residue(String threeLetterName, int residueID, Collection<Atom> atoms){
-    //System.out.printf("Constructing residue %d-%s\n",residueID,threeLetterName);
+    this.hydrogensEnabled = true;
     this.threeLetterName = threeLetterName;
     this.oneLetterName = Residue.lookUpOneLetterName(this.threeLetterName);
     this.name = Residue.lookUpFullName(this.threeLetterName);
@@ -86,6 +95,7 @@ public class Residue implements Iterable<Atom>{
     this.hydrogens = new HashMap<String, Atom>();
     this.bondsToHydrogens = new HashSet<Bond>();
     initializeAminoAcid(this.threeLetterName+".dat", atoms);
+    this.hydrogensEnabled = false;
   }
 
   // For Initializing all Residues:
@@ -156,6 +166,7 @@ public class Residue implements Iterable<Atom>{
           String atomTwo = tokens[1];
           // TODO specify single or double bond depending on
           // atoms and residue
+
           addBondToHydrogen(atomOne, atomTwo);
         }
       }
@@ -184,7 +195,7 @@ public class Residue implements Iterable<Atom>{
   * field in the Atom record of the PDB File Format.
   * @return true if this Residue contains an Atom with this name
   */
-  public boolean contains(String atomName){
+  public final boolean contains(String atomName){
     if(this.heavyAtoms.containsKey(atomName)){
       return true;
     }
