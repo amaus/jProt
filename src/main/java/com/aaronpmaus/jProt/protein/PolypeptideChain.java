@@ -4,6 +4,8 @@ import com.aaronpmaus.jMath.graph.*;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 
 /**
@@ -11,12 +13,15 @@ import java.util.Iterator;
 * @author Aaron Maus aaron@aaronpmaus.com
 * @version 0.6.0
 * @since 0.6.0
+* TODO use a sorted list to store the residues and rebuild the lookup table
+* after every Residue is added. Why? So that when the residues are gotten or iterated on,
+* they are always in sorted order without the NlogN cost of sorting the list,
+* and we maintain the constant time access for getting a residue by ID.
 */
-
 public class PolypeptideChain extends Molecule implements Iterable<Residue>{
   private ArrayList<Residue> residues;
   // key: residueID, value: residue index in residues list
-  private HashMap<Integer, Integer> residueIndexLookupTable;
+  private HashMap<Integer, Integer> residueIndices;
   private String chainID;
 
   /**
@@ -26,7 +31,7 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>{
   public PolypeptideChain(String chainID){
     super();
     residues = new ArrayList<Residue>();
-    residueIndexLookupTable = new HashMap<Integer,Integer>();
+    residueIndices = new HashMap<Integer,Integer>();
     this.chainID = chainID;
   }
 
@@ -43,10 +48,19 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>{
   * @param residue the residue to add
   */
   public void addResidue(Residue residue){
-    int residueIndex = residues.size();
     residues.add(residue);
-    residueIndexLookupTable.put(residue.getResidueID(), residueIndex);
+    Collections.sort(residues, new ResidueComparator());
+    buildResidueIndices();
     addBondsFromResidue(residue);
+  }
+
+  private void buildResidueIndices(){
+    residueIndices = new HashMap<Integer,Integer>();
+    int index = 0;
+    for(Residue res : this){
+      residueIndices.put(res.getResidueID(), index);
+      index++;
+    }
   }
 
   /**
@@ -81,7 +95,7 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>{
   */
   public Residue getResidue(int residueID){
     if(this.containsResidue(residueID)){
-      int residueIndex = residueIndexLookupTable.get(residueID);
+      int residueIndex = residueIndices.get(residueID);
       return this.residues.get(residueIndex);
     }
     return null;
@@ -94,7 +108,7 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>{
   *         PolypeptideChain, false otherwise
   */
   public boolean containsResidue(int residueID){
-    return residueIndexLookupTable.containsKey(residueID);
+    return residueIndices.containsKey(residueID);
   }
 
   /**
@@ -126,8 +140,8 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>{
     Double[][] distanceMatrix = new Double[numResidues][numResidues];
     int i = 0;
     int j = 0;
-    for(Residue residueOne : this.residues){
-      for(Residue residueTwo : this.residues){
+    for(Residue residueOne : this.getResidues()){
+      for(Residue residueTwo : this.getResidues()){
         Atom carbonAlphaOne = residueOne.getAtom("CA");
         Atom carbonAlphaTwo = residueTwo.getAtom("CA");
         distanceMatrix[i][j] = carbonAlphaOne.distance(carbonAlphaTwo);
@@ -146,7 +160,7 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>{
   public Integer[] getResidueIDs(){
     Integer[] resIDs = new Integer[getNumResidues()];
     int i = 0;
-    for(Residue res : this.residues){
+    for(Residue res : this.getResidues()){
       resIDs[i] = res.getResidueID();
       i++;
     }
@@ -193,11 +207,19 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>{
       residue.disableHydrogens();
     }
   }
-  /**
-  * {@inheritDoc}
-  */
+
+  private Collection<Residue> getResidues(){
+    return this.residues;
+  }
+
   @Override
   public Iterator<Residue> iterator(){
-    return this.residues.iterator();
+    return this.getResidues().iterator();
+  }
+
+  private class ResidueComparator implements Comparator<Residue>{
+    public int compare(Residue one, Residue two){
+      return one.getResidueID() - two.getResidueID();
+    }
   }
 }
