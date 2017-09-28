@@ -236,6 +236,7 @@ public class Atom implements Comparable<Atom> {
   @Override
   public String toString(){
     String str = String.format("Atom Name: %s\n",getAtomName()) +
+    String.format("Element: %s\n", getElement()) +
     String.format("Serial Number: %d\n", getSerialNumber()) +
     String.format("Mass: %.2f\n",getMass()) +
     String.format("Charge: %.2f\n", getCharge())+
