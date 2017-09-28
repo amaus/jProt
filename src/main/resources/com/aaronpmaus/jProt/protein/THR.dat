@@ -14,9 +14,9 @@ N    3H
 CA   HA
 CB   HB
 OG1  HG1
-CG2  1HG1
-CG2  2HG1
-CG2  3HG1
+CG2  1HG2
+CG2  2HG2
+CG2  3HG2
 !defined dihedral angles
 N    CA    CB    OG1
 !atom types
