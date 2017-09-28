@@ -1,6 +1,8 @@
 package com.aaronpmaus.jProt.protein;
 
 import com.aaronpmaus.jProt.protein.*;
+import com.aaronpmaus.jProt.io.*;
+
 import static org.junit.Assert.*;
 import org.junit.Test;
 import org.junit.Before;
@@ -9,6 +11,16 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
+
+import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.math.BigDecimal;
+
+import java.io.InputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 /*
  * @Test flags a method as a test method.
@@ -27,6 +39,108 @@ public class TestPolypeptideChain{
 
   @Before
   public void setup(){
-      
+    chain = new PolypeptideChain("A");
+                                          // {main-bonds, h-bonds}
+    chain.addResidue(new Residue('I',1)); //  {7,11}
+
+    chain.addResidue(new Residue('A',2)); //  {4,5}
+    chain.addResidue(new Residue('M',3)); //  {7,9}
+
+    chain.addResidue(new Residue('S',4)); //  {5,5}
+    chain.addResidue(new Residue('T',5)); //  {6,7}
+    chain.addResidue(new Residue('A',6)); //  {4,5}
+    chain.addResidue(new Residue('R',7)); //  {10,13}
+
+    chain.addResidue(new Residue('S',8)); //  {5,5}
+    chain.addResidue(new Residue('T',9)); //  {6,7}
+    chain.addResidue(new Residue('F',10)); // {11,9}
+    Residue phe = new Residue('F',11); // {12,9}
+    phe.setAsCarboxylTerminus();
+    chain.addResidue(phe);       // TOTALS {77,85}
+                              // TOTAL of 172 (plus 10 for peptide bonds)
   }
+
+  @Test
+  public void testGetSequence(){
+    assertEquals(chain.getSequence(), "IAMSTARSTFF");
+  }
+
+  @Test
+  public void testGetResidueIDs(){
+    Integer[] ids = chain.getResidueIDs();
+    int counter = 1;
+    for(Integer id : ids){
+      assertEquals(id, new Integer(counter));
+      counter++;
+    }
+  }
+
+  @Test
+  public void testCarbonAlphaMatric() throws FileNotFoundException, IOException{
+    boolean different = false;
+
+    InputStream stream = TestPolypeptideChain.class.getResourceAsStream("1rop.pdb");
+    //PDBFileIO pdb = new PDBFileIO(stream);
+    Protein rop = new PDBFileIO().readInPDBFile(stream, "1rop");
+    stream.close();
+    PolypeptideChain chain = rop.getChain("A");
+
+    stream = TestPolypeptideChain.class.getResourceAsStream("1ropDistanceMatrix.csv");
+    Double[][] ropMatrix = readInDistanceFile(stream);
+    stream.close();
+    Double[][] calculatedMatrix = chain.calculateCarbonAlphaDistanceMatrix();
+    for(int i = 1; i < chain.getNumResidues(); i++){
+      for(int j = i+1; j < chain.getNumResidues(); j++){
+        if(Math.abs(ropMatrix[i][j] - getNumInSigFigs(calculatedMatrix[i][j],4)) > 0.001){
+          different = true;
+        }
+      }
+    }
+    assertFalse(different);
+  }
+
+  private static double getNumInSigFigs(double num, int significantFigures){
+    BigDecimal bd = BigDecimal.valueOf(num);
+    return new Double(String.format("%."+significantFigures+"G",bd));
+  }
+
+  @Test
+  public void testHydrogensToggle(){
+    chain.enableHydrogens();
+    Collection<Bond> bonds = chain.getBonds();
+    assertEquals(bonds.size(), 172);
+
+    chain.disableHydrogens();
+    bonds = chain.getBonds();
+    assertEquals(bonds.size(), 87);
+    for(Bond bond : bonds){
+      assertFalse(bond.containsHydrogen());
+    }
+  }
+
+  private Double[][] readInDistanceFile(InputStream stream) throws FileNotFoundException{
+    Scanner fileReader = new Scanner(stream);
+    fileReader.nextLine(); // throw away the first line. it's the residue IDs.
+
+    ArrayList<String> dataLines = new ArrayList<String>();
+    while(fileReader.hasNext()){
+      dataLines.add(fileReader.nextLine());
+    }
+    int numResidues = dataLines.size();
+    Double[][] data = new Double[numResidues][numResidues];
+    for(int i = 0; i < numResidues; i++){
+      for(int j = 0; j < numResidues; j++){
+        data[i][j] = Double.NaN;
+      }
+    }
+    // only use the values from the upper right hand side of the matrix.
+    for(int i = 0; i < dataLines.size(); i++){
+      String[] tokens = dataLines.get(i).split(",");
+      for(int j = i+1; j < tokens.length; j++){
+        data[i][j] = Double.parseDouble(tokens[j]);
+      }
+    }
+    return data;
+  }
+
 }
