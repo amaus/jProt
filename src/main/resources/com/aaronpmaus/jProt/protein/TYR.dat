@@ -24,6 +24,7 @@ CD1  HD1
 CD2  HD2
 CE1  HE1
 CE2  HE2
+OH   HH
 !defined dihedral angles
 N    CA    CB    CG    CD2
 !atom types
