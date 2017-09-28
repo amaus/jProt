@@ -52,7 +52,11 @@ public class Residue implements Iterable<Atom>{
     {"HIS","H","Histidine"},      {"LYS","K","Lysine"},
     {"SER","S","Serine"},         {"THR","T","Threonine"},
     {"CYS","C","Cysteine"},       {"MET","M","Methionine"},
-    {"ASN","N","Asparagine"},     {"GLN","Q","Glutamine"}
+    {"ASN","N","Asparagine"},     {"GLN","Q","Glutamine"},
+    {"HID","H","Histidine"},      {"HIE","H","Histidine"},
+    {"HIP","H","Histidine"},      {"CYH","C","Cysteine"},
+    {"ASH","D","Aspartic Acid"},  {"LYN","K","Lysine"},
+    {"GLH","E","Glutamic Acid"},
   };
 
   /**
