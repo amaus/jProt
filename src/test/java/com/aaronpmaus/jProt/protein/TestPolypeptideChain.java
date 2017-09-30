@@ -106,35 +106,6 @@ public class TestPolypeptideChain{
   }
 
   @Test
-  public void testCarbonAlphaMatric() throws FileNotFoundException, IOException{
-    boolean different = false;
-
-    InputStream stream = TestPolypeptideChain.class.getResourceAsStream("1rop.pdb");
-    //PDBFileIO pdb = new PDBFileIO(stream);
-    Protein rop = new PDBFileIO().readInPDBFile(stream, "1rop");
-    stream.close();
-    PolypeptideChain chain = rop.getChain("A");
-
-    stream = TestPolypeptideChain.class.getResourceAsStream("1ropDistanceMatrix.csv");
-    Double[][] ropMatrix = readInDistanceFile(stream);
-    stream.close();
-    Double[][] calculatedMatrix = chain.calculateCarbonAlphaDistanceMatrix();
-    for(int i = 1; i < chain.getNumResidues(); i++){
-      for(int j = i+1; j < chain.getNumResidues(); j++){
-        if(Math.abs(ropMatrix[i][j] - getNumInSigFigs(calculatedMatrix[i][j],4)) > 0.001){
-          different = true;
-        }
-      }
-    }
-    assertFalse(different);
-  }
-
-  private static double getNumInSigFigs(double num, int significantFigures){
-    BigDecimal bd = BigDecimal.valueOf(num);
-    return new Double(String.format("%."+significantFigures+"G",bd));
-  }
-
-  @Test
   public void testHydrogensToggle(){
     chain.enableHydrogens();
     Collection<Bond> bonds = chain.getBonds();
@@ -147,30 +118,4 @@ public class TestPolypeptideChain{
       assertFalse(bond.containsHydrogen());
     }
   }
-
-  private Double[][] readInDistanceFile(InputStream stream) throws FileNotFoundException{
-    Scanner fileReader = new Scanner(stream);
-    fileReader.nextLine(); // throw away the first line. it's the residue IDs.
-
-    ArrayList<String> dataLines = new ArrayList<String>();
-    while(fileReader.hasNext()){
-      dataLines.add(fileReader.nextLine());
-    }
-    int numResidues = dataLines.size();
-    Double[][] data = new Double[numResidues][numResidues];
-    for(int i = 0; i < numResidues; i++){
-      for(int j = 0; j < numResidues; j++){
-        data[i][j] = Double.NaN;
-      }
-    }
-    // only use the values from the upper right hand side of the matrix.
-    for(int i = 0; i < dataLines.size(); i++){
-      String[] tokens = dataLines.get(i).split(",");
-      for(int j = i+1; j < tokens.length; j++){
-        data[i][j] = Double.parseDouble(tokens[j]);
-      }
-    }
-    return data;
-  }
-
 }

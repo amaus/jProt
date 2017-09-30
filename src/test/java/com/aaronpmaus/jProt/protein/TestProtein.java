@@ -1,4 +1,4 @@
-package com.aaronpmaus.jProt.protein;
+package com.aaronpmaus.jProt;
 
 import com.aaronpmaus.jProt.protein.*;
 import com.aaronpmaus.jProt.io.*;
@@ -89,5 +89,10 @@ public class TestProtein{
     atomOne = one.getAtom("C");
     atomTwo = two.getAtom("C");
     assertEquals(m2j.getBondSeparation(atomOne, atomTwo), 6);
+  }
+
+  @Test
+  public void testEnableDisableHydrogens(){
+    
   }
 }
