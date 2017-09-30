@@ -29,8 +29,9 @@ import java.io.InputStream;
 * A protein by default has hydrogen atoms disabled. They can be enabled via the {@code
 * enableHydrogens()} method. When {@code enableHydrogens()} is called, all hydrogens read in from
 * the pdb structure will be added to the protein. TODO: Automatically build all hydrogens when when
-* a protein is constructed so that when they are enabled, all hydrogens in the structure are added
-* to the protein. Hydrogens can also be disabled with the method {@code disableHydrogens()}.
+* a protein is constructed so that when they are enabled ({@code enableHydrogens()}), all hydrogens
+* in the structure are added to the protein. Hydrogens can also be disabled with the method {@code
+* disableHydrogens()}.
 * <p>
 * @version 0.6.0
 * @since 0.6.0
@@ -211,70 +212,6 @@ public class Protein implements Iterable<PolypeptideChain>{
   }
 
   /**
-  * Calculate and return the CA Distance Matrix of this protein
-  *
-  * @return a 2D array of Double containing the CA distances
-  */
-  public Double[][] calculateCarbonAlphaDistanceMatrix(){
-    boolean[] mask = new boolean[getNumResidues()];
-    Arrays.fill(mask, true);
-    return calculateCarbonAlphaDistanceMatrix(mask);
-  }
-
-  /**
-  * Calculate and return the CA Distance Matrix of this protein using only the residues
-  * specified by the mask.
-  *
-  * The mask must contain as many elements as there are residues in this protein. Each
-  * residue in order will have a value true or false. If true, include that residue
-  * in the distance matrix, otherwise, ignore it.
-  *
-  * @param mask an array of boolean containing as many values as there are residues, each
-  *  indicating whether to include that residue in the distance matrix.
-  * @return a 2D array of Double containing the CA distances
-  * @since 0.6.0
-  */
-  public Double[][] calculateCarbonAlphaDistanceMatrix(boolean[] mask){
-    ArrayList<Residue> residues = new ArrayList<Residue>();
-    int maskIndex = 0;
-    for(PolypeptideChain chain : this.chains){
-      for(Residue res : chain){
-        if(mask[maskIndex]){
-          residues.add(res);
-        }
-        maskIndex++;
-      }
-    }
-    int numResidues = residues.size();
-    Double[][] distanceMatrix = new Double[numResidues][numResidues];
-    int i = 0;
-    int j = 0;
-    for(Residue residueOne : residues){
-      for(Residue residueTwo : residues){
-        Atom carbonAlphaOne = residueOne.getAtom("CA");
-        Atom carbonAlphaTwo = residueTwo.getAtom("CA");
-        distanceMatrix[i][j] = carbonAlphaOne.distance(carbonAlphaTwo);
-        j++;
-      }
-      j = 0;
-      i++;
-    }
-    return distanceMatrix;
-  }
-
-  /**
-  * Calculates and returns the CA Distance Matrix of one of the chains in
-  * this protein
-  *
-  * @param chainID the ID of the chain to get the CA Distance Matrix of
-  * @return a 2D array of Double containing the CA distances
-  */
-  public Double[][] calculateCarbonAlphaDistanceMatrix(String chainID){
-    PolypeptideChain chain = getChain(chainID);
-    return chain.calculateCarbonAlphaDistanceMatrix();
-  }
-
-  /**
   * Return the residue IDs of all the residues in this Protein
   *
   * @return an array of Integers holding the residue IDs
@@ -307,7 +244,7 @@ public class Protein implements Iterable<PolypeptideChain>{
     int residueArrayIndex = 0;
     int maskIndex = 0;
     for(PolypeptideChain chain : this.chains){
-      for(Integer id : getResidueIDs(chain.getChainID())){
+      for(Integer id : chain.getResidueIDs()){
         if(mask[maskIndex]){
           residueIDs[residueArrayIndex] = id;
           residueArrayIndex++;
@@ -316,15 +253,6 @@ public class Protein implements Iterable<PolypeptideChain>{
       }
     }
     return residueIDs;
-  }
-
-  /**
-  * Return the residue IDs of all the residues from the chain specified
-  * @param chainID the letter ID of the chain to get the residue IDs from
-  * @return an array of Integers holding the residue IDs
-  */
-  public Integer[] getResidueIDs(String chainID){
-    return getChain(chainID).getResidueIDs();
   }
 
   /**

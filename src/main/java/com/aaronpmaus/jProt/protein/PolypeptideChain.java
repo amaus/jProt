@@ -13,10 +13,6 @@ import java.util.Iterator;
 * @author Aaron Maus aaron@aaronpmaus.com
 * @version 0.6.0
 * @since 0.6.0
-* TODO use a sorted list to store the residues and rebuild the lookup table
-* after every Residue is added. Why? So that when the residues are gotten or iterated on,
-* they are always in sorted order without the NlogN cost of sorting the list,
-* and we maintain the constant time access for getting a residue by ID.
 */
 public class PolypeptideChain extends Molecule implements Iterable<Residue>{
   private ArrayList<Residue> residues;
@@ -129,28 +125,6 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>{
       numAtoms += res.getNumAtoms();
     }
     return numAtoms;
-  }
-
-  /**
-  * Calculates and returns the CA Distance Matrix of this chain
-  * @return a 2D array of Double containing the CA distances
-  */
-  public Double[][] calculateCarbonAlphaDistanceMatrix(){
-    int numResidues = getNumResidues();
-    Double[][] distanceMatrix = new Double[numResidues][numResidues];
-    int i = 0;
-    int j = 0;
-    for(Residue residueOne : this.getResidues()){
-      for(Residue residueTwo : this.getResidues()){
-        Atom carbonAlphaOne = residueOne.getAtom("CA");
-        Atom carbonAlphaTwo = residueTwo.getAtom("CA");
-        distanceMatrix[i][j] = carbonAlphaOne.distance(carbonAlphaTwo);
-        j++;
-      }
-      j = 0;
-      i++;
-    }
-    return distanceMatrix;
   }
 
   /**

@@ -31,6 +31,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     BLOSUM matrices (and PAM) can be added in the future. The DNA and RNA
     matrices are naive and can certainly be improved.
   - junit tests for SequenceAligner
+- DistanceMatrixCalculator class in tools package with JUnit tests for base
+  and masked versions of the calculateDistanceMatrix methods.
+  - This class contains the methods that were formally in Protein and
+    PolypeptideChain. The code was duplicate so it has been moved into its
+    own standalone static class.
 ### Changed
 - Internal Change: changed contains(String flag) in CommandLineParser to no
   longer split on colons. The proper format for arguments if `-flag value`
