@@ -1,12 +1,9 @@
-Usage: AngularDistanceJProt [<options>] <mol1-f fname> <mol2-f fname>
+Usage: JProtMetrics [<options>] <mol1-f fname> <mol2-f fname>
   options :
       -h
           Display the usage file.
       -a, --angular-distance
           Calculate and print the angular distance.
-      --pdbs
-          use pdb files to specify the structures rather than distance
-          matrix files
       --mol1-f fname
           This file must either be a PDB file or a csv file. If it is a
           PDB file it must end in the .pdb extension and conform to the

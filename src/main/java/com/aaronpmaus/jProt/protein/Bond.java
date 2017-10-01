@@ -1,19 +1,14 @@
 package com.aaronpmaus.jProt.protein;
 import java.lang.IllegalArgumentException;
 
-// make this an Observer of the atoms in it? That way if one of them
-// is moved, the bond will atomatically update its distance and energy?
 /**
- * Class Bond to represent an atomic bond.
- * @author Aarom Maus aaron@aaronpmaus.com
+ * A bond is the covalent bond between two atoms.
  * @version 0.6.0
  * @since 0.6.0
 */
 public class Bond {
     private Atom a1;
     private Atom a2;
-    private double bondLength;
-    private double energy;
     private int bondStrength; // single, double, triple bond, etc.
 
     /**
@@ -45,8 +40,6 @@ public class Bond {
             throw new IllegalArgumentException("Atoms added to a bond must be different.");
         }
         this.bondStrength = bondStrength;
-        this.bondLength = a1.distance(a2);
-        this.energy = calculateEnergy();
     }
 
     /**
@@ -54,7 +47,7 @@ public class Bond {
      * @return the length of the bond in Angstroms.
     */
     public double getBondLength(){
-        return this.bondLength;
+        return this.getAtomOne().distance(this.getAtomTwo());
     }
 
     /**
@@ -63,16 +56,6 @@ public class Bond {
     */
     public int getBondStrength(){
         return this.bondStrength;
-    }
-
-    /**
-     * Returns the potential energy of the bond. The potential energy is modeled
-     * as a spring. The bond wants to be at a particular length, corresponding
-     * to a minimum energy. Any deviation from that length increases the energy.
-     * @return the potential energy of this bond.
-    */
-    public double getEnergy(){
-        return this.energy;
     }
 
     /**
@@ -103,21 +86,18 @@ public class Bond {
         return false;
     }
 
-    /**
-     * A private helper method to calculate the energy of this bond.
-     * @return the energy of this bond in kcal/mol
-    */
-    private double calculateEnergy(){
-        double bondForceConstant = EncadParameters.getBondForceConstant(a1, a2);
-        double idealBondLength = EncadParameters.getBondLength(a1, a2);
-        return (bondForceConstant * Math.pow(getBondLength() - idealBondLength, 2));
+    public boolean containsHydrogen(){
+      if(getAtomOne().getElement().equals("H") || getAtomTwo().getElement().equals("H")){
+        return true;
+      }
+      return false;
     }
 
     /**
      * The hashCode of a bond is the concatenation of the hash codes of the
      * atoms in the bond.
      * @return an int, the concatenations of the hash codes of the atoms in
-     *         the bond.
+     * the bond.
     */
     @Override
     public int hashCode(){
@@ -125,8 +105,8 @@ public class Bond {
     }
 
     /**
-     * Overriden equals method. Returns true if the bonds contain the same
-     * atoms. That is,
+     * Overriden equals method.
+     * @return true if the bonds contain the same atoms.
     */
     @Override
     public boolean equals(Object o){
@@ -144,4 +124,8 @@ public class Bond {
         return false;
     }
 
+    @Override
+    public String toString(){
+      return getAtomOne().getAtomName() + " - " + getAtomTwo().getAtomName();
+    }
 }

@@ -1,10 +1,8 @@
-!alternate protonation state
-CYH
 !main bonds
 N   CA
 CA  C
 CA  CB
-C   O   
+C   O
 CB  SG
 C   OXT
 !hydrogens

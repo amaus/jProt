@@ -5,12 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## Unreleased
+### Added
+[None]
+### Changed
+[None]
+### Deprecated
+[None]
+### Removed
+[None]
+### Fixed
+[None]
+### Security
+[None]
+
+## [0.6.0] - 2017-10-01
 ### Added
 - Section on Semantic Versioning to README.
 - Comments in build.gradle to explain Semantic Versioning.
 - Comments in build.gradle to explain gradle build and install usage.
 - class Residue
+  - JUnit test class for Residue. It tests the construction of several default
+    residues.
 - Residue data files in main resources. These files specify atom bonds and
   alternate atom type IDs for various energy functions.
 - class Bond
@@ -19,8 +35,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - class PolypeptideChain
 - class Protein
 - class PDBFileIO with initial ability to read in PDBs. It does not fill in
-  missing atoms, build disulfide bonds, or use any of the data outside of the
-  ATOM records yet, but it can build a protein with all chains, residues, and
+  missing atoms, but it can build a protein with all chains, residues, and
   atoms specified in the file. It can not write proteins back out to PDB yet.
 - stubbed test classes TestProtein TestPolypeptideChain along with
   resource file 1rop.pdb
@@ -35,6 +50,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - PotentialOfMeanForce to represent a PMF with getters and setters for
     its various information. Includes methods to get and set the
     energy functions.
+- DistanceMatrixCalculator class in tools package with JUnit tests for base
+  and masked versions of the calculateDistanceMatrix methods.
+  - This class contains the methods that were formally in Protein and
+    PolypeptideChain. The code was duplicate so it has been moved into its
+    own standalone static class.
 ### Changed
 - Internal Change: changed contains(String flag) in CommandLineParser to no
   longer split on colons. The proper format for arguments if `-flag value`
@@ -47,11 +67,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Deprecated
 - JProtMetrics usage ability to take in CA Distance Matrices. In the future,
   it will only be able to work with PDBs as input.
-[None]
 ### Removed
-- Atom#moveTo() method
+- Atom::moveTo()
+- Bond:getEnergy()
 ### Fixed
 - Dates in CHANGELOG to better conform to ISO 8601
+- Javadoc generation to include links to standard java APIs
 ### Security
 [None]
 
