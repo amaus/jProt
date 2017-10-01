@@ -104,6 +104,13 @@ public class Molecule {
     return new HashSet<Bond>(covalentBonds);
   }
 
+  /**
+  * @return the number of covalent bonds in this molecule
+  */
+  public int getNumBonds(){
+    return this.covalentBonds.size();
+  }
+
   public boolean containsAtom(Atom atom){
     return this.atoms.contains(atom);
   }

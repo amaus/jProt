@@ -197,6 +197,10 @@ public class Protein implements Iterable<PolypeptideChain>{
     return numAtoms;
   }
 
+  public int getNumBonds(){
+    return this.atoms.numEdges();
+  }
+
   /**
   * Return the sequence of this Protein in the form of a String of the single letter
   * residue names.
@@ -273,6 +277,14 @@ public class Protein implements Iterable<PolypeptideChain>{
       chain.enableHydrogens();
       addToProteinGraph(chain);
     }
+    // Add all edges for inter-chain disulfide bonds.
+    for(Bond bond : this.disulfideBonds){
+      String atomOneChain = getAtomChainID(bond.getAtomOne());
+      String atomTwoChain = getAtomChainID(bond.getAtomTwo());
+      if(!atomOneChain.equals(atomTwoChain)){
+        atoms.addEdge(bond.getAtomOne(), bond.getAtomTwo());
+      }
+    }
   }
 
   public void disableHydrogens(){
@@ -287,7 +299,20 @@ public class Protein implements Iterable<PolypeptideChain>{
     }
   }
 
-  public boolean hydrogensEnables(){
+  private String getAtomChainID(Atom atom){
+    String chainID;
+    for(PolypeptideChain chain : this){
+      if(chain.containsAtom(atom)){
+        return chain.getChainID();
+      }
+    }
+    throw new IllegalStateException(String.format("Atom \n%sNot in Protein",atom));
+  }
+
+  /**
+  * @return true if hydrogens are enabled for this protein
+  */
+  public boolean hydrogensEnabled(){
     return this.hydrogensEnabled;
   }
 
