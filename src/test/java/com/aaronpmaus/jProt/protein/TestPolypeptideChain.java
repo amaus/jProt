@@ -58,7 +58,7 @@ public class TestPolypeptideChain{
     chain.addResidue(phe);
     chain.addResidue(new Residue('F',10)); // {11,9}
                               // TOTALS {77,85}
-                              // TOTAL of 172 (plus 10 for peptide bonds)
+                              // TOTAL of 172 (incudes 10 peptide bonds)
   }
 
   @Test

@@ -60,16 +60,6 @@ public class Bond {
     }
 
     /**
-     * Returns the potential energy of the bond. The potential energy is modeled
-     * as a spring. The bond wants to be at a particular length, corresponding
-     * to a minimum energy. Any deviation from that length increases the energy.
-     * @return the potential energy of this bond.
-    */
-    public double getEnergy(){
-        return this.calculateEnergy();
-    }
-
-    /**
      * Returns one of the atoms in this bond.
      * @return one of the Atoms in this bond.
     */
@@ -105,20 +95,10 @@ public class Bond {
     }
 
     /**
-     * A private helper method to calculate the energy of this bond.
-     * @return the energy of this bond in kcal/mol
-    */
-    private double calculateEnergy(){
-        double bondForceConstant = EncadParameters.getBondForceConstant(a1, a2);
-        double idealBondLength = EncadParameters.getBondLength(a1, a2);
-        return (bondForceConstant * Math.pow(getBondLength() - idealBondLength, 2));
-    }
-
-    /**
      * The hashCode of a bond is the concatenation of the hash codes of the
      * atoms in the bond.
      * @return an int, the concatenations of the hash codes of the atoms in
-     *         the bond.
+     * the bond.
     */
     @Override
     public int hashCode(){
@@ -126,8 +106,8 @@ public class Bond {
     }
 
     /**
-     * Overriden equals method. Returns true if the bonds contain the same
-     * atoms. That is,
+     * Overriden equals method.
+     * @return true if the bonds contain the same atoms.
     */
     @Override
     public boolean equals(Object o){
