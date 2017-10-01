@@ -15,8 +15,8 @@ import java.io.File;
 import java.io.InputStream;
 
 /**
-* An Residue consists of a collection of Atoms bonded together in a particular way.<p>
-*
+* A Residue is one of the 20 standard Amino acids.
+* <p>
 * By default, residues are not terminal. If a residue is to be the c-terminus, the method
 * setAsCarboxylTerminus() must be called BEFORE the Residue is added to the chain, otherwise the
 * carboxyl Oxygen will be missing from the Chain.

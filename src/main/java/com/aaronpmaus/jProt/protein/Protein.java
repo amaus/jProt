@@ -18,12 +18,10 @@ import java.io.InputStream;
 * constructed from PDB files or they can be constructed residue by residue ab initio style. <p>
 *
 * To read in a Protein from a PDB file:
+* <p>
+* {@code InputStream in = new FileInputStream(new File(pathToPDBFile));}
 * <br>
-* {@code Protein prot = PDBFileIO.readInPDBFile(streamToFile, proteinName)}
-* <br>
-* To build a Protein from sequence data (TODO implement this):
-* <br>
-* {@code Protein prot = new Protein(proteinName, fastaSequence)}
+* {@code Protein prot = PDBFileIO.readInPDBFile(in, proteinName)}
 * <p>
 *
 * A protein by default has hydrogen atoms disabled. They can be enabled via the {@code

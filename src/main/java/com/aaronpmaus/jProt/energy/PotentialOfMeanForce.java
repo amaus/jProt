@@ -13,7 +13,20 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.PrintWriter;
 
-
+/**
+* A PotentialOfMeanForce is a set of energy functions, one for each possible atom type pair. Each
+* energy function represents the non bonded energy for that pair.
+* <p>
+* To read in a PMF from file, use PMFFileIo:
+* <p>
+* {@code InputStream in = new FileInputStream(new File(pathToFile));}
+* <br>
+* {@code PotentialOfMeanForce pmf = PMFFileIO.readInPMF(in);}
+* <p>
+*
+* @version 0.6.0
+* @since 0.6.0
+*/
 public class PotentialOfMeanForce {
   private String encadFileName;
   private int fullResidueSkip;

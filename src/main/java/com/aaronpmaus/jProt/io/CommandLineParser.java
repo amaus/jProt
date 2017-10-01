@@ -5,8 +5,8 @@ import java.security.InvalidParameterException;
 
 /**
 * Provides a set of methods to parse command line arguments for
-* executables. Arguments to set values are in the form flag:val
-* where flag is something like -d or --distance, and val is the
+* executables. Arguments to set values are in the form {@code -flag val}
+* where flag is something like {@code -d} or {@code --distance}, and val is the
 * value to be used.
 * @author Aaron Maus aaron@aaronpmaus.com
 * @version 0.3.0

@@ -20,9 +20,11 @@ import java.io.InputStream;
 * Example Usage:
 * <p>
 * To build a protein from a pdb file:
-* {@code Protein prot = new Protein(pdbInputStream, proteinName);}
-* To build a protein from sequence data:
-* {@code Protein prot = new Protein(new FastaFileIO(fastaInputStream), proteinName);}
+* <p>
+* {@code InputStream in = new FileInputStream(new File(pathToPDBFile));}
+* <br>
+* {@code Protein prot = PDBFileIO.readInPDBFile(in, proteinName)}
+* <p>
 * @author Aaron Maus aaron@aaronpmaus.com
 * @version 0.6.0
 * @since 0.6.0

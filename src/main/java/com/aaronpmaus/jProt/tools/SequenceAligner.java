@@ -8,13 +8,24 @@ import java.io.InputStream;
 
 /**
 * A SequenceAligner can be used to align Protein, DNA, or RNA sequences.
-*
+* <p>
 * It is designed as a class with only static methods. An individual alignment is completely
 * self-contained so there need be no state to this class.
-*
+* <p>
 * It uses the Needleman-Wuncsh algorithm with an affine gap penalty. The default values for the gap
 * penalty are -10 to start a gap and -2 to extend it. The similarity scores matchMatrix used in the
 * BLOSUM62 matrix.
+* <p>
+* To perform a sequence alignment:
+* <p>
+* {@code InputStream prot1Stream = new FileInputStream(new File(pathToProt1));}<br>
+* {@code InputStream prot2Stream = new FileInputStream(new File(pathToProt2));}<br>
+* {@code Protein prot1 = PDBFileIO.readInPDBFile(prot1Stream, "prot1");}<br>
+* {@code Protein prot2 = PDBFileIO.readInPDBFile(prot2Stream, "prot2");}<br>
+* <br>
+* {@code String[] alignment = SequenceAligner.alignProteinSequences(prot1.getSequence(), prot2.getSequence());}<br>
+* {@code String prot1Alignment = alignment[0];}<br>
+* {@code String prot1Alignment = alignment[1];}<br>
 *
 * @version 0.6.0
 * @since 0.6.0

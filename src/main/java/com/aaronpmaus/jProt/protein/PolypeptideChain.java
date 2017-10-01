@@ -9,7 +9,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 
 /**
-* A PolypeptideChain is a single chain of amino acids
+* A PolypeptideChain is a single chain of amino acids.
 * @author Aaron Maus aaron@aaronpmaus.com
 * @version 0.6.0
 * @since 0.6.0

@@ -17,15 +17,21 @@ import java.io.PrintWriter;
 import java.math.BigDecimal;
 
 /**
- * Provides an easy to use interface to PMF Files. This class allows for simple and efficient
- * access into any of the energy functions listed in a pmf.
- * <p>
- * The values in this class are immutable. It is intended to be used as the tool to read in
- * or write out a PMF.
- * <p>
- * To read in a PMF,
- * @version 0.6.0
- * @since 0.6.0
+* PMFFileIO provides an easy to use interface to PMF Files. This class allows for simple and
+* efficient access into any of the energy functions listed in a pmf.
+* <p>
+* To read in a PMF:
+* <p>
+* {@code InputStream in = new FileInputStream(new File(pathToFile));}
+* <br>
+* {@code PotentialOfMeanForce pmf = PMFFileIO.readInPMF(in);}
+* <p>
+* The values in this class are immutable. It is intended to be used as the tool to read in
+* or write out a PMF.
+* <p>
+* To read in a PMF,
+* @version 0.6.0
+* @since 0.6.0
 */
 public class PMFFileIO{
 
@@ -84,7 +90,7 @@ public class PMFFileIO{
   * Write a PMF out to the given PrintWriter. The format is the standard pmf format as used by
   * encad.
   * @param out the PrintWriter to write the the pmf out to
-  * @param pmf
+  * @param pmf the PotentialOfMeanForce to write to file
   */
   public static void writePMF(PrintWriter out, PotentialOfMeanForce pmf) {
     List<String[]> pairs = pmf.getAtomPairs();

@@ -9,15 +9,13 @@ import java.util.Collection;
 * This tool can be used to calculate distance matrices for Proteins and Polypeptide Chains.
 * <p>
 * To calculate a distance matrix for a protein or a chain:
-* <pre>
-* <code>
-* Protein prot1 = PDBFileIO.readInPDBFile(streamToProtFile, "1ABC");
-* // get a CA-distance matrix for prot1
-* Double[][] protMatrix = DistanceMatrixCalculator.calculateDistanceMatrix(prot1);
-* // get a CA-distance matrix for chain "A" of prot1
-* Double[][] chainMatrix = DistanceMatrixCalculator.calculateDistanceMatrix(prot1.getChain("A"));
-* </code>
-* </pre>
+* <p>
+* {@code InputStream in = new FileInputStream(new File(pathToPDBFile));}<br>
+* {@code Protein prot1 = PDBFileIO.readInPDBFile(in, "1ABC");}<br>
+* {@code // get a CA-distance matrix for prot1}<br>
+* {@code Double[][] protMatrix = DistanceMatrixCalculator.calculateDistanceMatrix(prot1);}<br>
+* {@code // get a CA-distance matrix for chain "A" of prot1}<br>
+* {@code Double[][] chainMatrix = DistanceMatrixCalculator.calculateDistanceMatrix(prot1.getChain("A"));}<br>
 * <p>
 * The masked versions of the methods allow for residues to be selected to be used in the
 * distance calculations. This is intended to be used in concert with the SequenceAligner
@@ -26,25 +24,24 @@ import java.util.Collection;
 * the two structures.
 * <p>
 * For example:
-* <pre>
-* <code>
-* Protein prot1 = PDBFileIO.readInPDBFile(streamToProt1, "prot1");
-* Protein prot2 = PDBFileIO.readInPDBFile(streamToProt2, "prot2");
-*
-* // first, get an alignment of the sequences of these proteins
-* String[] alignment = SequenceAligner.alignProteinSequences(prot1.getSequence(),
-*                                                           prot2.getSequence());
-* // get masks which indicate which residues in each protein have a match in the other protein.
-* boolean[][] masks = SequenceAligner.getSequenceMatchMasks(alignment[0], alignment[1]);
-* boolean[] prot1Mask = masks[0];
-* boolean[] prot2Mask = masks[1];
-*
-* Double[][] prot1DistanceMatrix = DistanceMatrixCalculator.calculateDistanceMatrix(prot1, prot1Mask);
-* Double[][] prot2DistanceMatrix = DistanceMatrixCalculator.calculateDistanceMatrix(prot2, prot2Mask);
-* // Now prot1DistanceMatrix and prot2DistanceMatrix can be used directly to compare the two
-* // structures
-* </code>
-* </pre>
+* <p>
+* {@code InputStream prot1Stream = new FileInputStream(new File(pathToProt1));}<br>
+* {@code InputStream prot2Stream = new FileInputStream(new File(pathToProt2));}<br>
+* {@code Protein prot1 = PDBFileIO.readInPDBFile(prot1Stream, "prot1");}<br>
+* {@code Protein prot2 = PDBFileIO.readInPDBFile(prot2Stream, "prot2");}<br>
+* <br>
+* {@code // first, get an alignment of the sequences of these proteins}<br>
+* {@code String[] alignment = SequenceAligner.alignProteinSequences(prot1.getSequence(),}<br>
+* {@code     prot2.getSequence());}<br>
+* {@code // get masks which indicate which residues in each protein have a match in the other protein.}<br>
+* {@code boolean[][] masks = SequenceAligner.getSequenceMatchMasks(alignment[0], alignment[1]);}<br>
+* {@code boolean[] prot1Mask = masks[0];}<br>
+* {@code boolean[] prot2Mask = masks[1];}<br>
+* <br>
+* {@code Double[][] prot1DistanceMatrix = DistanceMatrixCalculator.calculateDistanceMatrix(prot1, prot1Mask);}<br>
+* {@code Double[][] prot2DistanceMatrix = DistanceMatrixCalculator.calculateDistanceMatrix(prot2, prot2Mask);}<br>
+* {@code // Now prot1DistanceMatrix and prot2DistanceMatrix can be used directly to compare the two}<br>
+* {@code // structures}<br>
 *
 * @version 0.6.0
 * @since 0.6.0

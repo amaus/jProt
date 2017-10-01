@@ -9,8 +9,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 /**
-* This class represents a Molecule. It can be used for Amino Acids,
-* PolypeptideChains, H20, anything that is a Molecule.
+* A Molecule is a set of atoms all connected by covalent bonds.
 * @author Aaron Maus aaron@aaronpmaus.com
 * @version 0.6.0
 * @since 0.6.0
