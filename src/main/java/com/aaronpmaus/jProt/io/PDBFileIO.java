@@ -326,7 +326,7 @@ public class PDBFileIO{
   }
 
   private static Atom constructAtom(AtomRecord rec){
-    return new Atom(rec.getAtomName(), rec.getElement(), rec.getSerial(), rec.getOccupancy(),
+    return new Atom(rec.getAtomName(), rec.getSerial(), rec.getOccupancy(),
         rec.getTempFactor(), rec.getCharge(),
         rec.getX(), rec.getY(), rec.getZ());
   }
