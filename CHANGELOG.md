@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [0.6.2]
 ### Added
 [None]
 ### Changed
@@ -18,6 +18,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [None]
 ### Security
 [None]
+
+## [0.6.2]
+### Added
+- A check when adding disulfide bridges to ensure that both chains and residues
+  are present in the protein before attempting to add the disulfide bridge.
+### Fixed
+- BUG issue-#002: Calculating CA Distance Matrices when residues are missing CA.
+  A residue is only constructed and added to a protein if the N, CA, and C atoms
+  are present.
+
+## [0.6.1]
+### Fixed
+- BUG issue-#001: Reading in PDBs without explicit element fields in the Atom
+  records. The atomName (CA, CG1, N, O, etc) is now used to determine the
+  element.
 
 ## [0.6.0] - 2017-10-01
 ### Added

@@ -265,6 +265,23 @@ public class Protein implements Iterable<PolypeptideChain>{
     return this.atoms.contains(atom);
   }
 
+  /**
+  * @param chain the PolypeptideChain to check for
+  * @return true if this protein contains the chain
+  */
+  public boolean contains(PolypeptideChain chain){
+    return this.chains.contains(chain);
+  }
+
+  public boolean containsChain(String chainID){
+    for(PolypeptideChain chain: this){
+      if(chain.getChainID().equals(chainID)){
+        return true;
+      }
+    }
+    return false;
+  }
+
   public void enableHydrogens(){
     // set the hydrogensEnabled flag in Protein (instance variable)
     this.hydrogensEnabled = true;

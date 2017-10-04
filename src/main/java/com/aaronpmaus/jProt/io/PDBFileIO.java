@@ -281,17 +281,42 @@ public class PDBFileIO{
         int resSeq = residueAtomRecords.get(0).getResSeq();
 
         Collection<Atom> residueAtoms = constructAtoms(residueAtomRecords);
-        Residue res = new Residue(resName, resSeq, residueAtoms);
-        if(containsCarboxylOxygen(residueAtoms)){
-          res.setAsCarboxylTerminus();
+        // only build and add the residue if it contains the backbone atoms N CA C
+        if(resContainsBackboneAtoms(residueAtoms)){
+          Residue res = new Residue(resName, resSeq, residueAtoms);
+          if(containsCarboxylOxygen(residueAtoms)){
+            res.setAsCarboxylTerminus();
+          }
+          chain.addResidue(res);
         }
-        chain.addResidue(res);
       }
       protein.addChain(chain);
     }
 
     addDisulfideBonds(protein);
     return protein;
+  }
+
+  /**
+  * @param atoms a Collection of atoms that make up a residue
+  * @return true if atoms contains atoms with the names N, CA, and C. All three must be present
+  */
+  private boolean resContainsBackboneAtoms(Collection<Atom> atoms){
+    boolean n = false;
+    boolean ca = false;
+    boolean c = false;
+    for(Atom atom : atoms){
+      if(atom.getAtomName().equals("N")){
+        n = true;
+      }
+      if(atom.getAtomName().equals("CA")){
+        ca = true;
+      }
+      if(atom.getAtomName().equals("C")){
+        c = true;
+      }
+    }
+    return (n && ca && c);
   }
 
   private boolean containsCarboxylOxygen(Collection<Atom> atoms){
@@ -309,7 +334,11 @@ public class PDBFileIO{
       String chainID2 = ssBondRec.getChainID2();
       int resID1 = ssBondRec.getResID1();
       int resID2 = ssBondRec.getResID2();
-      protein.addDisulfideBond(chainID1, resID1, chainID2, resID2);
+      if(protein.containsChain(chainID1) && protein.getChain(chainID1).containsResidue(resID2)){
+        if(protein.containsChain(chainID2) && protein.getChain(chainID2).containsResidue(resID2)){
+          protein.addDisulfideBond(chainID1, resID1, chainID2, resID2);
+        }
+      }
     }
   }
 
