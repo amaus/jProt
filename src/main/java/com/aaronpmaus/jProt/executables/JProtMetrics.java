@@ -285,7 +285,7 @@ public class JProtMetrics{
     // The last row in the array holds the averages. If there are 4 thresholds,
     // rows 0-3 hold the number and percents of residues for each threshold. Row
     // 4 holds the averages.
-    System.out.printf("Score: %.4f\n",globalDistanceTest[numThresholds][1]*100);
+    System.out.printf("MCDT Score: %.4f\n",globalDistanceTest[numThresholds][1]*100);
     long end = new Date().getTime();
     System.out.println("Total Time for Global Distance Test: " + (end - start) + " milleseconds.");
   }

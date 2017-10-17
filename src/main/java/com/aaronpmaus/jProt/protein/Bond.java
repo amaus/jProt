@@ -93,39 +93,35 @@ public class Bond {
       return false;
     }
 
-    /**
-     * The hashCode of a bond is the concatenation of the hash codes of the
-     * atoms in the bond.
-     * @return an int, the concatenations of the hash codes of the atoms in
-     * the bond.
-    */
     @Override
     public int hashCode(){
-        return Integer.parseInt("" + getAtomOne().hashCode() + getAtomTwo().hashCode());
+      long hash = Long.parseLong("" + getAtomOne().hashCode() + getAtomTwo().hashCode());
+      hash %= Integer.MAX_VALUE;
+      return (int) hash;
     }
 
     /**
-     * Overriden equals method.
-     * @return true if the bonds contain the same atoms.
+    * Overriden equals method.
+    * @return true if the bonds contain the same atoms.
     */
     @Override
     public boolean equals(Object o){
-        if(o instanceof Bond){
-            Bond other = (Bond)o;
-            if(this.getAtomOne().equals(other.getAtomOne())
-              && this.getAtomTwo().equals(other.getAtomTwo())){
-                return true;
-            }
-            if(this.getAtomOne().equals(other.getAtomTwo())
-              && this.getAtomTwo().equals(other.getAtomOne())){
-                return true;
-            }
+      if(o instanceof Bond){
+        Bond other = (Bond)o;
+        if(this.getAtomOne().equals(other.getAtomOne())
+        && this.getAtomTwo().equals(other.getAtomTwo())){
+          return true;
         }
-        return false;
+        if(this.getAtomOne().equals(other.getAtomTwo())
+        && this.getAtomTwo().equals(other.getAtomOne())){
+          return true;
+        }
+      }
+      return false;
     }
 
     @Override
     public String toString(){
       return getAtomOne().getAtomName() + " - " + getAtomTwo().getAtomName();
     }
-}
+  }
