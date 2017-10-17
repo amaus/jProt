@@ -19,6 +19,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Security
 [None]
 
+## [0.6.3]
+### Fixed
+- Issue-#003: Fix Bond::hashCode(). Mod the final number by MAXINT to keep it in
+  range.
+
 ## [0.6.2]
 ### Added
 - A check when adding disulfide bridges to ensure that both chains and residues
