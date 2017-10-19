@@ -240,17 +240,49 @@ public class PDBFileIO{
 
     // make sure there is a value for charge. if so, parse and assign.
     // else default charge of 0.
-    // format for charge is 1+ or 2+ or 1-.
+    // PDB format specifies charge in form of 1+ or 2+ or 1-, but it could also
+    // be +1, +2, or -1. It could also omit the sign.
     String chargeString = line.substring(78,80).trim();
-    double charge = 0;
-    if(!chargeString.equals("")){
-      charge = Double.parseDouble(chargeString.substring(0,1));
-      if(chargeString.substring(1,2).equals("-")){
-        charge *= -1;
-      }
-    }
+    double charge = parseChargeString(chargeString);
+
     return new AtomRecord(serial, atomName, altLoc, resName, chainID, resSeq, iCode,
                           x, y, z, occupancy, tempFactor, element, charge);
+  }
+
+  private static double parseChargeString(String chargeString){
+    // By PDB Specification, the chargeString should be 2+, 1-, etc,
+    // but they could also be +2, -1, etc, or even simply 1, 2.
+    double charge = 0;
+    if(!chargeString.equals("")){
+      // The charge string can be 1 or 2 characters long.
+      // If the chargeString is only 1 character long and that character
+      // is a digit, save it as the charge.
+      if(chargeString.length() == 1){
+        if(chargeString.matches("\\d")){
+          charge = Double.parseDouble(chargeString);
+        }
+      } else if(chargeString.length() == 2){
+        // The charge string must be 2 characters long
+        String firstChar = chargeString.substring(0,1);
+        String secondChar = chargeString.substring(1,2);
+        // If the first character is a digit, save it as the charge, and if the secondChar
+        // is "-", make the charge negative.
+        // Otherwise, if the second char is a digit, use it for the charge and the firstChar
+        // to determine the sign.
+        if(firstChar.matches("\\d")){
+          charge = Double.parseDouble(firstChar);
+          if(secondChar.equals("-")){
+            charge *= -1;
+          }
+        } else if(secondChar.matches("\\d")){
+          charge = Double.parseDouble(secondChar);
+          if(firstChar.equals("-")){
+            charge *= -1;
+          }
+        }
+      }
+    }
+    return charge;
   }
 
   private static SSBondRecord parseSSBondLine(String line){

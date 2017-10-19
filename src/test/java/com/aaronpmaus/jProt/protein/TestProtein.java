@@ -168,4 +168,20 @@ public class TestProtein{
     assertEquals(prot.getNumBonds(), 20);
   }
 
+  @Test
+  public void testAtomCharges(){
+    PolypeptideChain chain = rop.getChain("A");
+    Atom atomOne = chain.getResidue(1).getAtom("O"); // charge   -1
+    Atom atomTwo = chain.getResidue(2).getAtom("O"); // charge   1-
+    Atom atomThree = chain.getResidue(2).getAtom("OG1"); // charge +2
+    Atom atomFour = chain.getResidue(3).getAtom("O"); // charge   2+
+    Atom atomFive = chain.getResidue(4).getAtom("O"); // charge   3
+    Atom atomSix = chain.getResidue(4).getAtom("OE1"); // charge  3
+    assertTrue(Math.abs(atomOne.getCharge() - -1.0) < 0.000000001);
+    assertTrue(Math.abs(atomTwo.getCharge() - -1.0) < 0.000000001);
+    assertTrue(Math.abs(atomThree.getCharge() - 2.0) < 0.000000001);
+    assertTrue(Math.abs(atomFour.getCharge() - 2.0) < 0.000000001);
+    assertTrue(Math.abs(atomFive.getCharge() - 3.0) < 0.000000001);
+    assertTrue(Math.abs(atomSix.getCharge() - 3.0) < 0.000000001);
+  }
 }

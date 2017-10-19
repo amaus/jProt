@@ -19,12 +19,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Security
 [None]
 
-## [0.6.3]
+## [0.6.4] 2017-10-19
+### Fixed
+- PDBIO atom charges bug. Reading in the charges is more flexible. Previously
+  only accepted input in form specified by PDB File Format V. 3.30. Now reads in
+  charges in form 2+, 1-, +2, -1, 3, etc.
+
+
+## [0.6.3] 2017-10-16
 ### Fixed
 - Issue-#003: Fix Bond::hashCode(). Mod the final number by MAXINT to keep it in
   range.
 
-## [0.6.2]
+## [0.6.2] 2017-10-02
 ### Added
 - A check when adding disulfide bridges to ensure that both chains and residues
   are present in the protein before attempting to add the disulfide bridge.
@@ -33,7 +40,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   A residue is only constructed and added to a protein if the N, CA, and C atoms
   are present.
 
-## [0.6.1]
+## [0.6.1] 2017-10-01
 ### Fixed
 - BUG issue-#001: Reading in PDBs without explicit element fields in the Atom
   records. The atomName (CA, CG1, N, O, etc) is now used to determine the
