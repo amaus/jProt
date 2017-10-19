@@ -368,7 +368,9 @@ public class PDBFileIO{
       int resID2 = ssBondRec.getResID2();
       if(protein.containsChain(chainID1) && protein.getChain(chainID1).containsResidue(resID2)){
         if(protein.containsChain(chainID2) && protein.getChain(chainID2).containsResidue(resID2)){
-          protein.addDisulfideBond(chainID1, resID1, chainID2, resID2);
+          if(!chainID1.equals(chainID2) || resID1 != resID2){
+            protein.addDisulfideBond(chainID1, resID1, chainID2, resID2);
+          }
         }
       }
     }
