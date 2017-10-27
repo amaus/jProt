@@ -19,12 +19,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Security
 [None]
 
-## [0.6.4] 2017-10-19
+## [0.6.4] 2017-10-27
 ### Fixed
 - PDBIO atom charges bug. Reading in the charges is more flexible. Previously
   only accepted input in form specified by PDB File Format V. 3.30. Now reads in
   charges in form 2+, 1-, +2, -1, 3, etc.
-
 
 ## [0.6.3] 2017-10-16
 ### Fixed
