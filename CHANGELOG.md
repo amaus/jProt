@@ -19,6 +19,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Security
 [None]
 
+## [0.7.0]
+### Added
+- package sequence
+- Class Sequence w/ subclasses ProteinSequence, DNASequence, RNASequence
+  - sequences of subclass types can be aligned
+- Class Alignment
+  - Holds the results of aligning two sequences
+### Changed
+- Moved SequenceAligner into new package sequence
+- Protein and PolypeptideChain getSequence methods to use new sequence package
+
 ## [0.6.4] 2017-10-27
 ### Fixed
 - PDBIO atom charges bug. Reading in the charges is more flexible. Previously

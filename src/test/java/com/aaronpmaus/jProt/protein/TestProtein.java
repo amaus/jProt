@@ -47,16 +47,16 @@ public class TestProtein{
     //System.out.println(chain.getResidue(1));
     String sequence = "MTKQEKTALNMARFIRSQTLTLLEKLNELDADEQADICESLHDHADELYRSCLARF";
     //System.out.println(rop.getSequence());
-    assertTrue((rop.getSequence()).equals(sequence));
+    assertTrue(rop.getSequence().toString().equals(sequence));
     assertTrue(rop.getNumAtoms() == 447);
 
     chain = m2j.getChain("A");
     sequence = "SDKPVAHVVANPQAEGQLQWLNRRANALLANGVELRDNQLVVPSEGLYLIYSQVLFKGQGCPSTHVLLTHTISRIAVSYQTKVNLLSAIKSPCQPWYEPIYLGGVFQLEKGDRLSAEINRPDYLDFAESGQVYFGIIAL";
-    assertTrue(chain.getSequence().equals(sequence));
+    assertTrue(chain.getSequence().toString().equals(sequence));
 
     chain = m2j.getChain("D");
     sequence = "QVQLVESGGGLVQPGGSLRLSCAASGFTFSNYWMYWVRQAPGKGLEWVSEINTNGLITKYPDSVKGRFTISRDNAKNTLYLQMNSLKPEDTALYYCARSPSGFNRGQGTQVTVSS";
-    assertTrue(chain.getSequence().equals(sequence));
+    assertTrue(chain.getSequence().toString().equals(sequence));
   }
 
   @Test

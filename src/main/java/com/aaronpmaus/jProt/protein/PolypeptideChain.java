@@ -1,6 +1,11 @@
 package com.aaronpmaus.jProt.protein;
 
+import com.aaronpmaus.jProt.sequence.*;
+
 import com.aaronpmaus.jMath.graph.*;
+import com.aaronpmaus.jMath.transformations.Transformable;
+import com.aaronpmaus.jMath.transformations.Transformation;
+
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,7 +19,7 @@ import java.util.Iterator;
 * @version 0.6.0
 * @since 0.6.0
 */
-public class PolypeptideChain extends Molecule implements Iterable<Residue>{
+public class PolypeptideChain extends Molecule implements Iterable<Residue>, Transformable{
   private ArrayList<Residue> residues;
   // key: residueID, value: residue index in residues list
   private HashMap<Integer, Integer> residueIndices;
@@ -147,12 +152,12 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>{
   *
   * @return a String containing the single letter residue names with no spaces
   */
-  public String getSequence(){
+  public ProteinSequence getSequence(){
     String seq = "";
     for(Residue res : this){
       seq += res.getOneLetterName();
     }
-    return seq;
+    return new ProteinSequence(seq);
   }
 
   /**
@@ -184,6 +189,13 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>{
 
   private Collection<Residue> getResidues(){
     return this.residues;
+  }
+
+  @Override
+  public void applyTransformation(Transformation t){
+    for(Residue residue : this ){
+      residue.applyTransformation(t);
+    }
   }
 
   @Override

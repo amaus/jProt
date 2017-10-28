@@ -1,4 +1,4 @@
-package com.aaronpmaus.jProt.tools;
+package com.aaronpmaus.jProt.sequence;
 
 import com.aaronpmaus.jProt.protein.*;
 import java.util.ArrayList;
@@ -16,17 +16,21 @@ import java.io.InputStream;
 * penalty are -10 to start a gap and -2 to extend it. The similarity scores matchMatrix used in the
 * BLOSUM62 matrix.
 * <p>
-* To perform a sequence alignment:
+* It is intended that sequences are aligned using the align method from the subclasses
+* of Sequence. For example, to perform a sequence alignment of two protein sequences:
 * <p>
 * {@code InputStream prot1Stream = new FileInputStream(new File(pathToProt1));}<br>
 * {@code InputStream prot2Stream = new FileInputStream(new File(pathToProt2));}<br>
 * {@code Protein prot1 = PDBFileIO.readInPDBFile(prot1Stream, "prot1");}<br>
 * {@code Protein prot2 = PDBFileIO.readInPDBFile(prot2Stream, "prot2");}<br>
 * <br>
-* {@code String[] alignment = SequenceAligner.alignProteinSequences(prot1.getSequence(), prot2.getSequence());}<br>
-* {@code String prot1Alignment = alignment[0];}<br>
-* {@code String prot1Alignment = alignment[1];}<br>
-*
+* {@code ProteinSequence prot1Seq = prot1.getSequence();}<br>
+* {@code ProteinSequence prot2Seq = prot2.getSequence();}<br>
+* {@code Alignment alignment = prot1Seq.align(prot2Seq);}<br>
+* {@code String prot1Alignment = alignment.getAlignment(prot1Seq;}<br>
+* {@code String prot1Alignment = alignment.getAlignment(prot2Seq;}<br>
+* @see com.aaronpmaus.jProt.sequence.ProteinSequence
+* @see com.aaronpmaus.jProt.sequence.Alignment
 * @version 0.6.0
 * @since 0.6.0
 */
@@ -35,144 +39,17 @@ public class SequenceAligner{
   private static int gapStartPenalty = -10; //-10
 
   /**
-  * Calculate and return an alignment of the two protein sequences.
-  *
-  * The sequences must not be empty and must contain only valid capital single letter IDs.
-  * These are the standard IDs for the standard 20 amino acids plus:
-  * - B: Aspartic Acid or Asparagine
-  * - Z: Glutamic Acid or Glutamine
-  * - X: Undetermined
-  * - *: Any
-  * Undetermined indicates undetermined via the crystallographic process. This itself offers
-  * clues about which amino acid it may be.
+  * Calculate and return an alignment of the two sequences.
   *
   * @param seq1 one of the sequences to align
   * @param seq2 the other sequence to align
-  * @return an array of String where the 0th String is the alignment of seq1 and the 1st String
-  *         is the alignment of seq2
-  * @throws IllegalArgumentException throws IllegalArgumentException if either of the sequences are
-  *     not valid protein sequences or if either of either of the sequences is empty
+  * @param matrixName the name of the Scoring Matrix to use, must be either "BLOSUM62.txt",
+  * "DNA.txt", or "RNA.txt"
+  * @return an object of type Alignment which can be queried to get the results of this alignment
   */
-  public static String[] alignProteinSequences(String seq1, String seq2){
-    validateProteinSequence(seq1);
-    validateProteinSequence(seq2);
-
-    ScoringMatrix scoringMatrix = new ScoringMatrix("BLOSUM62.txt");
+  public static Alignment align(Sequence seq1, Sequence seq2, String matrixName){
+    ScoringMatrix scoringMatrix = new ScoringMatrix(matrixName);
     return align(seq1, seq2, scoringMatrix);
-  }
-
-  /**
-  * Calculate and return an alignment of the two DNA sequences.
-  *
-  * The sequences must contain only the characters G A T C
-  *
-  * @param seq1 one of the sequences to align
-  * @param seq2 the other sequence to align
-  * @return an array of String where the 0th String is the alignment of seq1 and the 1st String
-  *         is the alignment of seq2
-  * @throws IllegalArgumentException throws IllegalArgumentException if either of the sequences are
-  *     not valid DNA sequences or if either of either of the sequences is empty
-  */
-  public static String[] alignDNASequences(String seq1, String seq2){
-    validateDNASequence(seq1);
-    validateDNASequence(seq2);
-
-    ScoringMatrix scoringMatrix = new ScoringMatrix("DNA.txt");
-    return align(seq1, seq2, scoringMatrix);
-  }
-
-  /**
-  * Calculate and return an alignment of the two RNA sequences.
-  *
-  * The sequences must contain only the characters G A U C
-  *
-  * @param seq1 one of the sequences to align
-  * @param seq2 the other sequence to align
-  * @return an array of String where the 0th String is the alignment of seq1 and the 1st String
-  *     is the alignment of seq2
-  * @throws IllegalArgumentException throws IllegalArgumentException if either of the sequences are
-  *     not valid RNA sequences or if either of either of the sequences is empty
-  */
-  public static String[] alignRNASequences(String seq1, String seq2){
-    validateRNASequence(seq1);
-    validateRNASequence(seq2);
-
-    ScoringMatrix scoringMatrix = new ScoringMatrix("RNA.txt");
-    return align(seq1, seq2, scoringMatrix);
-  }
-
-  /**
-  * Get a mask for each alignment string indicating the matches in its alignment to the other.
-  *
-  * The alignment strings are those produced by the alignment methods above and must be the
-  * same length.
-  *
-  * The size of the mask is the number of elements in that alignment string exluding gaps. The
-  * idea is to return a mask for the original sequence indicating which parts of it were able to
-  * find a match in the other sequence.
-  *
-  * @param alignmentSequenceOne the top sequence in the alignment. Can contain element ids and gaps
-  * @param alignmentSequenceTwo the bottom sequence in the alignment. Can contain element ids and
-  *   gaps
-  * @return a array containing 2 arrays of booleans. The first is the mask for sequenceOne, and
-  *   the second the mask for sequenceTwo
-  */
-  public static boolean[][] getSequenceMatchMasks(String alignmentSequenceOne,
-    String alignmentSequenceTwo){
-    boolean[][] masks = new boolean[2][];
-    masks[0] = getMask(alignmentSequenceOne, alignmentSequenceTwo);
-    masks[1] = getMask(alignmentSequenceTwo, alignmentSequenceOne);
-    return masks;
-  }
-
-  /**
-  * From the alignment Strings seq1 and seq2, get a mask for all the elements in seq1 that
-  * have a match in seq2. The elements are the original elements in the sequence that produced
-  * seq1 alignment - that is, ignore all gaps in seq1
-  *
-  * given an alignment, for example:
-  * AA-EYE
-  * AAP-E-
-  * we want to perform a comparison where there are matches.
-  * The masks should be as long as their corresponding protein sequences, and include true
-  * everywhere there is a match and false otherwise.
-  *
-  * In the case above, we are expecting
-  * TTFTF
-  * because AA have matches, E does not, Y does, and E again doesn't
-  *
-  * If we wanted to find the mask for the bottom sequence, that is for the case:
-  * AAP-E-
-  * AA-EYE
-  * It would be:
-  * TTFT
-  *
-  */
-  private static boolean[] getMask(String seq1, String seq2){
-    int seq1Length = 0; // the length of seq1 with no gaps
-    for(char c : seq1.toCharArray()){
-      if(c != '-'){
-        seq1Length++;
-      }
-    }
-    boolean[] mask = new boolean[seq1Length];
-    int maskIndex = 0;
-    for(int alignmentIndex = 0; alignmentIndex < seq1.length(); alignmentIndex++){
-      char seq1Char = seq1.charAt(alignmentIndex);
-      char seq2Char = seq2.charAt(alignmentIndex);
-      if((seq1.charAt(alignmentIndex) != '-')
-          && (seq2.charAt(alignmentIndex) != '-')){
-        mask[maskIndex] = true;
-        maskIndex++;
-      } else if((seq1.charAt(alignmentIndex) != '-')
-          && (seq2.charAt(alignmentIndex) == '-')){
-        mask[maskIndex] = false;
-        maskIndex++;
-      } else if(seq1.charAt(alignmentIndex) == '-'){
-        // ignore gaps in prot1;
-      }
-    }
-    return mask;
   }
 
   /**
@@ -190,7 +67,9 @@ public class SequenceAligner{
   * @return an array of String where the 0th String is the alignment of upSeq and the 1st String
   *     is the alignment of leftSeq
   */
-  private static String[] align(String upSeq, String leftSeq, ScoringMatrix scoringMatrix){
+  private static Alignment align(Sequence seq1, Sequence seq2, ScoringMatrix scoringMatrix){
+    String upSeq = seq1.getSequenceString();
+    String leftSeq = seq2.getSequenceString();
     if(upSeq.length() == 0 || leftSeq.length() == 0){
       throw new IllegalArgumentException("Sequences must not be empty.\n"
           + "seq1: |" + upSeq + "|\n"
@@ -225,7 +104,10 @@ public class SequenceAligner{
     if(yBottomRightCell.getValue() > max.getValue()){
       max = yBottomRightCell;
     }
-    return traceBackOptimalAlignments(max);
+    String[] alignments = traceBackOptimalAlignments(max);
+    boolean[][] alignmentMasks = getSequenceMatchMasks(alignments[0], alignments[1]);
+    return new Alignment(seq1, alignments[0], alignmentMasks[0],
+                         seq2, alignments[1], alignmentMasks[1]);
   }
 
   /**
@@ -486,6 +368,80 @@ public class SequenceAligner{
   }
 
   /**
+  * Get a mask for each alignment string indicating the matches in its alignment to the other.
+  *
+  * The alignment strings are those produced by the alignment methods above and must be the
+  * same length.
+  *
+  * The size of the mask is the number of elements in that alignment string exluding gaps. The
+  * idea is to return a mask for the original sequence indicating which parts of it were able to
+  * find a match in the other sequence.
+  *
+  * @param alignmentSequenceOne the top sequence in the alignment. Can contain element ids and gaps
+  * @param alignmentSequenceTwo the bottom sequence in the alignment. Can contain element ids and
+  *   gaps
+  * @return a array containing 2 arrays of booleans. The first is the mask for sequenceOne, and
+  *   the second the mask for sequenceTwo
+  */
+  public static boolean[][] getSequenceMatchMasks(String alignmentSequenceOne,
+    String alignmentSequenceTwo){
+    boolean[][] masks = new boolean[2][];
+    masks[0] = getMask(alignmentSequenceOne, alignmentSequenceTwo);
+    masks[1] = getMask(alignmentSequenceTwo, alignmentSequenceOne);
+    return masks;
+  }
+
+  /**
+  * From the alignment Strings seq1 and seq2, get a mask for all the elements in seq1 that
+  * have a match in seq2. The elements are the original elements in the sequence that produced
+  * seq1 alignment - that is, ignore all gaps in seq1
+  *
+  * given an alignment, for example:
+  * AA-EYE
+  * AAP-E-
+  * we want to perform a comparison where there are matches.
+  * The masks should be as long as their corresponding protein sequences, and include true
+  * everywhere there is a match and false otherwise.
+  *
+  * In the case above, we are expecting
+  * TTFTF
+  * because AA have matches, E does not, Y does, and E again doesn't
+  *
+  * If we wanted to find the mask for the bottom sequence, that is for the case:
+  * AAP-E-
+  * AA-EYE
+  * It would be:
+  * TTFT
+  *
+  */
+  private static boolean[] getMask(String seq1, String seq2){
+    int seq1Length = 0; // the length of seq1 with no gaps
+    for(char c : seq1.toCharArray()){
+      if(c != '-'){
+        seq1Length++;
+      }
+    }
+    boolean[] mask = new boolean[seq1Length];
+    int maskIndex = 0;
+    for(int alignmentIndex = 0; alignmentIndex < seq1.length(); alignmentIndex++){
+      char seq1Char = seq1.charAt(alignmentIndex);
+      char seq2Char = seq2.charAt(alignmentIndex);
+      if((seq1.charAt(alignmentIndex) != '-')
+          && (seq2.charAt(alignmentIndex) != '-')){
+        mask[maskIndex] = true;
+        maskIndex++;
+      } else if((seq1.charAt(alignmentIndex) != '-')
+          && (seq2.charAt(alignmentIndex) == '-')){
+        mask[maskIndex] = false;
+        maskIndex++;
+      } else if(seq1.charAt(alignmentIndex) == '-'){
+        // ignore gaps in prot1;
+      }
+    }
+    return mask;
+  }
+
+  /**
   * Return the max of 3 ints.
   *
   * @param a first int
@@ -502,101 +458,6 @@ public class SequenceAligner{
       max = c;
     }
     return max;
-  }
-
-  /**
-  * Verify that the seq passed in is a valid protein sequence.
-  *
-  * The sequences must contain only valid capital single letter IDs.
-  * These are the standard IDs for the standard 20 amino acids plus:
-  * - B: Aspartic Acid or Asparagine
-  * - Z: Glutamic Acid or Glutamine
-  * - X: Undetermined
-  * - *: Any
-  * Undetermined indicates undetermined via the crystallographic process. This itself offers
-  * clues about which amino acid it may be.
-  *
-  * @param seq the sequence to check
-  * @throws IllegalArgumentException if the sequence is invalid
-  */
-  private static void validateProteinSequence(String seq){
-    ArrayList<Character> validCharacters = new ArrayList<Character>();
-    validCharacters.add('A');
-    validCharacters.add('R');
-    validCharacters.add('N');
-    validCharacters.add('D');
-    validCharacters.add('C');
-    validCharacters.add('Q');
-    validCharacters.add('E');
-    validCharacters.add('G');
-    validCharacters.add('H');
-    validCharacters.add('I');
-    validCharacters.add('L');
-    validCharacters.add('K');
-    validCharacters.add('M');
-    validCharacters.add('F');
-    validCharacters.add('P');
-    validCharacters.add('S');
-    validCharacters.add('T');
-    validCharacters.add('W');
-    validCharacters.add('Y');
-    validCharacters.add('V');
-    validCharacters.add('B');
-    validCharacters.add('Z');
-    validCharacters.add('X');
-    validCharacters.add('*');
-
-    for(Character res : seq.toCharArray()){
-      if(!validCharacters.contains(res)){
-        throw new IllegalArgumentException("Seq invalid. " + res + " not a valid residue.");
-      }
-    }
-  }
-
-  /**
-  * Verify that the seq passed in is a valid DNA sequence.
-  *
-  * A valid DNA sequence can only contain G A T C
-  *
-  * @param seq the sequence to check
-  * @throws IllegalArgumentException if the sequence is invalid
-  */
-  private static void validateDNASequence(String seq){
-    ArrayList<Character> validCharacters = new ArrayList<Character>();
-    validCharacters.add('G');
-    validCharacters.add('A');
-    validCharacters.add('T');
-    validCharacters.add('C');
-
-    for(Character nucleotide : seq.toCharArray()){
-      if(!validCharacters.contains(nucleotide)){
-        throw new IllegalArgumentException("Seq invalid. " + nucleotide + " not a valid DNA base."
-            + "\n only G A T C allowed.");
-      }
-    }
-  }
-
-  /**
-  * Verify that the seq passed in is a valid RNA sequence.
-  *
-  * A valid RNA sequence can only contain G A U C
-  *
-  * @param seq the sequence to check
-  * @throws IllegalArgumentException if the sequence is invalid
-  */
-  private static void validateRNASequence(String seq){
-    ArrayList<Character> validCharacters = new ArrayList<Character>();
-    validCharacters.add('G');
-    validCharacters.add('A');
-    validCharacters.add('U');
-    validCharacters.add('C');
-
-    for(Character nucleotide : seq.toCharArray()){
-      if(!validCharacters.contains(nucleotide)){
-        throw new IllegalArgumentException("Seq invalid. " + nucleotide + " not a valid RNA base."
-            + "\n only G A U C allowed.");
-      }
-    }
   }
 
   /**

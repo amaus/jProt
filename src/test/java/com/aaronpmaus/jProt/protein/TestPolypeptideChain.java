@@ -63,7 +63,7 @@ public class TestPolypeptideChain{
 
   @Test
   public void testGetSequence(){
-    assertEquals(chain.getSequence(), "IAMSTARSTFF");
+    assertEquals(chain.getSequence().toString(), "IAMSTARSTFF");
   }
 
   @Test
