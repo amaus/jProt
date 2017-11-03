@@ -60,6 +60,9 @@ import java.util.Date;
 *          Global Distance Test - High Accuracy: the same as gdt except
 *          with thresholds: {0.5, 1.0, 2.0, 4.0}. Warning: This may take
 *          a long time to run depending on the structures.
+*      --gdt-plot
+*          Global Distance Test: Operates as --gdt but with thresholds
+*          {0.5, 1.0, 1.5, ..., 9.5, 10.0}
 * </code>
 * </pre>
 *
@@ -70,6 +73,7 @@ public class JProtMetrics{
   private static boolean runAngularDistance = false;
   private static boolean runLocalSimilarity = false;
   private static boolean runGDT = false;
+  private static boolean printGDTPlotData = false;
   private static boolean usePDBs = false;
   private static boolean useCSVs = false;
   private static double localSimilarityThreshold = 1.0;
@@ -114,6 +118,14 @@ public class JProtMetrics{
         gdtThresholds[1] = 1.0;
         gdtThresholds[2] = 2.0;
         gdtThresholds[3] = 4.0;
+      }
+      if(args.contains("--gdt-plot")){
+        runGDT = true;
+        printGDTPlotData = true;
+        gdtThresholds = new double[20];
+        for(int i = 0; i < 20; i++){
+          gdtThresholds[i] = (i / 2.0) + 0.5;
+        }
       }
       if(args.contains("--ls") || args.contains("--local-similarity")){
         runLocalSimilarity = true;
@@ -273,19 +285,30 @@ public class JProtMetrics{
     System.out.println(thresholdsStr);
     System.out.println(resNumStr);
     System.out.println(percentsStr);
-    //System.out.printf("Thresholds:\t%.2f\t%.2f\t%.2f\t%.2f\n",
-    //                    thresholds[0], thresholds[1], thresholds[2], thresholds[3]);
-    //System.out.printf("Num Res:\t%.0f\t%.0f\t%.0f\t%.0f\n",
-    //                    globalDistanceTest[0][0], globalDistanceTest[1][0],
-    //                    globalDistanceTest[2][0], globalDistanceTest[3][0]);
-    //System.out.printf("Percents:\t%.2f%%\t%.2f%%\t%.2f%%\t%.2f%%\n",
-    //                    globalDistanceTest[0][1]*100, globalDistanceTest[1][1]*100,
-    //                    globalDistanceTest[2][1]*100, globalDistanceTest[3][1]*100);
 
-    // The last row in the array holds the averages. If there are 4 thresholds,
-    // rows 0-3 hold the number and percents of residues for each threshold. Row
-    // 4 holds the averages.
-    System.out.printf("MCDT Score: %.4f\n",globalDistanceTest[numThresholds][1]*100);
+    if(printGDTPlotData){
+      System.out.println();
+      System.out.println("GDT Plot Data:");
+      System.out.println("Percent Res, Threshold");
+      for(int i = 0; i < thresholds.length; i++){
+        System.out.printf("%.2f, %.2f\n", globalDistanceTest[i][1]*100, thresholds[i]);
+      }
+      double half = globalDistanceTest[0][1]*100;
+      double one = globalDistanceTest[1][1]*100;
+      double two = globalDistanceTest[3][1]*100;
+      double four = globalDistanceTest[7][1]*100;
+      double eight = globalDistanceTest[15][1]*100;
+      double mcdtScore_ha = ( half + one + two + four ) / 4.0;
+      double mcdtScore = ( one + two + four + eight) / 4.0;
+      System.out.println();
+      System.out.printf("MCDT-HA Score: %.4f\n", mcdtScore_ha);
+      System.out.printf("MCDT Score: %.4f\n", mcdtScore);
+    } else {
+      // The last row in the array holds the averages. If there are 4 thresholds,
+      // rows 0-3 hold the number and percents of residues for each threshold. Row
+      // 4 holds the averages.
+      System.out.printf("MCDT Score: %.4f\n",globalDistanceTest[numThresholds][1]*100);
+    }
     long end = new Date().getTime();
     System.out.println("Total Time for Global Distance Test: " + (end - start) + " milleseconds.");
   }

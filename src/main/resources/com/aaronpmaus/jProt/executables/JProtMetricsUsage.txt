@@ -37,3 +37,6 @@ Usage: JProtMetrics [<options>] <mol1-f fname> <mol2-f fname>
           Global Distance Test - High Accuracy: the same as gdt except
           with thresholds: {0.5, 1.0, 2.0, 4.0}. Warning: This may take
           a long time to run depending on the structures.
+      --gdt-plot
+          Global Distance Test: Operates as --gdt but with thresholds
+          {0.5, 1.0, 1.5, ..., 9.5, 10.0}
