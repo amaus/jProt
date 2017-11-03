@@ -22,13 +22,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [0.7.0]
 ### Added
 - package sequence
-- Class Sequence w/ subclasses ProteinSequence, DNASequence, RNASequence
-  - sequences of subclass types can be aligned
-- Class Alignment
-  - Holds the results of aligning two sequences
+  -  Class Sequence w/ subclasses ProteinSequence, DNASequence, RNASequence
+    - sequences of subclass types can be aligned
+  - Class Alignment
+    - Holds the results of aligning two sequences
+- Constructor to Residue that takes a char to indicate which amino acid to build
+- Feature to PDDFileIO: can now write out bare bones PDB files.
 ### Changed
 - Moved SequenceAligner into new package sequence
 - Protein and PolypeptideChain getSequence methods to use new sequence package
+- All structure classes are now transformable.
+- Atom constructors now take doubles for the coordinates rather than Strings.
 
 ## [0.6.4] 2017-10-27
 ### Fixed
