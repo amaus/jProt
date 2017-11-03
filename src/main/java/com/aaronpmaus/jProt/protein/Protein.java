@@ -16,6 +16,10 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+
 
 /**
 * A Protein is composed of PolypeptideChains which are composed of Residues. Proteins can either be
@@ -333,6 +337,18 @@ public class Protein implements Iterable<PolypeptideChain>, Transformable{
   */
   public boolean hydrogensEnabled(){
     return this.hydrogensEnabled;
+  }
+
+  /**
+  * Write this protein out to a PDB file.
+  * @param fileName the name of the file to write out to, will create new file if doesn't exist,
+  * will override if does exist.
+  * @throws IOException if the output file can not be opened
+  */
+  public void writeToFile(String fileName) throws IOException{
+    OutputStreamWriter outputStream = new FileWriter(fileName);
+    this.pdbIO.writeToPDB(outputStream, this);
+    outputStream.close();
   }
 
   @Override

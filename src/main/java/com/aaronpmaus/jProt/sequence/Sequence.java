@@ -3,7 +3,7 @@ package com.aaronpmaus.jProt.sequence;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-public class Sequence implements Iterable<String>{
+public class Sequence implements Iterable<Character>{
   String seq;
 
   public Sequence(String seq){
@@ -18,10 +18,10 @@ public class Sequence implements Iterable<String>{
   }
 
   @Override
-  public Iterator<String> iterator(){
-    LinkedList<String> list = new LinkedList<String>();
-    for(Character character : seq.toCharArray()){
-      list.add(String.format("%s",character));
+  public Iterator<Character> iterator(){
+    LinkedList<Character> list = new LinkedList<Character>();
+    for(Character c :  seq.toCharArray()){
+      list.add(c);
     }
     return list.iterator();
   }

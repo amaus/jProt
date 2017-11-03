@@ -1,6 +1,8 @@
 package com.aaronpmaus.jProt.protein;
 
 import com.aaronpmaus.jMath.graph.*;
+import com.aaronpmaus.jMath.transformations.Transformable;
+import com.aaronpmaus.jMath.transformations.Transformation;
 import com.aaronpmaus.jProt.io.PDBFileIO;
 
 import java.util.HashMap;
@@ -25,7 +27,7 @@ import java.io.InputStream;
 * @version 0.6.0
 * @since 0.6.0
 */
-public class Residue implements Iterable<Atom>{
+public class Residue implements Iterable<Atom>, Transformable{
   private final String name;
   private final String threeLetterName;
   private final String oneLetterName;
@@ -59,6 +61,9 @@ public class Residue implements Iterable<Atom>{
     {"GLH","E","Glutamic Acid"},
   };
 
+  protected void addAtom(Atom atom){
+    this.heavyAtoms.put(atom.getAtomName(), atom);
+  }
   /**
   * A constructor for a residue that builds a default residue of this type
   * @param threeLetterID the three letter name of the residue to builds
@@ -281,11 +286,19 @@ public class Residue implements Iterable<Atom>{
   }
 
   /**
+  * Return all the heavy atoms in this residue
+  * @return a {@code Collection<Atom>} containing the heavy atoms in this residue
+  */
+  protected Collection<Atom> getHeavyAtoms(){
+    return this.heavyAtoms.values();
+  }
+
+  /**
   * Return all the hydrogens in this residue whether they are enabled or not.
   * @return a {@code Collection<Atom>} containing the hydrogens in this residue
   */
-  public Collection<Atom> getHydrogens(){
-    return new ArrayList<Atom>(this.hydrogens.values());
+  protected Collection<Atom> getHydrogens(){
+    return this.hydrogens.values();
   }
 
   /**
@@ -419,6 +432,16 @@ public class Residue implements Iterable<Atom>{
 
   public boolean hydrogensEnabled(){
     return this.hydrogensEnabled;
+  }
+
+  @Override
+  public void applyTransformation(Transformation t){
+    for(Atom atom : getHeavyAtoms()){
+      atom.applyTransformation(t);
+    }
+    for(Atom atom : getHydrogens()){
+      atom.applyTransformation(t);
+    }
   }
 
   @Override

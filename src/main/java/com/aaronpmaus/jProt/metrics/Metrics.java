@@ -2,6 +2,8 @@ package com.aaronpmaus.jProt.metrics;
 
 import com.aaronpmaus.jProt.protein.*;
 import com.aaronpmaus.jProt.tools.*;
+import com.aaronpmaus.jProt.sequence.*;
+
 import com.aaronpmaus.jMath.graph.*;
 import com.aaronpmaus.jMath.linearAlgebra.*;
 
@@ -97,13 +99,13 @@ public class Metrics{
   * @param prot2 the other protein in the comparison
   */
   public Metrics(Protein prot1, Protein prot2){
+    ProteinSequence prot1Sequence = prot1.getSequence();
+    ProteinSequence prot2Sequence = prot2.getSequence();
     // first we need an alignment of the sequences of these proteins
-    String[] alignment = SequenceAligner.alignProteinSequences(prot1.getSequence(),
-                                                                prot2.getSequence());
+    Alignment alignment = prot1Sequence.align(prot2Sequence);
     // get masks indicating which residues in each protein have a match in the other protein.
-    boolean[][] masks = SequenceAligner.getSequenceMatchMasks(alignment[0], alignment[1]);
-    boolean[] prot1Mask = masks[0];
-    boolean[] prot2Mask = masks[1];
+    boolean[] prot1Mask = alignment.getAlignmentMask(prot1Sequence);
+    boolean[] prot2Mask = alignment.getAlignmentMask(prot2Sequence);
 
     // get the residue ids from prot1 that were aligned with residues in prot2
     Integer[] protOneResIDs = prot1.getResidueIDs(prot1Mask);
