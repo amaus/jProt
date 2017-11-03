@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Security
 [None]
 
+## [0.7.0]
+### Added
+- Feature to the JProtMetrics executable. It now takes the cmd line flag
+  --gdt-plot and prints out the percent of residues for each threshold in the
+  range 0.5 to 10.0 in 0.5 increments. This data can be used to produce
+  GDT Plots like those on prediction center.
+
 ## [0.6.4] 2017-10-27
 ### Fixed
 - PDBIO atom charges bug. Reading in the charges is more flexible. Previously
