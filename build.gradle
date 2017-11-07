@@ -162,3 +162,4 @@ jar.doLast {
 
 // Call this for each Main class you want to expose with an app script
 createScript(project, 'com.aaronpmaus.jProt.executables.JProtMetrics', 'JProtMetrics')
+createScript(project, 'com.aaronpmaus.jProt.executables.AlignSequences', 'AlignSequences')

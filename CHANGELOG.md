@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     - sequences of subclass types can be aligned
   - Class Alignment
     - Holds the results of aligning two sequences
+- Executable AlignSequences that can align the sequences of 2 PDBs or FASTA
+  files.
 - Constructor to Residue that takes a char to indicate which amino acid to build
 - Feature to PDDFileIO: can now write out bare bones PDB files.
 ### Changed
