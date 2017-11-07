@@ -51,9 +51,9 @@ public class PDBFileIO{
   /**
   * Read in a PDB file and return a Protein. A PDBFileIO Object can only call this method once.
   * If you wish to read in multiple pdb file, you must instantiate a PDBFileIO object for each.
-  *
+  * <p>
   * This method does not close the InputStream. It is the clients job to do so.
-  *
+  * <p>
   * @param inputStream the inputStream to read from
   * @param pdbFileNameBase the base name of the PDB file (the part before the extension).
   * @return the Protein built from the information in this PDB

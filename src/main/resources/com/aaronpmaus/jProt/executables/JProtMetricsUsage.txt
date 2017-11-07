@@ -7,7 +7,7 @@ Usage: JProtMetrics [<options>] <mol1-f fname> <mol2-f fname>
       --mol1-f fname
           This file must either be a PDB file or a csv file. If it is a
           PDB file it must end in the .pdb extension and conform to the
-          PDB File Format Version 3.30. otherwise, the file should
+          PDB File Format Version 3.30. Otherwise, the file should
           contain the distance matrix for If the file provided is csv,
           it must end in the .csv extension. The first row must contain
           the residue IDs and the rest of the file contains all pairwise
