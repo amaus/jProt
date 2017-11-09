@@ -30,6 +30,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   files.
 - Constructor to Residue that takes a char to indicate which amino acid to build
 - Feature to PDDFileIO: can now write out bare bones PDB files.
+- Residue of Type UNK to residue class and templates.
+  - 3 letter name: UNK, 1 letter name: X, full name Unknown
+  - Template Coordinates and bonds: same as Alanine
 ### Changed
 - Moved SequenceAligner into new package sequence
 - Protein and PolypeptideChain getSequence methods to use new sequence package

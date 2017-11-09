@@ -58,7 +58,7 @@ public class Residue implements Iterable<Atom>, Transformable{
     {"HID","H","Histidine"},      {"HIE","H","Histidine"},
     {"HIP","H","Histidine"},      {"CYH","C","Cysteine"},
     {"ASH","D","Aspartic Acid"},  {"LYN","K","Lysine"},
-    {"GLH","E","Glutamic Acid"},
+    {"GLH","E","Glutamic Acid"},  {"UNK","X","Unknown"}
   };
 
   protected void addAtom(Atom atom){

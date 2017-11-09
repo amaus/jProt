@@ -1,0 +1,36 @@
+!main bonds
+N   CA
+CA  C
+CA  CB
+C   O
+C   OXT
+!hydrogens
+N   H
+N   1H
+N   2H
+N   3H
+CA  HA
+CB  1HB
+CB  2HB
+CB  3HB
+!defined dihedral angles
+!atom types
+# column 1: atom name
+# column 2: AMBER all atom atomtype
+# column 3: AMBER united atom atomtype
+# column 4: ENCAD atomtype
+# column 5: AMBER95 atomtype
+N    N    N    N1    N
+CA   CT   CH   C1    CT
+C    C    C    AO    C
+O  	 O    O    OA    O
+CB 	 CT   C3   C3    CT
+OXT	 O    O    O"    O
+H    H    -    HN    H1
+HA 	 HC   -    HC    HC
+1HB	 HC   -    HC    HC
+2HB	 HC   -    HC    HC
+3HB	 HC   -    HC    HC
+1H 	 H    -    H     HM
+2H 	 H    -    H     HM
+3H 	 H    -    H     HM
