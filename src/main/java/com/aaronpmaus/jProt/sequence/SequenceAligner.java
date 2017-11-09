@@ -107,7 +107,8 @@ public class SequenceAligner{
     String[] alignments = traceBackOptimalAlignments(max);
     boolean[][] alignmentMasks = getSequenceMatchMasks(alignments[0], alignments[1]);
     return new Alignment(seq1, alignments[0], alignmentMasks[0],
-                         seq2, alignments[1], alignmentMasks[1]);
+                         seq2, alignments[1], alignmentMasks[1],
+                         max.getValue());
   }
 
   /**

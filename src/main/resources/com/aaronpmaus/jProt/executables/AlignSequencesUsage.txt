@@ -9,3 +9,21 @@ Usage: AlignSequences [<options>] <mol1-f fname> <mol2-f fname>
           a fasta file ending in the .fasta extension.
       --mol2-f fname
           The file for molecule two. The format is the same as mol1-f.
+      --mol1-chain chainID
+          The chain from mol1 to use in the alignment, capital letter
+          indicating the chain. This argument is only applicable if PDBs
+          are provided as input, otherwise it will be ignored. If
+          omitted, the entire sequence will be used.
+      --mol2-chain chainID
+          The chain from mol2 to use in the alignment, capital letter
+          indicating the chain. This argument is only applicable if PDBs
+          are provided as input, otherwise it will be ignored. If
+          omitted, the entire sequence will be used.
+      --mol1-entry entryNumber
+          A number indicating which entry to use in the alignment.
+          Possible values: [1,N], where N is the number of entries in
+          the FASTA File. If omitted the first entry will be used.
+      --mol2-entry entryNumber
+          A number indicating which entry to use in the alignment.
+          Possible values: [1,N], where N is the number of entries in
+          the FASTA File. If omitted the first entry will be used.
