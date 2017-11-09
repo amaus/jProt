@@ -38,9 +38,8 @@ public class FASTAFileIO{
   * <p>
   * An instance of FASTAFileIO can only call this method once.
   * @param inputStream the inputStream to read from
-  * @return an ArrayList of all the sequences in it
   */
-  public ArrayList<ProteinSequence> readInFASTAFile(InputStream inputStream){
+  public void readInFASTAFile(InputStream inputStream){
     if(this.fastaReadIn){
       throw new IllegalStateException("A FASTAFileIO Object can only read in a single FASTA File. "
       + " If you wish to read in a second FASTA file, you must instantiate another FASTAFileIO.");
@@ -50,6 +49,7 @@ public class FASTAFileIO{
     boolean lastLineComment = true;
     String seqString = "";
     String commentString = "";
+    boolean readingFirstLine = true;
     while(in.hasNextLine()){
       String line = in.nextLine().trim();
       char firstChar = line.toCharArray()[0];
@@ -62,23 +62,30 @@ public class FASTAFileIO{
           seqString = "";
           this.comments.add(line);
         } else if(lastLineComment){
-          // if the last line was a comment, concatenate onto it in the comments ArrayList this
-          // comment as well.
-          int lastIndex = comments.size() - 1;
-          this.comments.set(lastIndex, comments.get(lastIndex) + "\n" + line);
+          if(readingFirstLine){
+            this.comments.add(line);
+          } else {
+            // if the last line was a comment, concatenate onto it in the comments ArrayList this
+            // comment as well.
+            int lastIndex = comments.size() - 1; //((comments.size() - 1) < 0  ?  0  :  comments.size() - 1);
+            this.comments.set(lastIndex, comments.get(lastIndex) + "\n" + line);
+          }
         }
+        lastLineComment = true;
       } else {
         // if the line is not a comment, add it onto seqString
         seqString += line;
+        lastLineComment = false;
       }
     }
+    this.sequences.add(new ProteinSequence(seqString));
     try{
       in.close();
       inputStream.close();
     } catch(IOException e){
 
     }
-    return this.sequences;
+    //return this.sequences;
   }
 
   /**
@@ -91,8 +98,13 @@ public class FASTAFileIO{
   /**
   * @param index a number in the range [0, getNumSequences()-1]
   * @return a ProteinSequence
+  * @throws IllegalArgumentException if index is not in range of [0,getNumSequences()-1]
   */
-  public ProteinSequence getSequence(int index){
+  public ProteinSequence getSequence(int index) throws IllegalArgumentException {
+    if(index < 0 || index >= getNumSequences()){
+      throw new IllegalArgumentException("FASTAFileIO::getSequence() - Index must be in range "
+          + "[0, getNumSequences()-1], provided: " + index);
+    }
     return this.sequences.get(index);
   }
 
@@ -100,8 +112,13 @@ public class FASTAFileIO{
   * @param index a number in the range [0, getNumSequences()-1]
   * @return a comment. Comments correspond to ProteinSequences by index. The comment at index
   * 0 corresponds to the ProteinSequence at index 0.
+  * @throws IllegalArgumentException if index is not in range of [0,getNumSequences()-1]
   */
   public String getComment(int index){
+    if(index < 0 || index >= getNumSequences()){
+      throw new IllegalArgumentException("FASTAFileIO::getComment() - Index must be in range "
+          + "[0, getNumSequences()-1], provided: " + index);
+    }
     return this.comments.get(index);
   }
 }
