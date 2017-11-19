@@ -197,8 +197,7 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>, Tra
   * <p>
   * This residue and the previous residue must both be present.
   * @param residueID the residue ID of the residue to return the omega angle of
-  * @return the phi angle - the angle about the (N) -- (CA) bond, in degrees
-  * @throws IllegalStateException if either residue at residueID or residueID-1 are not present
+  * @return the phi angle - the angle about the (N) -- (CA) bond, in degrees, or 1000 if undefined
   */
   public double getPhiAngle(int residueID){
     if(!containsResidue(residueID) || !containsResidue(residueID-1)){
@@ -220,8 +219,7 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>, Tra
   * <p>
   * This residue and the next residue must both be present.
   * @param residueID the residue ID of the residue to return the omega angle of
-  * @return the psi angle - the angle about the (CA) -- (C) bond, in degrees
-  * @throws IllegalStateException if either residue at residueID or residueID+1 are not present
+  * @return the psi angle - the angle about the (CA) -- (C) bond, in degrees, or 1000 if undefined
   */
   public double getPsiAngle(int residueID){
     if(!containsResidue(residueID) || !containsResidue(residueID+1)){
@@ -241,8 +239,8 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>, Tra
   * <p>
   * This residue and the previous residue must both be present.
   * @param residueID the residue ID of the residue to return the omega angle of
-  * @return the omega angle - the angle about the (C-1) -- (O) bond, in degrees
-  * @throws IllegalStateException if either residue at residueID or residueID-1 are not present
+  * @return the omega angle - the angle about the (C-1) -- (O) bond, in degrees, or 1000 if
+  * undefined
   */
   public double getOmegaAngle(int residueID){
     if(!containsResidue(residueID) || !containsResidue(residueID-1)){
