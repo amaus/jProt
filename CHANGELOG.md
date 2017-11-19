@@ -43,7 +43,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   takes a residueID and returns the angle if it can be calculated or 1000
   otherwise.
   - a test to TestProtein to check that all the angles for 1rop are calculated
-    correctly. 
+    correctly.
+- Initial implementation for VirtualRibosome, constructs a single chain with
+  correct bond angles and residues on opposite sides of the backbone.
 ### Changed
 - Moved SequenceAligner into new package sequence
 - Protein and PolypeptideChain getSequence methods to use new sequence package
