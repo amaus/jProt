@@ -3,6 +3,7 @@ package com.aaronpmaus.jProt.protein;
 import com.aaronpmaus.jProt.sequence.*;
 
 import com.aaronpmaus.jMath.graph.*;
+import com.aaronpmaus.jMath.linearAlgebra.Vector3D;
 import com.aaronpmaus.jMath.transformations.Transformable;
 import com.aaronpmaus.jMath.transformations.Transformation;
 
@@ -190,6 +191,83 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>, Tra
   private Collection<Residue> getResidues(){
     return this.residues;
   }
+
+  /**
+  * Return the Phi Angle for a residue.
+  * <p>
+  * This residue and the previous residue must both be present.
+  * @param residueID the residue ID of the residue to return the omega angle of
+  * @return the phi angle - the angle about the (N) -- (CA) bond, in degrees
+  * @throws IllegalStateException if either residue at residueID or residueID-1 are not present
+  */
+  public double getPhiAngle(int residueID){
+    if(!containsResidue(residueID) || !containsResidue(residueID-1)){
+      return 1000;
+      //throw new IllegalStateException(String.format("Both residues %d and %d must be present\n"
+      //    , residueID, residueID-1));
+    }
+    // get the C from residueID-1 and the N, CA, and C from residueID.
+    Residue prev = getResidue(residueID-1);
+    Residue current = getResidue(residueID);
+    return calculateDihedralAngle(prev.getAtom("C").getCoordinates(),
+                                  current.getAtom("N").getCoordinates(),
+                                  current.getAtom("CA").getCoordinates(),
+                                  current.getAtom("C").getCoordinates());
+  }
+
+  /**
+  * Return the Psi Angle for a residue.
+  * <p>
+  * This residue and the next residue must both be present.
+  * @param residueID the residue ID of the residue to return the omega angle of
+  * @return the psi angle - the angle about the (CA) -- (C) bond, in degrees
+  * @throws IllegalStateException if either residue at residueID or residueID+1 are not present
+  */
+  public double getPsiAngle(int residueID){
+    if(!containsResidue(residueID) || !containsResidue(residueID+1)){
+      return 1000;
+    }
+    // get the N, CA and C from residueID and the N from residueID+1.
+    Residue current = getResidue(residueID);
+    Residue next = getResidue(residueID+1);
+    return calculateDihedralAngle(current.getAtom("N").getCoordinates(),
+                                  current.getAtom("CA").getCoordinates(),
+                                  current.getAtom("C").getCoordinates(),
+                                  next.getAtom("N").getCoordinates());
+  }
+
+  /**
+  * Return the Omega Angle for a residue.
+  * <p>
+  * This residue and the previous residue must both be present.
+  * @param residueID the residue ID of the residue to return the omega angle of
+  * @return the omega angle - the angle about the (C-1) -- (O) bond, in degrees
+  * @throws IllegalStateException if either residue at residueID or residueID-1 are not present
+  */
+  public double getOmegaAngle(int residueID){
+    if(!containsResidue(residueID) || !containsResidue(residueID-1)){
+      return 1000;
+    }
+    // get the CA and C from residueID-1 and the N and CA from residueID.
+    Residue prev = getResidue(residueID-1);
+    Residue current = getResidue(residueID);
+    /*return calculateDihedralAngle(prev.getAtom("CA").getCoordinates(),
+                                  prev.getAtom("C").getCoordinates(),
+                                  current.getAtom("N").getCoordinates(),
+                                  current.getAtom("CA").getCoordinates());*/
+    return calculateDihedralAngle(current.getAtom("CA").getCoordinates(),
+                                  current.getAtom("N").getCoordinates(),
+                                  prev.getAtom("C").getCoordinates(),
+                                  prev.getAtom("CA").getCoordinates());
+  }
+
+  /*
+  * Calculate and return the angle between the ab vector and the cd vector about the bc vector.
+  */
+  private static double calculateDihedralAngle(Vector3D a, Vector3D b, Vector3D c, Vector3D d){
+    return -1.0 * Vector3D.calculateDihedralAngle(a,b,c,d);
+  }
+
 
   @Override
   public void applyTransformation(Transformation t){

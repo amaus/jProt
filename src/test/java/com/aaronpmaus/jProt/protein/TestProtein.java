@@ -13,6 +13,8 @@ import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 
 import java.io.InputStream;
+import java.util.Scanner;
+import java.util.ArrayList;
 
 /*
  * @Test flags a method as a test method.
@@ -29,6 +31,7 @@ import java.io.InputStream;
 public class TestProtein{
   private Protein rop;
   private Protein m2j;
+  private ArrayList<Double[]> dihedrals;
 
   @Before
   public void setup(){
@@ -39,6 +42,21 @@ public class TestProtein{
     stream = TestProtein.class.getResourceAsStream("5m2j.pdb");
     //pdb = new PDBFileIO(stream);
     m2j = new PDBFileIO().readInPDBFile(stream, "5m2j");
+    dihedrals = readInDihedrals();
+  }
+
+  public ArrayList<Double[]> readInDihedrals(){
+    ArrayList<Double[]> dihedrals = new ArrayList<Double[]>();
+    InputStream stream = TestProtein.class.getResourceAsStream("1rop.dihedrals");
+    Scanner in = new Scanner(stream);
+    while(in.hasNext()){
+      String[] tokens = in.nextLine().split(",");
+      Double[] angles = {Double.parseDouble(tokens[0]),
+                         Double.parseDouble(tokens[1]),
+                         Double.parseDouble(tokens[2])};
+      dihedrals.add(angles);
+    }
+    return dihedrals;
   }
 
   @Test
@@ -51,11 +69,13 @@ public class TestProtein{
     assertTrue(rop.getNumAtoms() == 447);
 
     chain = m2j.getChain("A");
-    sequence = "SDKPVAHVVANPQAEGQLQWLNRRANALLANGVELRDNQLVVPSEGLYLIYSQVLFKGQGCPSTHVLLTHTISRIAVSYQTKVNLLSAIKSPCQPWYEPIYLGGVFQLEKGDRLSAEINRPDYLDFAESGQVYFGIIAL";
+    sequence = "SDKPVAHVVANPQAEGQLQWLNRRANALLANGVELRDNQLVVPSEGLYLIYSQVLFKGQGCPSTHVLLTHTISRIAVSYQTK"
+             + "VNLLSAIKSPCQPWYEPIYLGGVFQLEKGDRLSAEINRPDYLDFAESGQVYFGIIAL";
     assertTrue(chain.getSequence().toString().equals(sequence));
 
     chain = m2j.getChain("D");
-    sequence = "QVQLVESGGGLVQPGGSLRLSCAASGFTFSNYWMYWVRQAPGKGLEWVSEINTNGLITKYPDSVKGRFTISRDNAKNTLYLQMNSLKPEDTALYYCARSPSGFNRGQGTQVTVSS";
+    sequence = "QVQLVESGGGLVQPGGSLRLSCAASGFTFSNYWMYWVRQAPGKGLEWVSEINTNGLITKYPDSVKGRFTISRDNAKNTLYLQ"
+             + "MNSLKPEDTALYYCARSPSGFNRGQGTQVTVSS";
     assertTrue(chain.getSequence().toString().equals(sequence));
   }
 
@@ -183,5 +203,23 @@ public class TestProtein{
     assertTrue(Math.abs(atomFour.getCharge() - 2.0) < 0.000000001);
     assertTrue(Math.abs(atomFive.getCharge() - 3.0) < 0.000000001);
     assertTrue(Math.abs(atomSix.getCharge() - 3.0) < 0.000000001);
+  }
+
+  @Test
+  public void testDihedralAngles(){
+    PolypeptideChain chain = rop.getChain("A");
+    //System.out.printf("Res ID   | Omega   Phi     Psi\n");
+    for(int resID : chain.getResidueIDs()){
+      double omega = chain.getOmegaAngle(resID);
+      double phi = chain.getPhiAngle(resID);
+      double psi = chain.getPsiAngle(resID);
+      double expectedOmega = dihedrals.get(resID-1)[0];
+      double expectedPhi = dihedrals.get(resID-1)[1];
+      double expectedPsi = dihedrals.get(resID-1)[2];
+      //System.out.printf("Res %d    | %.2f  %.2f  %.2f\n", resID, omega, phi, psi);
+      assertTrue(Math.abs(omega - expectedOmega) < 0.001);
+      assertTrue(Math.abs(phi - expectedPhi) < 0.001);
+      assertTrue(Math.abs(psi - expectedPsi) < 0.001);
+    }
   }
 }
