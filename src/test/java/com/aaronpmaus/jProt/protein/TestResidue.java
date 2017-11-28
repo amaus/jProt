@@ -12,6 +12,8 @@ import org.junit.AfterClass;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 
+import java.util.ArrayList;
+
 /*
  * @Test flags a method as a test method.
  * @Before indicates that a method will be run before every
@@ -1125,5 +1127,53 @@ public class TestResidue{
     assertTrue(res.contains("1HG2"));
     assertTrue(res.contains("2HG2"));
     assertTrue(res.contains("3HG2"));
+  }
+
+  @Test
+  public void testRotateAboutBond(){
+    // arginine has the most bonds to rotate. rotate about each bond.
+    // Bond angles should be invariant
+    Residue res = new Residue("ARG",1);
+    ArrayList<Double> beforeAngles = getArginineAngles(res);
+    // rotate about all bonds. After each rotation, ensure that the angles haven't changed.
+    int inc = 30;
+    for(int i = 0; i <= 360; i += inc){
+      if(i != 0) res.rotateAboutBond("CA","CB",1);
+      ArrayList<Double> afterAngles = getArginineAngles(res);
+      assertAnglesInvariant(beforeAngles, afterAngles);
+      for(int j = 0; j <= 360; j += inc){
+        if(j != 0) res.rotateAboutBond("CB","CG",1);
+        afterAngles = getArginineAngles(res);
+        assertAnglesInvariant(beforeAngles, afterAngles);
+        for(int k = 0; k <= 360; k += inc){
+          if(k != 0) res.rotateAboutBond("CG","CD",1);
+          afterAngles = getArginineAngles(res);
+          assertAnglesInvariant(beforeAngles, afterAngles);
+          for(int l = 0; l <= 360; l += inc){
+            //System.out.printf("%d-%d-%d-%d\n",i,j,k,l);
+            if(l != 0) res.rotateAboutBond("CD","NE",1);
+            afterAngles = getArginineAngles(res);
+            assertAnglesInvariant(beforeAngles, afterAngles);
+          }
+        }
+      }
+    }
+  }
+
+  private void assertAnglesInvariant(ArrayList<Double> before, ArrayList<Double> after){
+    for(int i = 0; i < before.size(); i++){
+      //System.out.printf("%.10f - %.10f\n", before.get(i), after.get(i));
+      assertTrue(Math.abs(before.get(i) - after.get(i)) < 0.000000001);
+    }
+  }
+
+  private ArrayList<Double> getArginineAngles(Residue arg){
+    ArrayList<Double> angles = new ArrayList<Double>();
+    angles.add(arg.getAngle("N","CA","CB"));
+    angles.add(arg.getAngle("CA","CB","CG"));
+    angles.add(arg.getAngle("CB","CG","CD"));
+    angles.add(arg.getAngle("CG","CD","NE"));
+    angles.add(arg.getAngle("CD","NE","CZ"));
+    return angles;
   }
 }
