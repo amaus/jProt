@@ -44,6 +44,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   otherwise.
   - a test to TestProtein to check that all the angles for 1rop are calculated
     correctly.
+- setOmegaAngle(), setPhiAngle, and setPsiAngle() in PolypeptideChain
+- In Residue, the ability to get and set the angles for any of its Rotatable
+  bonds.
 - Initial implementation for VirtualRibosome, constructs a single chain with
   correct bond angles and residues on opposite sides of the backbone.
 ### Changed
