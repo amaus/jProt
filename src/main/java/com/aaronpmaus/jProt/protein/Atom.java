@@ -1,6 +1,8 @@
 package com.aaronpmaus.jProt.protein;
 
-import com.aaronpmaus.jMath.linearAlgebra.*;
+import com.aaronpmaus.jMath.linearAlgebra.Vector3D;
+import com.aaronpmaus.jMath.transformations.Transformable;
+import com.aaronpmaus.jMath.transformations.Transformation;
 
 /**
 * The classical building block of all matter, the Atom.
@@ -13,7 +15,7 @@ import com.aaronpmaus.jMath.linearAlgebra.*;
 * @version 0.6.0
 * @since 0.1.0
 */
-public class Atom implements Comparable<Atom> {
+public class Atom implements Comparable<Atom>, Transformable{
   // maxSerialNum is used for constructing Atoms when they haven't been read in from
   // a PDB file. Every atom is given (maxSerialNum+1)
   private static int maxSerialNum = 0;
@@ -22,7 +24,7 @@ public class Atom implements Comparable<Atom> {
   private final String element;
   private final String atomName;
   private final double radius;
-  private Vector itsCoordinates;
+  private Vector3D itsCoordinates;
   private int serialNumber;
   private double occupancy; // -1.0 means no value
   private double tempFactor; // -1.0 means no value
@@ -44,7 +46,7 @@ public class Atom implements Comparable<Atom> {
   */
   public Atom(String atomName, int serialNumber, double occupancy,
   double tempFactor, double charge){
-    this(atomName, serialNumber, occupancy, tempFactor, charge, "0.0", "0.0", "0.0");
+    this(atomName, serialNumber, occupancy, tempFactor, charge, 0.0, 0.0, 0.0);
   }
 
   /**
@@ -66,8 +68,8 @@ public class Atom implements Comparable<Atom> {
   * @since 0.6.1
   */
   public Atom(String atomName, int serialNumber, double occupancy,
-  double tempFactor, double charge, String x, String y, String z){
-    this.itsCoordinates = new Vector(x,y,z);
+  double tempFactor, double charge, double x, double y, double z){
+    this.itsCoordinates = new Vector3D(x,y,z);
     this.atomName = atomName.toUpperCase().trim();
     this.charge = charge;
     // If the serialNumber is -1, then this atom was built from one of the default amino acids.
@@ -116,7 +118,7 @@ public class Atom implements Comparable<Atom> {
   * @return a Vector containing the coordinates of this atom
   * @since 0.1.0
   */
-  public Vector getCoordinates(){
+  public Vector3D getCoordinates(){
     return itsCoordinates;
   }
 
@@ -212,6 +214,11 @@ public class Atom implements Comparable<Atom> {
   */
   public double distance(Atom otherAtom) {
     return getCoordinates().distance(otherAtom.getCoordinates());
+  }
+
+  @Override
+  public void applyTransformation(Transformation t){
+    this.itsCoordinates.applyTransformation(t);
   }
 
   /**

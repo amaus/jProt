@@ -62,9 +62,9 @@ public class Molecule {
     double mass = 0.0;
     for(Atom a: atoms){
       mass += a.getMass();
-      comX += a.getMass() * a.getCoordinates().getValue(0).doubleValue();
-      comY += a.getMass() * a.getCoordinates().getValue(1).doubleValue();
-      comZ += a.getMass() * a.getCoordinates().getValue(2).doubleValue();
+      comX += a.getMass() * a.getCoordinates().getValue(0);
+      comY += a.getMass() * a.getCoordinates().getValue(1);
+      comZ += a.getMass() * a.getCoordinates().getValue(2);
     }
     return new Vector(comX/mass, comY/mass, comZ/mass);
   }

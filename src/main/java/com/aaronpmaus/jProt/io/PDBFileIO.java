@@ -1,6 +1,9 @@
 package com.aaronpmaus.jProt.io;
 
 import com.aaronpmaus.jProt.protein.*;
+
+import com.aaronpmaus.jMath.linearAlgebra.Vector3D;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -11,6 +14,8 @@ import java.io.FileInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.IOException;
 
 /**
 * Provides the ability to read in and write out PDB Files. Every protein has its own
@@ -46,9 +51,9 @@ public class PDBFileIO{
   /**
   * Read in a PDB file and return a Protein. A PDBFileIO Object can only call this method once.
   * If you wish to read in multiple pdb file, you must instantiate a PDBFileIO object for each.
-  *
+  * <p>
   * This method does not close the InputStream. It is the clients job to do so.
-  *
+  * <p>
   * @param inputStream the inputStream to read from
   * @param pdbFileNameBase the base name of the PDB file (the part before the extension).
   * @return the Protein built from the information in this PDB
@@ -82,6 +87,45 @@ public class PDBFileIO{
       }
     }
     return constructProtein(pdbFileNameBase);
+  }
+
+  /**
+  * Write prot out to file.
+  * @param outputStream the OutputStreamWriter to write out to
+  * @param prot the Protein to write out to file.
+  * @throws IOException if an I/O error occurs
+  */
+  public void writeToPDB(OutputStreamWriter outputStream, Protein prot) throws IOException{
+    String chainID = null;
+    int resID = -1;
+    String resName = null;
+    int serialNum = -1;
+    for(PolypeptideChain chain : prot){
+      chainID = chain.getChainID();
+      for(Residue res : chain){
+        resID = res.getResidueID();
+        resName = res.getThreeLetterName();
+        for(Atom atom : res){
+          serialNum = atom.getSerialNumber();
+          String altLoc = " ";
+          String iCode = " ";
+          Vector3D loc = atom.getCoordinates();
+          AtomRecord atomRecord = new AtomRecord(serialNum, atom.getAtomName(), altLoc,
+              resName, chainID, resID, iCode, loc.getX().doubleValue(), loc.getY().doubleValue(),
+              loc.getZ().doubleValue(), atom.getOccupancy(), atom.getTempFactor(),
+              atom.getElement(), atom.getCharge());
+          outputStream.write(atomRecord.toString());
+          outputStream.flush();
+        }
+      }
+      String ter = String.format("%-6s%5d      %s %s%4s\n",
+          "TER", serialNum+1, resName, chainID, resID);
+      outputStream.write(ter);
+      outputStream.flush();
+    }
+    String end = "END\n";
+    outputStream.write(end);
+    outputStream.flush();
   }
 
   private static HashMap<String, ArrayList<AtomRecord>> readInDefaultResidues(){
@@ -217,9 +261,9 @@ public class PDBFileIO{
     String chainID = line.substring(21,22).trim();
     int resSeq = Integer.parseInt(line.substring(22,26).trim());
     String iCode = line.substring(26,27).trim(); // code for insertion of residues
-    String x = line.substring(30,38).trim();
-    String y = line.substring(38,46).trim();
-    String z = line.substring(46,54).trim();
+    double x = Double.parseDouble(line.substring(30,38).trim());
+    double y = Double.parseDouble(line.substring(38,46).trim());
+    double z = Double.parseDouble(line.substring(46,54).trim());
 
     // make sure there is a value for occupancy. if so, assign.
     // else, default value of -1.0.
@@ -402,9 +446,9 @@ public class PDBFileIO{
     private String chainID;
     private int resSeq;
     private String iCode;
-    private String x;
-    private String y;
-    private String z;
+    private double x;
+    private double y;
+    private double z;
     private double occupancy;
     private double tempFactor;
     private String element;
@@ -412,7 +456,7 @@ public class PDBFileIO{
 
     public AtomRecord(int serial, String atomName, String altLoc,
         String resName, String chainID, int resSeq,
-        String iCode, String x, String y, String z,
+        String iCode, double x, double y, double z,
         double occupancy, double tempFactor,
         String element, double charge){
 
@@ -439,14 +483,26 @@ public class PDBFileIO{
     public String getChainID(){ return this.chainID; }
     public int getResSeq(){ return this.resSeq; }
     public String getICode(){ return this.iCode; }
-    public String getX(){ return this.x; }
-    public String getY(){ return this.y; }
-    public String getZ(){ return this.z; }
+    public double getX(){ return this.x; }
+    public double getY(){ return this.y; }
+    public double getZ(){ return this.z; }
     public double getOccupancy(){ return this.occupancy; }
     public double getTempFactor(){ return this.tempFactor; }
     public String getElement(){ return this.element; }
     public double getCharge(){ return this.charge; }
+    public String getChargeString(){
+      int charge = (int)getCharge();
+      return ""+charge;
+    }
 
+    @Override
+    public String toString(){
+      String record = String.format("%-6s%5d %-4s%s%3s %s%4d%s   %8.3f%8.3f%8.3f%6.2f%6.2f          %2s%2s\n",
+          "ATOM", getSerial(), getAtomName(), getAltLoc(), getResName(), getChainID(),
+          getResSeq(), getICode(), getX(), getY(), getZ(), getOccupancy(), getTempFactor(),
+          getElement(), getChargeString());
+      return record;
+    }
   }
 
   private static class SSBondRecord{

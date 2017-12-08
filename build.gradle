@@ -96,8 +96,8 @@ configurations {
 dependencies {
     deployerJars "org.apache.maven.wagon:wagon-ssh:2.2"
     testCompile group: 'junit', name: 'junit', version: '4.12'
-    compile group: 'com.aaronpmaus.jMath', name: 'jMath', version: '0.11.0', transitive: true
-    runtime group: 'com.aaronpmaus.jMath', name: 'jMath', version: '0.11.0', transitive: true
+    compile group: 'com.aaronpmaus.jMath', name: 'jMath', version: '0.12.3', transitive: true
+    runtime group: 'com.aaronpmaus.jMath', name: 'jMath', version: '0.12.3', transitive: true
 }
 
 // Creates scripts for entry points
@@ -162,3 +162,4 @@ jar.doLast {
 
 // Call this for each Main class you want to expose with an app script
 createScript(project, 'com.aaronpmaus.jProt.executables.JProtMetrics', 'JProtMetrics')
+createScript(project, 'com.aaronpmaus.jProt.executables.AlignSequences', 'AlignSequences')

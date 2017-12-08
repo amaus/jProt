@@ -25,6 +25,39 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   --gdt-plot and prints out the percent of residues for each threshold in the
   range 0.5 to 10.0 in 0.5 increments. This data can be used to produce
   GDT Plots like those on prediction center.
+- package sequence
+  -  Class Sequence w/ subclasses ProteinSequence, DNASequence, RNASequence
+    - sequences of subclass types can be aligned
+  - Class Alignment
+    - Holds the results of aligning two sequences
+- Executable AlignSequences that can align the sequences of 2 PDBs or FASTA
+  files.
+- Constructor to Residue that takes a char to indicate which amino acid to build
+- Feature to PDDFileIO: can now write out bare bones PDB files.
+- Residue of Type UNK to residue class and templates.
+  - 3 letter name: UNK, 1 letter name: X, full name Unknown
+  - Template Coordinates and bonds: same as Alanine
+- applyTransformation() methods to Protein, PolypeptideChain, Residue, and Atom
+  - applyTransformation() naively applies the transformation to all components
+    of that class. Eg, when called on Protein, it calls the applyTransformation
+    for each PolypeptideChain, which does the same for every Residue, which then
+    applies the transformation to each Atom - whose coordinates are then
+    transformed.
+- getOmegaAngle(), getPhiAngle(), and getPsiAngle() in PolypeptideChain. Each
+  takes a residueID and returns the angle if it can be calculated or 1000
+  otherwise.
+  - a test to TestProtein to check that all the angles for 1rop are calculated
+    correctly.
+- setOmegaAngle(), setPhiAngle, and setPsiAngle() in PolypeptideChain
+- In Residue, the ability to get and set the angles for any of its Rotatable
+  bonds.
+- Initial implementation for VirtualRibosome, constructs a single chain with
+  correct bond angles and residues on opposite sides of the backbone.
+### Changed
+- Moved SequenceAligner into new package sequence
+- Protein and PolypeptideChain getSequence methods to use new sequence package
+- All structure classes are now transformable.
+- Atom constructors now take doubles for the coordinates rather than Strings.
 
 ## [0.6.4] 2017-10-27
 ### Fixed

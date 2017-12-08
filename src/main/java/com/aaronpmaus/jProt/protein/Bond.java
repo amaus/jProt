@@ -7,8 +7,8 @@ import java.lang.IllegalArgumentException;
  * @since 0.6.0
 */
 public class Bond {
-    private Atom a1;
-    private Atom a2;
+    private final Atom ATOM_ONE;
+    private final Atom ATOM_TWO;
     private int bondStrength; // single, double, triple bond, etc.
 
     /**
@@ -31,11 +31,11 @@ public class Bond {
         // Use an ordering when assigning atoms into the bond.
         // The smaller atom goes into atomOne and the larger into atomTwo.
         if(a1.compareTo(a2) < 0){
-            this.a1 = a1;
-            this.a2 = a2;
+            this.ATOM_ONE = a1;
+            this.ATOM_TWO = a2;
         } else if(a1.compareTo(a2) > 0){
-            this.a2 = a1;
-            this.a1 = a2;
+            this.ATOM_TWO = a1;
+            this.ATOM_ONE = a2;
         } else {
             throw new IllegalArgumentException("Atoms added to a bond must be different.");
         }
@@ -63,7 +63,7 @@ public class Bond {
      * @return one of the Atoms in this bond.
     */
     public Atom getAtomOne(){
-        return this.a1;
+        return this.ATOM_ONE;
     }
 
     /**
@@ -71,7 +71,7 @@ public class Bond {
      * @return  the other Atom in this bond.
     */
     public Atom getAtomTwo(){
-        return this.a2;
+        return this.ATOM_TWO;
     }
 
     /**
@@ -80,10 +80,19 @@ public class Bond {
      * @return true if atom is in this bond
     */
     public boolean containsAtom(Atom atom){
-        if(getAtomOne().equals(atom) || getAtomTwo().equals(atom)){
-            return true;
-        }
-        return false;
+      return containsAtom(atom.getAtomName());
+    }
+
+    /**
+    * @param atomName the name of an atom to check for
+    * @return true if an atom with this name in in this bond, false otherwise
+    */
+    public boolean containsAtom(String atomName){
+      if(getAtomOne().getAtomName().equals(atomName)
+          || getAtomTwo().getAtomName().equals(atomName)){
+        return true;
+      }
+      return false;
     }
 
     public boolean containsHydrogen(){

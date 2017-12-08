@@ -12,6 +12,9 @@ import org.junit.AfterClass;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /*
  * @Test flags a method as a test method.
  * @Before indicates that a method will be run before every
@@ -1125,5 +1128,92 @@ public class TestResidue{
     assertTrue(res.contains("1HG2"));
     assertTrue(res.contains("2HG2"));
     assertTrue(res.contains("3HG2"));
+  }
+
+  @Test
+  public void testSetRotatableBondAngle(){
+    Residue res = new Residue("ARG",1);
+    res.setRotatableBondAngle("CA", "CB", 30);
+    assertTrue(Math.abs(res.getDihedralAngle("CA", "CB") - 30) < 0.0000000001);
+
+    res.setRotatableBondAngle("CB", "CG", 60);
+    assertTrue(Math.abs(res.getDihedralAngle("CB", "CG") - 60) < 0.0000000001);
+
+    res.setRotatableBondAngle("CG", "CD", 90);
+    assertTrue(Math.abs(res.getDihedralAngle("CG", "CD") - 90) < 0.0000000001);
+
+    res.setRotatableBondAngle("CD", "NE", 120);
+    assertTrue(Math.abs(res.getDihedralAngle("CD", "NE") - 120) < 0.0000000001);
+
+  }
+
+  @Test
+  public void testDihedralRotationsLeaveBondAnglesInvariant(){
+    // arginine has the most dihedrals to rotate. rotate about each bond.
+    // Bond angles should be invariant
+    Residue res = new Residue("ARG",1);
+    ArrayList<Double> beforeAngles = getArginineAngles(res);
+    // rotate about all bonds. After each rotation, ensure that the angles haven't changed.
+    int inc = 30;
+    for(int i = 0; i <= 360; i += inc){
+      if(i != 0) res.rotateAboutBond("CA","CB",1);
+      ArrayList<Double> afterAngles = getArginineAngles(res);
+      assertAnglesInvariant(beforeAngles, afterAngles);
+      for(int j = 0; j <= 360; j += inc){
+        if(j != 0) res.rotateAboutBond("CB","CG",1);
+        afterAngles = getArginineAngles(res);
+        assertAnglesInvariant(beforeAngles, afterAngles);
+        for(int k = 0; k <= 360; k += inc){
+          if(k != 0) res.rotateAboutBond("CG","CD",1);
+          afterAngles = getArginineAngles(res);
+          assertAnglesInvariant(beforeAngles, afterAngles);
+          for(int l = 0; l <= 360; l += inc){
+            //System.out.printf("%d-%d-%d-%d\n",i,j,k,l);
+            if(l != 0) res.rotateAboutBond("CD","NE",1);
+            afterAngles = getArginineAngles(res);
+            assertAnglesInvariant(beforeAngles, afterAngles);
+          }
+        }
+      }
+    }
+  }
+
+  @Test
+  public void testGetRotatableBonds(){
+    Residue res = new Residue("ARG",1);
+    List<Bond> bonds = res.getRotatableBonds();
+    assertTrue(bonds.size() == 4);
+    Bond bond1 = bonds.get(0);
+    Bond bond2 = bonds.get(1);
+    Bond bond3 = bonds.get(2);
+    Bond bond4 = bonds.get(3);
+    assertEquals(bond1.getAtomOne().getAtomName(), "CA");
+    assertEquals(bond1.getAtomTwo().getAtomName(), "CB");
+
+    assertEquals(bond2.getAtomOne().getAtomName(), "CB");
+    assertEquals(bond2.getAtomTwo().getAtomName(), "CG");
+
+    assertEquals(bond3.getAtomOne().getAtomName(), "CG");
+    assertEquals(bond3.getAtomTwo().getAtomName(), "CD");
+
+    assertEquals(bond4.getAtomOne().getAtomName(), "CD");
+    assertEquals(bond4.getAtomTwo().getAtomName(), "NE");
+  }
+
+  private void assertAnglesInvariant(ArrayList<Double> before, ArrayList<Double> after){
+    for(int i = 0; i < before.size(); i++){
+      //System.out.printf("%.10f - %.10f\n", before.get(i), after.get(i));
+      assertTrue(Math.abs(before.get(i) - after.get(i)) < 0.000000001);
+    }
+  }
+
+  private ArrayList<Double> getArginineAngles(Residue arg){
+    ArrayList<Double> angles = new ArrayList<Double>();
+    angles.add(arg.getAngle("N","CA","CB"));
+    angles.add(arg.getAngle("CA","CB","CG"));
+    angles.add(arg.getAngle("CB","CG","CD"));
+    angles.add(arg.getAngle("CG","CD","NE"));
+    angles.add(arg.getAngle("CD","NE","CZ"));
+    return angles;
   }
 }

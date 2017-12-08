@@ -1,7 +1,11 @@
 package com.aaronpmaus.jProt.protein;
 
 import com.aaronpmaus.jProt.io.*;
+import com.aaronpmaus.jProt.sequence.*;
+
 import com.aaronpmaus.jMath.graph.*;
+import com.aaronpmaus.jMath.transformations.Transformable;
+import com.aaronpmaus.jMath.transformations.Transformation;
 
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -12,6 +16,10 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+
 
 /**
 * A Protein is composed of PolypeptideChains which are composed of Residues. Proteins can either be
@@ -34,7 +42,7 @@ import java.io.InputStream;
 * @version 0.6.0
 * @since 0.6.0
 */
-public class Protein implements Iterable<PolypeptideChain>{
+public class Protein implements Iterable<PolypeptideChain>, Transformable{
   private ArrayList<PolypeptideChain> chains;
   private String proteinName;
   private ArrayList<Bond> disulfideBonds;
@@ -205,12 +213,12 @@ public class Protein implements Iterable<PolypeptideChain>{
   *
   * @return a String containing the single letter residue names with no spaces
   */
-  public String getSequence(){
+  public ProteinSequence getSequence(){
     String seq = "";
     for(PolypeptideChain chain : this.chains){
-      seq += chain.getSequence();
+      seq += chain.getSequence().getSequenceString();
     }
-    return seq;
+    return new ProteinSequence(seq);
   }
 
   /**
@@ -329,6 +337,25 @@ public class Protein implements Iterable<PolypeptideChain>{
   */
   public boolean hydrogensEnabled(){
     return this.hydrogensEnabled;
+  }
+
+  /**
+  * Write this protein out to a PDB file.
+  * @param fileName the name of the file to write out to, will create new file if doesn't exist,
+  * will override if does exist.
+  * @throws IOException if the output file can not be opened
+  */
+  public void writeToFile(String fileName) throws IOException{
+    OutputStreamWriter outputStream = new FileWriter(fileName);
+    this.pdbIO.writeToPDB(outputStream, this);
+    outputStream.close();
+  }
+
+  @Override
+  public void applyTransformation(Transformation t){
+    for(PolypeptideChain chain : this ){
+      chain.applyTransformation(t);
+    }
   }
 
   @Override

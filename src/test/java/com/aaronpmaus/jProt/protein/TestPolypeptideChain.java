@@ -2,6 +2,7 @@ package com.aaronpmaus.jProt.protein;
 
 import com.aaronpmaus.jProt.protein.*;
 import com.aaronpmaus.jProt.io.*;
+import com.aaronpmaus.jProt.sequence.*;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -63,7 +64,7 @@ public class TestPolypeptideChain{
 
   @Test
   public void testGetSequence(){
-    assertEquals(chain.getSequence(), "IAMSTARSTFF");
+    assertEquals(chain.getSequence().toString(), "IAMSTARSTFF");
   }
 
   @Test
@@ -117,5 +118,29 @@ public class TestPolypeptideChain{
     for(Bond bond : bonds){
       assertFalse(bond.containsHydrogen());
     }
+  }
+
+  @Test
+  public void testDihedralAngles(){
+    Protein prot = VirtualRibosome.synthesizeProtein(new ProteinSequence("IAMSTARSTFF"));
+    PolypeptideChain chain = prot.getChain("A");
+
+    assertTrue(Math.abs(Math.abs(chain.getOmegaAngle(2)) - 180.0) < 0.00000001);
+    chain.setOmegaAngle(2, 30.0);
+    assertTrue(Math.abs(chain.getOmegaAngle(2) - 30.0) < 0.00000001);
+
+    assertTrue(Math.abs(Math.abs(chain.getPhiAngle(2)) - 180.0) < 0.00000001);
+    chain.setPhiAngle(2, 60.0);
+    assertTrue(Math.abs(chain.getPhiAngle(2) - 60.0) < 0.00000001);
+
+    assertTrue(Math.abs(Math.abs(chain.getPsiAngle(2)) - 180.0) < 0.00000001);
+    chain.setPsiAngle(2, 90.0);
+    assertTrue(Math.abs(chain.getPsiAngle(2) - 90.0) < 0.00000001);
+
+    chain.setPsiAngle(2, 180.0);
+    assertTrue(Math.abs(chain.getPsiAngle(2) - 180.0) < 0.00000001);
+
+    chain.setPsiAngle(2, -90.0);
+    assertTrue(Math.abs(chain.getPsiAngle(2) - -90.0) < 0.00000001);
   }
 }
