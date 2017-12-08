@@ -13,6 +13,7 @@ import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /*
  * @Test flags a method as a test method.
@@ -1130,8 +1131,25 @@ public class TestResidue{
   }
 
   @Test
-  public void testRotateAboutBond(){
-    // arginine has the most bonds to rotate. rotate about each bond.
+  public void testSetRotatableBondAngle(){
+    Residue res = new Residue("ARG",1);
+    res.setRotatableBondAngle("CA", "CB", 30);
+    assertTrue(Math.abs(res.getDihedralAngle("CA", "CB") - 30) < 0.0000000001);
+
+    res.setRotatableBondAngle("CB", "CG", 60);
+    assertTrue(Math.abs(res.getDihedralAngle("CB", "CG") - 60) < 0.0000000001);
+
+    res.setRotatableBondAngle("CG", "CD", 90);
+    assertTrue(Math.abs(res.getDihedralAngle("CG", "CD") - 90) < 0.0000000001);
+
+    res.setRotatableBondAngle("CD", "NE", 120);
+    assertTrue(Math.abs(res.getDihedralAngle("CD", "NE") - 120) < 0.0000000001);
+
+  }
+
+  @Test
+  public void testDihedralRotationsLeaveBondAnglesInvariant(){
+    // arginine has the most dihedrals to rotate. rotate about each bond.
     // Bond angles should be invariant
     Residue res = new Residue("ARG",1);
     ArrayList<Double> beforeAngles = getArginineAngles(res);
@@ -1158,6 +1176,28 @@ public class TestResidue{
         }
       }
     }
+  }
+
+  @Test
+  public void testGetRotatableBonds(){
+    Residue res = new Residue("ARG",1);
+    List<Bond> bonds = res.getRotatableBonds();
+    assertTrue(bonds.size() == 4);
+    Bond bond1 = bonds.get(0);
+    Bond bond2 = bonds.get(1);
+    Bond bond3 = bonds.get(2);
+    Bond bond4 = bonds.get(3);
+    assertEquals(bond1.getAtomOne().getAtomName(), "CA");
+    assertEquals(bond1.getAtomTwo().getAtomName(), "CB");
+
+    assertEquals(bond2.getAtomOne().getAtomName(), "CB");
+    assertEquals(bond2.getAtomTwo().getAtomName(), "CG");
+
+    assertEquals(bond3.getAtomOne().getAtomName(), "CG");
+    assertEquals(bond3.getAtomTwo().getAtomName(), "CD");
+
+    assertEquals(bond4.getAtomOne().getAtomName(), "CD");
+    assertEquals(bond4.getAtomTwo().getAtomName(), "NE");
   }
 
   private void assertAnglesInvariant(ArrayList<Double> before, ArrayList<Double> after){

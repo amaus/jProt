@@ -9,10 +9,14 @@ import com.aaronpmaus.jProt.io.PDBFileIO;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Scanner;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Iterator;
+import java.util.Comparator;
 
 import java.io.File;
 import java.io.InputStream;
@@ -37,15 +41,17 @@ public class Residue implements Iterable<Atom>, Transformable{
   private static int maxResidueID = 0;
   private boolean hydrogensEnabled = false;
   private boolean hasRotatableBonds = false;
+  private boolean isCarboxylTerminus = false;
 
   // valid keys are the atomNames: CA, CB, CD, CD1, CD2, CE, C, O, N, etc...
   private HashMap<String, Atom> heavyAtoms;
   private HashMap<String, Atom> hydrogens;
   private HashMap<String, ArrayList<String>> heavyAtomHydrogens;
   private Atom carboxylOxygen;
-  private HashSet<Bond> bonds;
+  private ArrayList<Bond> bonds;
+  private ArrayList<Bond> rotatableBonds;
   // bonds_hydrogens: unusual var name format to avoid confusion with hydrogen bonds
-  private HashSet<Bond> bondsToHydrogens;
+  private ArrayList<Bond> bondsToHydrogens;
   // A list of atom types, every consecutive 4 define a dihedral angle
   // Eg.
   // N CA CB CG CD NE CZ
@@ -115,13 +121,21 @@ public class Residue implements Iterable<Atom>, Transformable{
     }
     Residue.maxResidueID = Math.max(this.residueID, Residue.maxResidueID);
     this.heavyAtoms = new HashMap<String, Atom>();
-    this.bonds = new HashSet<Bond>();
+    this.bonds = new ArrayList<Bond>();
     this.hydrogens = new HashMap<String, Atom>();
-    this.bondsToHydrogens = new HashSet<Bond>();
+    this.bondsToHydrogens = new ArrayList<Bond>();
     this.definedDihedralAngles = new ArrayList<String>();
     this.atomsToRotate = new ArrayList<String>();
+    this.atomsToRotate.add("N");
+    this.atomsToRotate.add("CA");
+    this.atomsToRotate.add("C");
+    this.atomsToRotate.add("O");
+    this.atomsToRotate.add("OXT");
     this.heavyAtomHydrogens = new HashMap<String, ArrayList<String>>();
+    this.rotatableBonds = new ArrayList<Bond>();
     initializeAminoAcid(this.threeLetterName+".dat", atoms);
+    Collections.sort(this.bonds, new ResidueBondComparator());
+    Collections.sort(this.bondsToHydrogens, new ResidueBondComparator());
     this.hydrogensEnabled = false;
   }
 
@@ -131,94 +145,98 @@ public class Residue implements Iterable<Atom>, Transformable{
   // constructor resolve all incomplete residues after they've all been added.
   private void initializeAminoAcid(String dataFileName, Collection<Atom> atoms){
     this.residueComplete = true;
-    // if atoms is null, build amino acid from default values
-    if(atoms == null){
-
-    } else {
-      if(atoms.isEmpty()){
-        throw new IllegalArgumentException("Collection of Atoms must not be empty");
+    if(atoms.isEmpty()){
+      throw new IllegalArgumentException("Collection of Atoms must not be empty");
+    }
+    // use the atoms passed in
+    for(Atom a: atoms){
+      //System.out.printf("Adding %s to residue atoms\n",a.getAtomName());
+      if(a.getElement().equals("H")){
+        this.hydrogens.put(a.getAtomName(), a);
+      } else if(a.getAtomName().equals("OXT")){
+        this.carboxylOxygen = a;
+      } else {
+        this.heavyAtoms.put(a.getAtomName(), a);
       }
-      // use the atoms passed in
-      for(Atom a: atoms){
-        //System.out.printf("Adding %s to residue atoms\n",a.getAtomName());
-        if(a.getElement().equals("H")){
-          this.hydrogens.put(a.getAtomName(), a);
-        } else if(a.getAtomName().equals("OXT")){
-          this.carboxylOxygen = a;
+    }
+    // read in residue data file. use it to add all main bonds.
+    // Then add all hydrogens
+    InputStream stream = Residue.class.getResourceAsStream(dataFileName);
+    Scanner in = new Scanner(stream);
+    boolean readingInMainBonds = false;
+    boolean readingInHydrogens = false;
+    while(in.hasNext()){
+      String line = in.nextLine().trim();
+      //System.out.println(line);
+      String firstChar = line.substring(0,1);
+      if(line.equals("!main bonds")){
+        readingInMainBonds = true;
+      }
+      if(line.equals("!hydrogens")){
+        readingInMainBonds = false;
+        readingInHydrogens = true;
+      }
+      if(line.equals("!defined dihedral angles")){
+        readingInMainBonds = false;
+        readingInHydrogens = false;
+        hasRotatableBonds = true;
+        line = in.nextLine().trim();
+        String[] atomTypes = line.split("\\s+");
+        for(String atomType : atomTypes){
+          definedDihedralAngles.add(atomType);
+        }
+        continue;
+      }
+      if(line.equals("!atom types")){
+        readingInMainBonds = false;
+        readingInHydrogens = false;
+      }
+      if((!firstChar.equals("!")) && readingInMainBonds){
+        String[] tokens = line.trim().split("\\s+");
+        String atomOne = tokens[0].trim();
+        String atomTwo = tokens[1].trim();
+        //System.out.printf("[%s-%s]\n",atomOne, atomTwo);
+        // TODO specify single or double bond depending on
+        // atoms and residue
+        if(atomTwo.equals("OXT")){
+          // do nothing. The bond will be added if this residue is setAsCarboxylTerminus()
         } else {
-          this.heavyAtoms.put(a.getAtomName(), a);
+          residueComplete = addBond(atomOne, atomTwo) & residueComplete;
+        }
+        if(!atomOne.equals("N") && !atomOne.equals("CA") && !atomOne.equals("C")
+            && !atomOne.equals("O") && !atomOne.equals("OXT")){
+
+          if(!this.atomsToRotate.contains(atomOne)){
+            this.atomsToRotate.add(atomOne);
+          }
+        }
+        if(!atomTwo.equals("N") && !atomTwo.equals("CA") && !atomTwo.equals("C")
+            && !atomTwo.equals("O") && !atomTwo.equals("OXT")){
+
+          if(!this.atomsToRotate.contains(atomTwo)){
+            this.atomsToRotate.add(atomTwo);
+          }
         }
       }
-      // read in residue data file. use it to add all main bonds.
-      // Then add all hydrogens
-      InputStream stream = Residue.class.getResourceAsStream(dataFileName);
-      Scanner in = new Scanner(stream);
-      boolean readingInMainBonds = false;
-      boolean readingInHydrogens = false;
-      while(in.hasNext()){
-        String line = in.nextLine().trim();
-        //System.out.println(line);
-        String firstChar = line.substring(0,1);
-        if(line.equals("!main bonds")){
-          readingInMainBonds = true;
+      if((!firstChar.equals("!")) && readingInHydrogens){
+        String[] tokens = line.trim().split("\\s+");
+        String heavyAtom = tokens[0];
+        String hydrogen = tokens[1];
+        addBondToHydrogen(heavyAtom, hydrogen);
+        if(!this.atomsToRotate.contains(hydrogen)){
+          int index = this.atomsToRotate.indexOf(heavyAtom);
+          this.atomsToRotate.add(index+1, hydrogen);
         }
-        if(line.equals("!hydrogens")){
-          readingInMainBonds = false;
-          readingInHydrogens = true;
+        if(heavyAtomHydrogens.containsKey(heavyAtom)){
+          heavyAtomHydrogens.get(heavyAtom).add(hydrogen);
+        } else {
+          heavyAtomHydrogens.put(heavyAtom, new ArrayList<String>());
         }
-        if(line.equals("!defined dihedral angles")){
-          readingInMainBonds = false;
-          readingInHydrogens = false;
-          hasRotatableBonds = true;
-          line = in.nextLine().trim();
-          String[] atomTypes = line.split("\\s+");
-          for(String atomType : atomTypes){
-            definedDihedralAngles.add(atomType);
-          }
-          continue;
-        }
-        if(line.equals("!atom types")){
-          readingInMainBonds = false;
-          readingInHydrogens = false;
-        }
-        if((!firstChar.equals("!")) && readingInMainBonds){
-          String[] tokens = line.trim().split("\\s+");
-          String atomOne = tokens[0].trim();
-          String atomTwo = tokens[1].trim();
-          //System.out.printf("[%s-%s]\n",atomOne, atomTwo);
-          // TODO specify single or double bond depending on
-          // atoms and residue
-          if(atomTwo.equals("OXT")){
-            // do nothing. The bond will be added if this residue is setAsCarboxylTerminus()
-          } else {
-            residueComplete = addBond(atomOne, atomTwo) & residueComplete;
-          }
-          if(!atomOne.equals("N") && !atomOne.equals("CA") && !atomOne.equals("C")
-              && !atomOne.equals("O") && !atomOne.equals("OXT")){
-
-            if(!this.atomsToRotate.contains(atomOne)){
-              this.atomsToRotate.add(atomOne);
-            }
-          }
-          if(!atomTwo.equals("N") && !atomTwo.equals("CA") && !atomTwo.equals("C")
-              && !atomTwo.equals("O") && !atomTwo.equals("OXT")){
-
-            if(!this.atomsToRotate.contains(atomTwo)){
-              this.atomsToRotate.add(atomTwo);
-            }
-          }
-        }
-        if((!firstChar.equals("!")) && readingInHydrogens){
-          String[] tokens = line.trim().split("\\s+");
-          String heavyAtom = tokens[0];
-          String hydrogen = tokens[1];
-          addBondToHydrogen(heavyAtom, hydrogen);
-          if(heavyAtomHydrogens.containsKey(heavyAtom)){
-            heavyAtomHydrogens.get(heavyAtom).add(hydrogen);
-          } else {
-            heavyAtomHydrogens.put(heavyAtom, new ArrayList<String>());
-          }
-        }
+      }
+    }
+    for(Bond bond : this.getBonds()){
+      if(isRotatableBond(bond.getAtomOne().getAtomName(), bond.getAtomTwo().getAtomName())){
+        this.rotatableBonds.add(bond);
       }
     }
   }
@@ -381,10 +399,18 @@ public class Residue implements Iterable<Atom>, Transformable{
   }
 
   /**
+  * @return a List of the rotatable Bonds in this residue
+  */
+  public List<Bond> getRotatableBonds(){
+    return this.rotatableBonds;
+  }
+
+  /**
   * Set this Residue as the Carboxyl Terminus. This adds the OXT atom to this residue.
   */
   public void setAsCarboxylTerminus(){
     if(carboxylOxygen != null){
+      this.isCarboxylTerminus = true;
       this.heavyAtoms.put(carboxylOxygen.getAtomName(), carboxylOxygen);
       if(contains("C")){
         Atom carbon = getAtom("C");
@@ -393,13 +419,21 @@ public class Residue implements Iterable<Atom>, Transformable{
     }
   }
 
+  /**
+  * @return true if this residue is the carboxyl terminus
+  */
+  public boolean isCarboxylTerminus(){
+    return this.isCarboxylTerminus;
+  }
+
   private boolean addBond(String atomNameOne, String atomNameTwo){
     return addBond(atomNameOne, atomNameTwo,1);
   }
 
   private boolean addBond(String atomNameOne, String atomNameTwo, int bondStrength){
     if(contains(atomNameOne) && contains(atomNameTwo)){
-      this.bonds.add(new Bond(getAtom(atomNameOne), getAtom(atomNameTwo), bondStrength));
+      Bond bond = new Bond(getAtom(atomNameOne), getAtom(atomNameTwo), bondStrength);
+      this.bonds.add(bond);
       return true;
     }
     return false;
@@ -476,6 +510,48 @@ public class Residue implements Iterable<Atom>, Transformable{
   }
 
   /**
+  * Given one of the rotatable bonds, set its dihedral angle to degrees.
+  * @param bond a rotatable bond in this residue
+  * @param degrees the degrees to get the angle to
+  * @throws IllegalArgumentException if the bond is not one of the rotatable bonds
+  * @since 0.7.0
+  */
+  public void setRotatableBondAngle(Bond bond, double degrees){
+    setRotatableBondAngle(bond.getAtomOne().getAtomName(), bond.getAtomTwo().getAtomName(), degrees);
+  }
+
+  /**
+  * Given two atom names that specify a rotatable bond, set that bond's dihedral angle as specified.
+  * <p>
+  * The order the atoms are passed in does not matter.
+  * @param atomOne one of the atoms in the bond
+  * @param atomTwo the other atom in the bond
+  * @param degrees the degrees to get the angle to
+  * @throws IllegalArgumentException if the bond is not one of the rotatable bonds
+  * @since 0.7.0
+  */
+  public void setRotatableBondAngle(String atomOne, String atomTwo, double degrees){
+    double currentAngle = getDihedralAngle(atomOne, atomTwo);
+    double delta = degrees - currentAngle;
+    rotateAboutBond(atomOne, atomTwo, delta);
+  }
+
+  /**
+  * Rotate a residue about one of its rotatable bonds, one of its defined dihedral angles.
+  * <p>
+  * All atoms after that bond are transformed.
+  * @param bond the bond to rotate about
+  * @param degrees the number of degrees to rotate the residue
+  * @throws IllegalStateException if either atomOne or atomTwo are missing from this residue
+  * @throws IllegalArgumentException if the atomOne and atomTwo are not a rotatable bond in this
+  * residue
+  * @since 0.7.0
+  */
+  public void rotateAboutBond(Bond bond, double degrees){
+    rotateAboutBond(bond.getAtomOne().getAtomName(), bond.getAtomTwo().getAtomName(), degrees);
+  }
+
+  /**
   * Rotate a residue about one of its rotatable bonds, one of its defined dihedral angles.
   * <p>
   * All atoms after that bond are transformed.
@@ -483,6 +559,9 @@ public class Residue implements Iterable<Atom>, Transformable{
   * @param atomTwo the name of the second atom in the bond, the atom further from the backbone
   * @param degrees the number of degrees to rotate the residue
   * @throws IllegalStateException if either atomOne or atomTwo are missing from this residue
+  * @throws IllegalArgumentException if the atomOne and atomTwo are not a rotatable bond in this
+  * residue
+  * @since 0.7.0
   */
   public void rotateAboutBond(String atomOne, String atomTwo, double degrees){
     if(!contains(atomOne)){
@@ -492,6 +571,10 @@ public class Residue implements Iterable<Atom>, Transformable{
     if(!contains(atomTwo)){
       throw new IllegalStateException(String.format("Residue %d: Can't rotate about %s-%s bond,"
           + "missing atom %s", getResidueID(), atomOne, atomTwo, atomTwo));
+    }
+    if(!isRotatableBond(atomOne, atomTwo)){
+      throw new IllegalArgumentException(String.format("%s-%s are not a rotable bond in %s",
+          atomOne, atomTwo, this.getThreeLetterName()));
     }
     // ensure that the atoms are in the correct order, the second atom further from the backbone
     int indexOfAtomOne = this.definedDihedralAngles.indexOf(atomOne);
@@ -513,6 +596,7 @@ public class Residue implements Iterable<Atom>, Transformable{
         this.getAtom(atomName).applyTransformation(t);
       }
     }
+    /*
     // also rotate all the hydrogens bonded to the atoms that have just been transformed
     for(String atomName : atomsToTransform){
       if(heavyAtomHydrogens.containsKey(atomName)){
@@ -524,7 +608,31 @@ public class Residue implements Iterable<Atom>, Transformable{
           }
         }
       }
+    }*/
+  }
+
+  private boolean isRotatableBond(String atomOne, String atomTwo){
+    // if the atoms of the bond are not in definedDihedralAngles, then they are not a rotatable bond
+    if(!this.definedDihedralAngles.contains(atomOne)
+        || !this.definedDihedralAngles.contains(atomTwo)){
+      return false;
     }
+    int indexOfAtomOne = this.definedDihedralAngles.indexOf(atomOne);
+    int indexOfAtomTwo = this.definedDihedralAngles.indexOf(atomTwo);
+    // the first and last elements in definedDihedralAngles are not rotatable bond atoms
+    String first = this.definedDihedralAngles.get(0);
+    String last = this.definedDihedralAngles.get(this.definedDihedralAngles.size()-1);
+    // if the atoms are either the first or last atoms in definedDihedralAngles, then they are not
+    // a rotable bond
+    if(atomOne.equals(first) || atomTwo.equals(first)
+        || atomOne.equals(last) || atomTwo.equals(last)){
+      return false;
+    }
+    // if they are not consecutive in definedDihedralAngles, then they are not a rotatable bond
+    if(Math.abs(indexOfAtomOne - indexOfAtomTwo) != 1){
+      return false;
+    }
+    return true;
   }
 
   private Collection<String> getAtomsAfterBond(String secondBondAtom){
@@ -542,6 +650,7 @@ public class Residue implements Iterable<Atom>, Transformable{
   * @param atomTwo the name of the second atom in the bond, the atom further from the backbone
   * @return the degree value of the dihedral angle about this bond, or 1000 if any of the atoms
   * required to calculate the angle are missing.
+  * @since 0.7.0
   */
   public double getDihedralAngle(String atomOne, String atomTwo){
     try{
@@ -558,7 +667,7 @@ public class Residue implements Iterable<Atom>, Transformable{
       Vector3D b = this.getAtom(atomOne).getCoordinates();
       Vector3D c = this.getAtom(atomTwo).getCoordinates();
       Vector3D d = this.getAtom(this.definedDihedralAngles.get(indexOfB+2)).getCoordinates();
-      return Vector3D.calculateDihedralAngle(a,b,c,d);
+      return -1 * Vector3D.calculateDihedralAngle(a,b,c,d);
     } catch(NoSuchElementException e){
       // one of the atoms is missing from the residue, can't calculate a dihedral angle
       // return 1000
@@ -566,6 +675,15 @@ public class Residue implements Iterable<Atom>, Transformable{
     }
   }
 
+  /**
+  * Return the angle formed by 3 atoms in this residue. The angle is that between atomOne and
+  * atomThree using atomTwo as the pivot.
+  * @param atomOne one of the atoms in the angle
+  * @param atomTwo the pivot atom
+  * @param atomThree the other atom in the angle
+  * @return the angle defined by atomOne-atomTwo-atomThree, in degrees
+  * @since 0.7.0
+  */
   public double getAngle(String atomOne, String atomTwo, String atomThree){
     Vector3D one = getAtom(atomOne).getCoordinates();
     Vector3D two = getAtom(atomTwo).getCoordinates();
@@ -599,5 +717,19 @@ public class Residue implements Iterable<Atom>, Transformable{
   @Override
   public Iterator<Atom> iterator(){
     return getAtoms().iterator();
+  }
+
+  private class ResidueBondComparator implements Comparator<Bond>{
+    public int compare(Bond a, Bond b){
+      int indexA1 = atomsToRotate.indexOf(a.getAtomOne());
+      int indexA2 = atomsToRotate.indexOf(a.getAtomTwo());
+      int indexB1 = atomsToRotate.indexOf(b.getAtomOne());
+      int indexB2 = atomsToRotate.indexOf(b.getAtomTwo());
+      if(indexA1 - indexB1 == 0){
+        return indexA2 - indexB2;
+      } else {
+        return indexA1 - indexB1;
+      }
+    }
   }
 }
