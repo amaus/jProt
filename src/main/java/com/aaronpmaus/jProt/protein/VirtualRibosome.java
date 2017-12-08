@@ -37,6 +37,7 @@ public class VirtualRibosome {
         newResidue = new Residue(resString, resID);
         moveResidueIntoPlace(prevResidue, newResidue);
         chain.addResidue(newResidue);
+        chain.setOmegaAngle(resID, 180);
         prevResidue = newResidue;
       }
       resID++;
@@ -44,6 +45,12 @@ public class VirtualRibosome {
     return chain;
   }
 
+  /*
+  * Move the next Residue into place next to the previous Residue.
+  *
+  * After the Transformations are applied, the O-C-N angle is 125, N is 1.32 Angstroms away from
+  * C, and the C-N-CA angle is 123 degrees.
+  */
   private static void moveResidueIntoPlace(Residue prevResidue, Residue nextResidue){
     Atom c = prevResidue.getAtom("C");
     Atom o = prevResidue.getAtom("O");
@@ -55,17 +62,17 @@ public class VirtualRibosome {
     Vector3D c_ca = ca.getCoordinates().subtract(c.getCoordinates());
     Vector3D normal = c_ca.crossProduct(c_o);
 
-    // Construct the rotation Transformation about the normal
+    // Construct and apply transformations such that the N of the next Residue is in a 125 degree
+    // angle O-C-N and is 1.32 Angstroms away from C.
     Transformation rotateCO = new Transformation();
     rotateCO.addRotationAboutAxis(c.getCoordinates(), normal, 125);
-
     Vector3D nitrogenOrientation = new Vector3D(o.getCoordinates());
     // Rotate the coordinates of oxygen about the axis passing through C in the
     // direction of the normal 125 degrees.
     nitrogenOrientation.applyTransformation(rotateCO);
     // move nitrogen's location out from C so that it is 1.32 Angstroms away
     Vector3D c_n = nitrogenOrientation.subtract(c.getCoordinates());
-    c_n = c_n.toUnitVector().multiply(1.32); //new BigDecimal("1.32", MathContext.DECIMAL128));
+    c_n = c_n.toUnitVector().multiply(1.32);
     Vector3D nitrogenLocation = c.getCoordinates().add(c_n);
 
     // translate the next residue so that the nitrogen is in the correct place
@@ -74,27 +81,17 @@ public class VirtualRibosome {
     translateResIntoPlace.addTranslation(translation);
     nextResidue.applyTransformation(translateResIntoPlace);
 
-    // now need to rotate the CA bonded to the N so that the CA-N-C angle is 123 degrees
-    // what is their current angle?
+    // Rotate the next Residue so that the CA-N-C angle is 123 degrees
     Vector3D n_c = c.getCoordinates().subtract(n.getCoordinates());
     Vector3D n_ca2 = ca2.getCoordinates().subtract(n.getCoordinates());
     normal = n_c.crossProduct(n_ca2);
     double angle = n_c.angle(n_ca2);
     // calculate the angle to rotate
     double angleToRotate = 123 - angle;
-    // construct a rotation about the ca-n-c normal for the needed amount of degrees
+    // construct a rotation about the CA-N-C normal for the needed amount of degrees
     // and rotate the residue that much
     Transformation rotateAboutNitrogen = new Transformation();
     rotateAboutNitrogen.addRotationAboutAxis(n.getCoordinates(), normal, angleToRotate);
     nextResidue.applyTransformation(rotateAboutNitrogen);
-
-    // rotate the Omega bond so it is 180 degrees to place side chains on opposite sides
-    c_n = n.getCoordinates().subtract(c.getCoordinates());
-    angle = Vector3D.calculateDihedralAngle(ca.getCoordinates(), c.getCoordinates(),
-                                      n.getCoordinates(), ca2.getCoordinates());
-    angleToRotate = 180 - angle;
-    Transformation rotateAboutCNBond = new Transformation();
-    rotateAboutCNBond.addRotationAboutAxis(n.getCoordinates(), c_n, angleToRotate);
-    nextResidue.applyTransformation(rotateAboutCNBond);
   }
 }
