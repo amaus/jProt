@@ -57,6 +57,7 @@ public class Metrics{
   private String[] betaResidueIDs;
   private String alphaStrucID;
   private String betaStrucID;
+  private int numResiduesInReference;
 
   /**
   * A constructor that both the distance matrix files. It will calculate the values for the differences.
@@ -69,6 +70,7 @@ public class Metrics{
     // read in the residue IDs for both structures
     Scanner reader = new Scanner(new File(alphaDistancesFileName));
     this.alphaResidueIDs = reader.nextLine().split(",");
+    this.numResiduesInReference = this.alphaResidueIDs.length;
     reader = new Scanner(new File(betaDistancesFileName));
     this.betaResidueIDs = reader.nextLine().split(",");
 
@@ -101,6 +103,7 @@ public class Metrics{
   public Metrics(Protein prot1, Protein prot2){
     ProteinSequence prot1Sequence = prot1.getSequence();
     ProteinSequence prot2Sequence = prot2.getSequence();
+    this.numResiduesInReference = prot1.getNumResidues();
     // first we need an alignment of the sequences of these proteins
     Alignment alignment = prot1Sequence.align(prot2Sequence);
     // get masks indicating which residues in each protein have a match in the other protein.
@@ -230,12 +233,18 @@ public class Metrics{
   }
 
   /**
-  * A query to get the number of residues
+  * A query to get the number of residues in the alignment.
   * @return the number of residues
   * @since 0.5.0
   */
   public int getNumResidues(){
     return getAlphaResidueIDs().length;
+  }
+
+  // return the number of residues in the reference structure. The scores are based on the percent
+  // of residues that match those in the reference.
+  private int getNumResiduesInReferenceStructure(){
+    return this.numResiduesInReference;
   }
 
   /**
@@ -366,9 +375,7 @@ public class Metrics{
   * @since 0.5.0
   */
   public double[][] getGlobalDistanceTestScore(ArrayList<UndirectedGraph<Integer>> regions){
-    // returns an array of 5 numbers, the first 4 are the percent residues under the
-    // thresholds. the last is the score.
-    double numRes = getNumResidues();
+    double numRes = getNumResiduesInReferenceStructure();
     int numRegions = regions.size();
     double[][] ret = new double[numRegions+1][2];
     double numResAve = 0;
@@ -423,6 +430,36 @@ public class Metrics{
       }
     }
     return pymolScript;
+  }
+
+  /**
+  * Return the corresponding residue IDs for those residues in the first Protein in this region.
+  * The first protein is that passed as the first argument to the constructor.
+  * @param region one of the regions of similarity returned by either getGlobalDistanceRegions or
+  * getLocalSimilarityRegions
+  * @return an ArrayList containing the residue IDs of the residues in that region.
+  */
+  public ArrayList<Integer> getProt1ResIDsInRegion(UndirectedGraph<Integer> region){
+    return getResIDsInRegion(region, getAlphaResidueIDs());
+  }
+
+  /**
+  * Return the corresponding residue IDs for those residues in the second Protein in this region.
+  * The second protein is that passed as the second argument to the constructor.
+  * @param region one of the regions of similarity returned by either getGlobalDistanceRegions or
+  * getLocalSimilarityRegions
+  * @return an ArrayList containing the residue IDs of the residues in that region.
+  */
+  public ArrayList<Integer> getProt2ResIDsInRegion(UndirectedGraph<Integer> region){
+    return getResIDsInRegion(region, getBetaResidueIDs());
+  }
+
+  private ArrayList<Integer> getResIDsInRegion(UndirectedGraph<Integer> region, String[] resIDs){
+    ArrayList<Integer> ids = new ArrayList<Integer>();
+    for(Node<Integer> node : region){
+      ids.add(Integer.parseInt(resIDs[node.get()]));
+    }
+    return ids;
   }
 
   /*
