@@ -97,13 +97,13 @@ public class Metrics{
   * It will first perform a sequence alignment and then build the carbon alpha distance
   * matrices out of the residues from that alignment that were matched.
   *
-  * @param prot1 one of the proteins in the comparison
-  * @param prot2 the other protein in the comparison
+  * @param reference the structure to serve as the base of comparison
+  * @param structure the the structure to compare agains the reference
   */
-  public Metrics(Protein prot1, Protein prot2){
-    ProteinSequence prot1Sequence = prot1.getSequence();
-    ProteinSequence prot2Sequence = prot2.getSequence();
-    this.numResiduesInReference = prot1.getNumResidues();
+  public Metrics(Protein reference, Protein structure){
+    ProteinSequence prot1Sequence = reference.getSequence();
+    ProteinSequence prot2Sequence = structure.getSequence();
+    this.numResiduesInReference = reference.getNumResidues();
     // first we need an alignment of the sequences of these proteins
     Alignment alignment = prot1Sequence.align(prot2Sequence);
     // get masks indicating which residues in each protein have a match in the other protein.
@@ -111,7 +111,7 @@ public class Metrics{
     boolean[] prot2Mask = alignment.getAlignmentMask(prot2Sequence);
 
     // get the residue ids from prot1 that were aligned with residues in prot2
-    Integer[] protOneResIDs = prot1.getResidueIDs(prot1Mask);
+    Integer[] protOneResIDs = reference.getResidueIDs(prot1Mask);
     this.alphaResidueIDs = new String[protOneResIDs.length];
     int i = 0;
     for(Integer id : protOneResIDs){
@@ -120,7 +120,7 @@ public class Metrics{
     }
 
     // get the residue ids from prot2 that were aligned with residues in prot1
-    Integer[] protTwoResIDs = prot2.getResidueIDs(prot2Mask);
+    Integer[] protTwoResIDs = structure.getResidueIDs(prot2Mask);
     this.betaResidueIDs = new String[protTwoResIDs.length];
     i = 0;
     for(Integer id : protTwoResIDs){
@@ -128,13 +128,13 @@ public class Metrics{
       i++;
     }
 
-    this.alphaStrucID = prot1.getProteinName();
-    this.betaStrucID = prot2.getProteinName();
+    this.alphaStrucID = reference.getProteinName();
+    this.betaStrucID = structure.getProteinName();
     // build the distance matrices out of the residues that were aligned
     //this.alphaDistancesMatrix = prot1.calculateCarbonAlphaDistanceMatrix(prot1Mask);
     //this.betaDistancesMatrix = prot2.calculateCarbonAlphaDistanceMatrix(prot2Mask);
-    this.alphaDistancesMatrix = DistanceMatrixCalculator.calculateDistanceMatrix(prot1, prot1Mask);
-    this.betaDistancesMatrix = DistanceMatrixCalculator.calculateDistanceMatrix(prot2, prot2Mask);
+    this.alphaDistancesMatrix = DistanceMatrixCalculator.calculateDistanceMatrix(reference, prot1Mask);
+    this.betaDistancesMatrix = DistanceMatrixCalculator.calculateDistanceMatrix(structure, prot2Mask);
     calculateDifferencesMatrix();
   }
 
