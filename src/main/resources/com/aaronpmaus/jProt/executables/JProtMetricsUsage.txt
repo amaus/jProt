@@ -5,14 +5,9 @@ Usage: JProtMetrics [<options>] <mol1-f fname> <mol2-f fname>
       -a, --angular-distance
           Calculate and print the angular distance.
       --mol1-f fname
-          This file must either be a PDB file or a csv file. If it is a
-          PDB file it must end in the .pdb extension and conform to the
-          PDB File Format Version 3.30. Otherwise, the file should
-          contain the distance matrix for If the file provided is csv,
-          it must end in the .csv extension. The first row must contain
-          the residue IDs and the rest of the file contains all pairwise
-          distances between those residues.  Each row contains that
-          residues distances to every other residue.
+          This file must either be a PDB file. If it is a PDB file it
+          must end in the .pdb extension and conform to the PDB File
+          Format Version 3.30.
       --mol2-f fname
           The file for molecule two. The format is the same as mol1-f.
       --ls, --local-similarity
@@ -37,3 +32,7 @@ Usage: JProtMetrics [<options>] <mol1-f fname> <mol2-f fname>
           Global Distance Test - High Accuracy: the same as gdt except
           with thresholds: {0.5, 1.0, 2.0, 4.0}. Warning: This may take
           a long time to run depending on the structures.
+      --chimera
+          Print out a chimera script to color the regions of similarity
+          found by either local similarity or gdt. By default, a pymol
+          script is printed. This changes that behavior.

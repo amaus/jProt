@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * <p>Metrics is a collection of protein similarity metrics. It consists of Angular Distance,
@@ -98,7 +99,7 @@ public class Metrics{
   * matrices out of the residues from that alignment that were matched.
   *
   * @param reference the structure to serve as the base of comparison
-  * @param structure the the structure to compare agains the reference
+  * @param structure the the structure to compare against the reference
   */
   public Metrics(Protein reference, Protein structure){
     ProteinSequence prot1Sequence = reference.getSequence();
@@ -430,6 +431,29 @@ public class Metrics{
       }
     }
     return pymolScript;
+  }
+
+  public ArrayList<String> getChimeraColoringScript(ArrayList<UndirectedGraph<Integer>> regions){
+    ArrayList<String> chimeraScript = new ArrayList<String>();
+    int numRes = getNumResidues();
+    int numRegions = regions.size();
+    int i = 0;
+    //                  Dark Blue  Light Blue  Yellow    Orange
+    //String[] colors = {"#2c7bb6", "#abd9e9", "#ffffbf", "#fdae61"};
+    String[] colors = {"green", "cyan", "yellow", "orange"};
+    for(UndirectedGraph<Integer> region : regions){
+      chimeraScript.add(String.format("color %s #0:%s; color %s #1:%s",
+                      colors[i], getNodesString(region, ",", getAlphaResidueIDs()),
+                      colors[i], getNodesString(region, ",", getBetaResidueIDs())));
+      i++;
+      if(i==3){
+        break;
+      }
+    }
+    //                      Red
+    chimeraScript.add("color #d7191c");
+    Collections.reverse(chimeraScript);
+    return chimeraScript;
   }
 
   /**

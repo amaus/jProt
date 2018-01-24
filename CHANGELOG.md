@@ -49,6 +49,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   bonds.
 - Initial implementation for VirtualRibosome, constructs a single chain with
   correct bond angles and residues on opposite sides of the backbone.
+- JProtMetrics: new cmd line argument --chimera to specify to print out chimera
+  script instead of pymol script.
 ### Changed
 - Moved SequenceAligner into new package sequence
 - Protein and PolypeptideChain getSequence methods to use new sequence package
@@ -59,7 +61,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   in the alignment. This makes the scores more stable and makes more
   sense when evaluating models. If a model only includes a fraction of the
   residues that are in the reference, it should be penalized for the
-  missing residues. 
+  missing residues.
+### Deprecated
+- JProtMetrics no longer accepts csv files as input. Two pdb files must be
+  provided.
 
 ## [0.6.4] 2017-10-27
 ### Fixed

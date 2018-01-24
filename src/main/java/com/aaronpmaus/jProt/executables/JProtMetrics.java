@@ -28,14 +28,9 @@ import java.util.Date;
 *      -a, --angular-distance
 *          Calculate and print the angular distance.
 *      --mol1-f fname
-*          This file must either be a PDB file or a csv file. If it is a
-*          PDB file it must end in the .pdb extension and conform to the
-*          PDB File Format Version 3.30. otherwise, the file should
-*          contain the distance matrix for If the file provided is csv,
-*          it must end in the .csv extension. The first row must contain
-*          the residue IDs and the rest of the file contains all pairwise
-*          distances between those residues.  Each row contains that
-*          residues distances to every other residue.
+*          This file must either be a PDB file. If it is a PDB file it
+*          must end in the .pdb extension and conform to the PDB File
+*          Format Version 3.30.
 *      --mol2-f fname
 *          The file for molecule two. The format is the same as mol1-f.
 *      --ls, --local-similarity
@@ -60,6 +55,10 @@ import java.util.Date;
 *          Global Distance Test - High Accuracy: the same as gdt except
 *          with thresholds: {0.5, 1.0, 2.0, 4.0}. Warning: This may take
 *          a long time to run depending on the structures.
+*      --chimera
+*          Print out a chimera script to color the regions of similarity
+*          found by either local similarity or gdt. By default, a pymol
+*          script is printed. This changes that behavior.
 * </code>
 * </pre>
 *
@@ -71,7 +70,7 @@ public class JProtMetrics{
   private static boolean runLocalSimilarity = false;
   private static boolean runGDT = false;
   private static boolean usePDBs = false;
-  private static boolean useCSVs = false;
+  private static boolean printChimera = false;
   private static double localSimilarityThreshold = 1.0;
   private static double[] gdtThresholds;
   private static String mol1FilePath;
@@ -130,6 +129,9 @@ public class JProtMetrics{
         mol2FilePath = args.getValue("--mol2-f");
         mol2FileProvided = true;
       }
+      if(args.contains("--chimera")){
+        printChimera = true;
+      }
     }
 
     try {
@@ -146,11 +148,8 @@ public class JProtMetrics{
 
         if(mol1Ext.equals("pdb") && mol2Ext.equals("pdb")){
           usePDBs = true;
-        } else if(mol1Ext.equals("csv") && mol2Ext.equals("csv")){
-          useCSVs = true;
         } else {
-          System.out.println("Both files must either be PDBs with extension .pdb"
-            + " or CSVs with extension .csv");
+          System.out.println("Both files must either be PDBs with extension .pdb");
           System.out.println("You provided files: \n" + mol1FileName + "\n" + mol2FileName);
           System.exit(1);
         }
@@ -162,8 +161,6 @@ public class JProtMetrics{
           Protein prot2 = new PDBFileIO().readInPDBFile(new FileInputStream(mol2FileName),mol2Base);
           //Protein prot2 = pdb.readInPDBFile(mol2FileName);
           theTool = new Metrics(prot1, prot2);
-        } else if(useCSVs){
-          theTool = new Metrics(mol1FileName, mol2FileName);
         }
       } else {
         System.out.println("You must provide the two protein data files.");
@@ -206,13 +203,20 @@ public class JProtMetrics{
     ArrayList<UndirectedGraph<Integer>> localSimilarityRegions;
     localSimilarityRegions = theTool.getLocalSimilarityRegions(threshold);
 
-    ArrayList<String> pymolScript = theTool.getPymolColoringScript(localSimilarityRegions);
+    ArrayList<String> script;
 
-    System.out.println("\n#Pymol Script:");
-    for(String cmd: pymolScript){
+    if(printChimera){
+      script = theTool.getChimeraColoringScript(localSimilarityRegions);
+      System.out.println("\n#Chimera Script:");
+    } else {
+      script = theTool.getPymolColoringScript(localSimilarityRegions);
+      System.out.println("\n#Pymol Script:");
+    }
+
+    for(String cmd: script){
       System.out.println(cmd);
     }
-    System.out.println("#End of Pymol Script\n");
+    System.out.println("#End of Script\n");
 
     double[][] globalDistanceTest = theTool.getGlobalDistanceTestScore(localSimilarityRegions);
     String cliquesStr = "Cliques:";
@@ -251,13 +255,20 @@ public class JProtMetrics{
     int numThresholds = thresholds.length;
     globalDistanceRegions = theTool.getGlobalDistanceRegions(thresholds);
 
-    ArrayList<String> pymolScript = theTool.getPymolColoringScript(globalDistanceRegions);
+    ArrayList<String> script;
 
-    System.out.println("\n#Pymol Script:");
-    for(String cmd: pymolScript){
+    if(printChimera){
+      script = theTool.getChimeraColoringScript(globalDistanceRegions);
+      System.out.println("\n#Chimera Script:");
+    } else {
+      script = theTool.getPymolColoringScript(globalDistanceRegions);
+      System.out.println("\n#Pymol Script:");
+    }
+
+    for(String cmd: script){
       System.out.println(cmd);
     }
-    System.out.println("#End of Pymol Script\n");
+    System.out.println("#End of Script\n");
 
     double[][] globalDistanceTest = theTool.getGlobalDistanceTestScore(globalDistanceRegions);
     System.out.println("Global Distance Test:");
