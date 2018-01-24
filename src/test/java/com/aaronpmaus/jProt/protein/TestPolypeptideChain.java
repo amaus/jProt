@@ -122,7 +122,8 @@ public class TestPolypeptideChain{
 
   @Test
   public void testDihedralAngles(){
-    Protein prot = VirtualRibosome.synthesizeProtein(new ProteinSequence("IAMSTARSTFF"));
+    Protein prot = VirtualRibosome.synthesizeProtein(new ProteinSequence("IAMSTARSTFF"),
+                                                     "strstf");
     PolypeptideChain chain = prot.getChain("A");
 
     assertTrue(Math.abs(Math.abs(chain.getOmegaAngle(2)) - 180.0) < 0.00000001);

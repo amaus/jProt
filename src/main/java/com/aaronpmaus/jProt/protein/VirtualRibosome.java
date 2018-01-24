@@ -13,10 +13,11 @@ public class VirtualRibosome {
   * Construct a Protein with a single chain. This chain is unfolded, linear, all phi, psi, and
   * omega angles are either 180 or -180.
   * @param sequence the sequence of the protein to construct
+  * @param pdbFileNameBase the base name of the PDB file (the part before the extension).
   * @return a Protein with a single chain built out of the residues in that sequence
   */
-  public static Protein synthesizeProtein(ProteinSequence sequence){
-    Protein prot = new Protein("Synthaprot");
+  public static Protein synthesizeProtein(ProteinSequence sequence, String pdbFileNameBase){
+    Protein prot = new Protein(pdbFileNameBase);
     prot.addChain(synthesizeChain(sequence, "A"));
     return prot;
   }
