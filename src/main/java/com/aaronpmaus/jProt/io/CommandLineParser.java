@@ -75,33 +75,4 @@ public class CommandLineParser{
   public String getValue(String flag) throws InvalidParameterException {
     return args.get( getIndex(flag)+1 ).trim();
   }
-  /*
-  public String getValue(String flag) throws InvalidParameterException {
-  boolean found = false;
-  String val = "";
-  for(String arg : args){ // for every cmd argument
-  char lastCharacter = arg.charAt(arg.length()-1);
-  String[] tokens = arg.split(":");
-  if(tokens[0].equals(flag)){ // if it contains the flag
-  // just in case any values have a ':' in them,
-  // concatenate all tokens after the flag back together
-  for(int i = 1; i < tokens.length; i++){
-  val += tokens[i];
-  if(i != tokens.length -1){
-  val+=":";
-}
-}
-if(lastCharacter == ':'){
-val+=":";
-}
-found = true;
-}
-}
-if(!found){
-throw new InvalidParameterException("Flag " + flag +
-"not found in command line arguments.");
-}
-return val;
-}
-*/
 }
