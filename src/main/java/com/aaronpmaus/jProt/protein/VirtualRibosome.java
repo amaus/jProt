@@ -7,8 +7,40 @@ import com.aaronpmaus.jMath.linearAlgebra.*;
 import java.math.BigDecimal;
 import java.math.MathContext;
 
+import java.util.List;
 
 public class VirtualRibosome {
+
+  /**
+  * Construct a Protein with multiple chains. Each chain is unfolded, linear, all phi, psi, and
+  * omega angles are either 180 or -180. At construction, the chains will occupy the same space.
+  * It is the responsibility of the client to fold and orient the chains relative to each other.
+  * @param sequences a list of sequences, each sequence will be constructed into its own chain.
+  * @param pdbFileNameBase the base name of the PDB file (the part before the extension).
+  * @return a Protein with a chain for each sequence provided
+  * @throws IllegalStateException if the number of sequences is greater than 62.
+  */
+  public static Protein synthesizeProtein(List<ProteinSequence> sequences, String pdbFileNameBase){
+    if(sequences.size() > 62){
+      throw new IllegalStateException(String.format(
+            "\nYou are attempting to build a protein with %d chains. This software only supports\n"
+          + "constructing proteins with up to 62 chains. Issue a feature request to tell the\n"
+          + "maintainer to increase this limit!",sequences.size()));
+    }
+    Protein prot = new Protein(pdbFileNameBase);
+    String[] chainIDs = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
+                         "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+                         "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+                         "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
+                         "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
+    int i = 0;
+    for(ProteinSequence sequence : sequences){
+      prot.addChain(synthesizeChain(sequence, chainIDs[i]));
+      i++;
+    }
+    return prot;
+  }
+
   /**
   * Construct a Protein with a single chain. This chain is unfolded, linear, all phi, psi, and
   * omega angles are either 180 or -180.
