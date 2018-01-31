@@ -139,7 +139,8 @@ public class TestPolypeptideChain{
     assertTrue(Math.abs(chain.getPsiAngle(2) - 90.0) < 0.00000001);
 
     chain.setPsiAngle(2, 180.0);
-    assertTrue(Math.abs(chain.getPsiAngle(2) - 180.0) < 0.00000001);
+    //System.out.printf("%.19f\n",chain.getPsiAngle(2));
+    assertTrue(Math.abs(Math.abs(chain.getPsiAngle(2)) - 180.0) < 0.00000001);
 
     chain.setPsiAngle(2, -90.0);
     assertTrue(Math.abs(chain.getPsiAngle(2) - -90.0) < 0.00000001);
