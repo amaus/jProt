@@ -334,6 +334,66 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>, Tra
   }
 
   /**
+  * Set the Omega bond length of the specified Residue to the given length.
+  * <p>
+  * Both the Residue and the Residue immediately before it must be present in the Chain.
+  * @param residueID the Residue whose Omega Bond Length to set
+  * @param length the length to set it to
+  * @since 0.7.0
+  */
+  public void setOmegaBondLength(int residueID, double length){
+    if(!containsResidue(residueID) || !containsResidue(residueID-1)){
+      throw new IllegalArgumentException(
+          String.format("Can not rotate about the Omega Angle of residue %d."
+          + "Both residues %d and %d must be in chain", residueID, residueID-1));
+    }
+    Residue prev = getResidue(residueID-1);
+    Residue res = getResidue(residueID);
+    //System.out.printf("Rotating about the Omega Bond of Residue %d, Prev: %d\n", res.getResidueID(), prev.getResidueID());
+    //System.out.printf("C: %d, N: %d\n", prev.getAtom("C").getSerialNumber(), res.getAtom("N").getSerialNumber());
+    setBondLength(prev.getAtom("C"), res.getAtom("N"), residueID, "Omega", length);
+  }
+
+  /**
+  * Set the Phi bond length of the specified Residue to the given length.
+  * <p>
+  * The Residue must be present in the Chain.
+  * @param residueID the Residue whose Phi Bond Length to set
+  * @param length the length to set it to
+  * @since 0.7.0
+  */
+  public void setPhiBondLength(int residueID, double length){
+    if(!containsResidue(residueID)){
+      throw new IllegalArgumentException(
+          String.format("Can not rotate Phi Angle of residue %d, not in chain", residueID));
+    }
+    Residue res = getResidue(residueID);
+    setBondLength(res.getAtom("N"), res.getAtom("CA"), residueID, "Phi", length);
+  }
+
+  /**
+  * Set the Psi bond length of the specified Residue to the given length.
+  * <p>
+  * The Residue must be present in the Chain.
+  * @param residueID the Residue whose Psi Bond Length to set
+  * @param length the length to set it to
+  * @since 0.7.0
+  */
+  public void setPsiBondLength(int residueID, double length){
+    if(!containsResidue(residueID)){
+      throw new IllegalArgumentException(
+          String.format("Can not rotate Psi Angle of residue %d, not in chain", residueID));
+    }
+    Residue res = getResidue(residueID);
+    setBondLength(res.getAtom("CA"), res.getAtom("C"), residueID, "Psi", length);
+  }
+
+  public void setOxygenBondLength(int residueID, double length){
+    Residue res = getResidue(residueID);
+    setBondLength(res.getAtom("C"), res.getAtom("O"), residueID, "CO", length);
+  }
+
+  /**
   * Rotate a PolypeptideChain about one of its rotatable bonds, one of its defined dihedral angles.
   * <p>
   * All atoms after that bond are transformed.
@@ -401,6 +461,35 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>, Tra
     }
   }
 
+  private void setBondLength(Atom atomOne, Atom atomTwo, int residueID,
+      String bondType, double length){
+
+    Vector3D coor1 = atomOne.getCoordinates();
+    Vector3D coor2 = atomTwo.getCoordinates();
+    Vector3D newAtomTwoPosition = coor2.subtract(coor1)
+                                    .toUnitVector()
+                                    .multiply(length)
+                                    .add(coor1);
+    Transformation t = new Transformation();
+    t.addTranslation(newAtomTwoPosition.subtract(coor2));
+    System.out.printf("Residue %d - Goal Length %.2f, set %.2f\n", residueID, length, coor1.distance(newAtomTwoPosition));
+    // Different bonds require different atoms to be rotated.
+    switch(bondType){
+      case "Omega":
+        applyTransformationToOmegaBond(t, residueID);
+        break;
+      case "Phi":
+        applyTransformationToPhiBond(t, residueID);
+        break;
+      case "Psi":
+        applyTransformationToPsiBond(t, residueID);
+        break;
+      case "CO":
+        atomTwo.applyTransformation(t);
+        break;
+    }
+  }
+
   private void applyTransformationToOmegaBond(Transformation t, int residueID){
     // In the Omega case, apply this transformation to this residue and every one after
     // it.
@@ -419,8 +508,8 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>, Tra
     while(it.hasNext()){
       Atom atom = it.next();
       if(atom.getAtomName().equals("H")
-          || atom.getAtomName().equals("N")
-          || atom.getAtomName().equals("CA")){
+          || atom.getAtomName().equals("N")){
+          //|| atom.getAtomName().equals("CA")){
         it.remove();
       }
     }
@@ -443,6 +532,7 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>, Tra
     if(residue.isCarboxylTerminus()){
       residue.getAtom("OXT").applyTransformation(t);
     }
+    residue.getAtom("C").applyTransformation(t);
     // If the next residue is in a gap, getResiduesToEnd will return all Residues after the gap.
     for(Residue res : getResiduesToEnd(residueID+1)){
       res.applyTransformation(t);
@@ -469,10 +559,6 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>, Tra
                                   prev.getAtom("C").getCoordinates(),
                                   current.getAtom("N").getCoordinates(),
                                   current.getAtom("CA").getCoordinates());
-    /*return calculateDihedralAngle(current.getAtom("CA").getCoordinates(),
-                                  current.getAtom("N").getCoordinates(),
-                                  prev.getAtom("C").getCoordinates(),
-                                  prev.getAtom("CA").getCoordinates());*/
   }
 
   /**
@@ -517,6 +603,50 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>, Tra
                                   current.getAtom("CA").getCoordinates(),
                                   current.getAtom("C").getCoordinates(),
                                   next.getAtom("N").getCoordinates());
+  }
+
+  /**
+  * Return the Omega Bond Length for a residue.
+  * <p>
+  * This residue and the previous residue must both be present.
+  * @param residueID the residue ID of the residue to return the omega angle of
+  * @return the length of the omega bond - the (C-1) -- (N) bond, in Angstroms
+  * @throws IllegalStateException if both the residues at residueID and residueID - 1 are not
+  * present
+  * @since 0.7.0
+  */
+  public double getOmegaBondLength(int residueID){
+    if(!containsResidue(residueID) || !containsResidue(residueID-1)){
+      throw new IllegalStateException(String.format("Both residues %d and %d must be present\n",
+          residueID, residueID-1));
+
+    }
+    // get the CA and C from residueID-1 and the N and CA from residueID.
+    Residue prev = getResidue(residueID-1);
+    Residue current = getResidue(residueID);
+    return prev.getAtom("C").distance(current.getAtom("N"));
+  }
+
+  /**
+  * Return the Phi Bond Length for a residue.
+  * @param residueID the residue ID of the residue to return the phi angle of
+  * @return the length of the omega bond - the (N) -- (CA) bond, in Angstroms
+  * @since 0.7.0
+  */
+  public double getPhiBondLength(int residueID){
+    Residue current = getResidue(residueID);
+    return current.getAtom("N").distance(current.getAtom("CA"));
+  }
+
+  /**
+  * Return the Psi Bond Length for a residue.
+  * @param residueID the residue ID of the residue to return the psi angle of
+  * @return the length of the omega bond - the (CA) -- (C) bond, in Angstroms
+  * @since 0.7.0
+  */
+  public double getPsiBondLength(int residueID){
+    Residue current = getResidue(residueID);
+    return current.getAtom("CA").distance(current.getAtom("C"));
   }
 
   /*
