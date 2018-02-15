@@ -596,19 +596,6 @@ public class Residue implements Iterable<Atom>, Transformable{
         this.getAtom(atomName).applyTransformation(t);
       }
     }
-    /*
-    // also rotate all the hydrogens bonded to the atoms that have just been transformed
-    for(String atomName : atomsToTransform){
-      if(heavyAtomHydrogens.containsKey(atomName)){
-        for(String hydrogen : heavyAtomHydrogens.get(atomName)){
-          // check the raw data structure, because we need to rotate the hydrogen whether
-          // it is enabled or not.
-          if(this.hydrogens.containsKey(hydrogen)){
-            this.hydrogens.get(hydrogen).applyTransformation(t);
-          }
-        }
-      }
-    }*/
   }
 
   private boolean isRotatableBond(String atomOne, String atomTwo){

@@ -261,6 +261,8 @@ public class Metrics{
     }
     Vector alphaVec = buildVector(getAlphaDistancesMatrix());
     Vector betaVec = buildVector(getBetaDistancesMatrix());
+    System.out.println(alphaVec);
+    System.out.println(betaVec);
     return alphaVec.angle(betaVec)*100/90; // adjust the range to be 0-100
   }
 
