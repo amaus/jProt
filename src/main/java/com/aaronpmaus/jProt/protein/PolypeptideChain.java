@@ -9,6 +9,7 @@ import com.aaronpmaus.jMath.transformations.Transformation;
 
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -279,6 +280,18 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>, Tra
   }
 
   /**
+  * Set the Oxygen Dihedral Angle of a Residue.
+  * @param residueID the residue to set the angle of.
+  * @param degrees the value to set it to
+  * @since 0.7.0
+  */
+  public void setOxygenDihedralAngle(int residueID, double degrees){
+    double currentAngle = getOxygenDihedralAngle(residueID);
+    double delta = degrees - currentAngle;
+    rotateOxygenDihedralAngle(residueID, delta);
+  }
+
+  /**
   * Rotate the Omega angle of the specified Residue by the given degrees.
   * <p>
   * Both the Residue and the Residue immediately before it must be present in the Chain.
@@ -294,8 +307,6 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>, Tra
     }
     Residue prev = getResidue(residueID-1);
     Residue res = getResidue(residueID);
-    //System.out.printf("Rotating about the Omega Bond of Residue %d, Prev: %d\n", res.getResidueID(), prev.getResidueID());
-    //System.out.printf("C: %d, N: %d\n", prev.getAtom("C").getSerialNumber(), res.getAtom("N").getSerialNumber());
     rotateAboutBond(prev.getAtom("C"), res.getAtom("N"), residueID, "Omega", degrees);
   }
 
@@ -334,6 +345,24 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>, Tra
   }
 
   /**
+  * Rotate the Oxygen Dihedral angle of the specified Residue by the given degrees.
+  * <p>
+  * The Residue must be present in the Chain.
+  * @param residueID the Residue whose Oxygen Dihedral Angle to rotate
+  * @param degrees the number of degrees to rotate that angle
+  * @since 0.7.0
+  */
+  public void rotateOxygenDihedralAngle(int residueID, double degrees){
+    if(!containsResidue(residueID)){
+      throw new IllegalArgumentException(
+          String.format("Can not rotate Psi Angle of residue %d, not in chain", residueID));
+    }
+    Residue res = getResidue(residueID);
+    rotateAboutBond(res.getAtom("CA"), res.getAtom("C"), residueID, "Oxygen", degrees);
+  }
+
+
+  /**
   * Set the Omega bond length of the specified Residue to the given length.
   * <p>
   * Both the Residue and the Residue immediately before it must be present in the Chain.
@@ -349,8 +378,6 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>, Tra
     }
     Residue prev = getResidue(residueID-1);
     Residue res = getResidue(residueID);
-    //System.out.printf("Rotating about the Omega Bond of Residue %d, Prev: %d\n", res.getResidueID(), prev.getResidueID());
-    //System.out.printf("C: %d, N: %d\n", prev.getAtom("C").getSerialNumber(), res.getAtom("N").getSerialNumber());
     setBondLength(prev.getAtom("C"), res.getAtom("N"), residueID, "Omega", length);
   }
 
@@ -394,6 +421,271 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>, Tra
   }
 
   /**
+  * Get the backbone Nitrogen Angle.
+  * <p>
+  * Both the Residue and the Residue immediately before it must be present in the Chain.
+  * @param residueID the Residue whose N backbone angle to get
+  * @return the angle in degrees
+  * @since 0.7.0
+  */
+  public double getNitrogenBackboneAngle(int residueID){
+    if(!containsResidue(residueID) || !containsResidue(residueID-1)){
+      throw new IllegalArgumentException(
+          String.format("Can not rotate the Nitrogen Angle of residue %d."
+          + " Both residues %d and %d must be in chain", residueID, residueID-1));
+    }
+    Residue prev = getResidue(residueID-1);
+    Residue res = getResidue(residueID);
+    if(!prev.contains("C") || !res.contains("N") || !res.contains("CA")){
+      throw new IllegalStateException(
+          String.format("Can not get the angle. C, N, and CA must be present"));
+    }
+
+    return getAngle(prev.getAtom("C"), res.getAtom("N"), res.getAtom("CA"));
+  }
+
+  /**
+  * Get the backbone Carbon Alpha Angle.
+  * @param residueID the Residue whose CA backbone angle to get
+  * @return the angle in degrees
+  * @since 0.7.0
+  */
+  public double getCarbonAlphaBackboneAngle(int residueID){
+    if(!containsResidue(residueID)){
+      throw new IllegalArgumentException(
+          String.format("Can not rotate the Carbon Alpha Angle of residue %d."
+          + " Residues %d must be in chain", residueID));
+    }
+    Residue res = getResidue(residueID);
+    if(!res.contains("N") || !res.contains("CA") || !res.contains("C")){
+      throw new IllegalStateException(
+          String.format("Can not get the angle. N, CA, and C must be present"));
+    }
+
+    return getAngle(res.getAtom("N"), res.getAtom("CA"), res.getAtom("C"));
+  }
+
+  /*
+  * Get the backbone Carbon Angle.
+  * @param residueID the Residue whose C backbone angle to get
+  * @return the angle in degrees
+  * @since 0.7.0
+  */
+  public double getCarbonBackboneAngle(int residueID){
+    if(!containsResidue(residueID) || !containsResidue(residueID+1)){
+      throw new IllegalArgumentException(
+          String.format("Can not rotate the Carbon Angle of residue %d."
+          + " Both residues %d and %d must be in chain", residueID, residueID+1));
+    }
+    Residue res = getResidue(residueID);
+    Residue next = getResidue(residueID+1);
+    if(!res.contains("CA") || !res.contains("C") || !next.contains("N")){
+      throw new IllegalStateException(
+          String.format("Can not get the angle. CA, C, and N must be present"));
+    }
+
+    return getAngle(res.getAtom("CA"), res.getAtom("C"), next.getAtom("N"));
+  }
+
+  /**
+  * Get the backbone Oxygen Angle, the CA, C, and O angle
+  * @param residueID the Residue whose O backbone angle to get
+  * @return the angle in degrees
+  * @since 0.7.0
+  */
+  public double getOxygenBackboneAngle(int residueID){
+    if(!containsResidue(residueID)){
+      throw new IllegalArgumentException(
+          String.format("Can not rotate the Carbon Alpha Angle of residue %d."
+          + " Residues %d must be in chain", residueID));
+    }
+    Residue res = getResidue(residueID);
+    if(!res.contains("CA") || !res.contains("C") || !res.contains("O")){
+      throw new IllegalStateException(
+          String.format("Can not get the angle. CA, C, and O must be present"));
+    }
+
+    return getAngle(res.getAtom("CA"), res.getAtom("C"), res.getAtom("O"));
+  }
+
+  /**
+  * Set the backbone Nitrogen Angle.
+  * <p>
+  * Both the Residue and the Residue immediately before it must be present in the Chain.
+  * @param residueID the Residue whose N backbone angle to set
+  * @param degrees the degrees to set the angle to
+  * @since 0.7.0
+  */
+  public void setNitrogenBackboneAngle(int residueID, double degrees){
+    if(!containsResidue(residueID) || !containsResidue(residueID-1)){
+      throw new IllegalArgumentException(
+          String.format("Can not rotate the Nitrogen Angle of residue %d."
+          + " Both residues %d and %d must be in chain", residueID, residueID-1));
+    }
+    Residue prev = getResidue(residueID-1);
+    Residue res = getResidue(residueID);
+    if(!prev.contains("C") || !res.contains("N") || !res.contains("CA")){
+      throw new IllegalStateException(
+          String.format("Can not rotate the Nitrogen Angle of residue %d."
+          + " C, N, and CA must be present"));
+    }
+
+    Transformation t = buildBackboneAngleTransformation(prev.getAtom("C"),
+                                                        res.getAtom("N"),
+                                                        res.getAtom("CA"),
+                                                        degrees);
+
+    List<Atom> atomsInThisRes = getAllAtomsInResidueExcept(residueID, "N", "H");
+
+    for(Atom atom : atomsInThisRes){
+      atom.applyTransformation(t);
+    }
+    // If the next residue is in a gap, getResiduesToEnd will return all Residues after the gap.
+    for(Residue residue : getResiduesToEnd(residueID+1)){
+      residue.applyTransformation(t);
+    }
+  }
+
+  /**
+  * Set the backbone Carbon Alpha Angle.
+  * <p>
+  * @param residueID the Residue whose CA backbone angle to set
+  * @param degrees the degrees to set the angle to
+  * @since 0.7.0
+  */
+  public void setCarbonAlphaBackboneAngle(int residueID, double degrees){
+    if(!containsResidue(residueID)){
+      throw new IllegalArgumentException(
+          String.format("Can not rotate the Carbon Alpha Angle of residue %d."
+          + " Residues %d must be in chain", residueID));
+    }
+    Residue res = getResidue(residueID);
+    if(!res.contains("N") || !res.contains("CA") || !res.contains("C")){
+      throw new IllegalStateException(
+          String.format("Can not rotate the Carbon Alpha Angle of residue %d."
+          + " N, CA, and C must be present"));
+    }
+
+    Transformation t = buildBackboneAngleTransformation(res.getAtom("N"),
+                                                        res.getAtom("CA"),
+                                                        res.getAtom("C"),
+                                                        degrees);
+
+    List<Atom> atomsInThisRes = getAllAtomsInResidueExcept(residueID, "N", "H", "CA");
+
+    for(Atom atom : atomsInThisRes){
+      atom.applyTransformation(t);
+    }
+    // If the next residue is in a gap, getResiduesToEnd will return all Residues after the gap.
+    for(Residue residue : getResiduesToEnd(residueID+1)){
+      residue.applyTransformation(t);
+    }
+  }
+
+  /**
+  * Set the backbone Carbon Angle.
+  * <p>
+  * Both the Residue and the Residue immediately after it must be present in the Chain.
+  * @param residueID the Residue whose C backbone angle to set
+  * @param degrees the degrees to set the angle to
+  * @since 0.7.0
+  */
+  public void setCarbonBackboneAngle(int residueID, double degrees){
+    if(!containsResidue(residueID) || !containsResidue(residueID+1)){
+      throw new IllegalArgumentException(
+          String.format("Can not rotate the Carbon Angle of residue %d."
+          + " Both residues %d and %d must be in chain", residueID, residueID+1));
+    }
+    Residue res = getResidue(residueID);
+    Residue next = getResidue(residueID+1);
+    if(!res.contains("CA") || !res.contains("C") || !next.contains("N")){
+      throw new IllegalStateException(
+          String.format("Can not rotate the Carbon Angle of residue %d."
+          + " CA, C, and N must be present"));
+    }
+
+    Transformation t = buildBackboneAngleTransformation(res.getAtom("CA"),
+                                                        res.getAtom("C"),
+                                                        next.getAtom("N"),
+                                                        degrees);
+
+    if(res.contains("O")){
+      res.getAtom("O").applyTransformation(t);
+    }
+
+    if(res.isCarboxylTerminus()){
+      res.getAtom("OXT").applyTransformation(t);
+    }
+
+    // If the next residue is in a gap, getResiduesToEnd will return all Residues after the gap.
+    for(Residue residue : getResiduesToEnd(residueID+1)){
+      residue.applyTransformation(t);
+    }
+  }
+
+  /**
+  * Set the backbone Oxygen Angle, the angle between CA, C, and O.
+  * <p>
+  * @param residueID the Residue whose Oxygen backbone angle to set
+  * @param degrees the degrees to set the angle to
+  * @since 0.7.0
+  */
+  public void setOxygenBackboneAngle(int residueID, double degrees){
+    if(!containsResidue(residueID)){
+      throw new IllegalArgumentException(
+          String.format("Can not rotate the Carbon Alpha Angle of residue %d."
+          + " Residues %d must be in chain", residueID));
+    }
+    Residue res = getResidue(residueID);
+    if(!res.contains("CA") || !res.contains("C") || !res.contains("O")){
+      throw new IllegalStateException(
+          String.format("Can not rotate the Carbon Alpha Angle of residue %d."
+          + " CA, C, and O must be present"));
+    }
+
+    Transformation t = buildBackboneAngleTransformation(res.getAtom("CA"),
+                                                        res.getAtom("C"),
+                                                        res.getAtom("O"),
+                                                        degrees);
+    Atom oxygen = res.getAtom("O");
+    oxygen.applyTransformation(t);
+  }
+
+  private Transformation buildBackboneAngleTransformation(Atom atomOne, Atom atomTwo,
+                                                          Atom atomThree, double degrees){
+    Vector3D atomOneCoor = atomOne.getCoordinates();
+    Vector3D atomTwoCoor = atomTwo.getCoordinates();
+    Vector3D atomThreeCoor = atomThree.getCoordinates();
+    double angle = getAngle(atomOne, atomTwo, atomThree);
+    //System.out.printf("Current Angle: %.2f\n", angle);
+    //System.out.printf("Goal: %.2f\n", degrees);
+    double delta = degrees - angle;
+    //System.out.printf("Delta: %.2f\n", delta);
+    Vector3D normal = atomOneCoor.subtract(atomTwoCoor)
+        .crossProduct(atomThreeCoor.subtract(atomTwoCoor));
+    Transformation t = new Transformation();
+    t.addRotationAboutAxis(atomTwoCoor, normal, delta);
+
+    return t;
+  }
+
+  /**
+  * Return the angle formed by 3 atoms in this chain. The angle is that between atomOne and
+  * atomThree using atomTwo as the pivot.
+  * @param atomOne one of the atoms in the angle
+  * @param atomTwo the pivot atom
+  * @param atomThree the other atom in the angle
+  * @return the angle defined by atomOne-atomTwo-atomThree, in degrees
+  * @since 0.7.0
+  */
+  private double getAngle(Atom atomOne, Atom atomTwo, Atom atomThree){
+    Vector3D one = atomOne.getCoordinates();
+    Vector3D two = atomTwo.getCoordinates();
+    Vector3D three = atomThree.getCoordinates();
+    return one.subtract(two).angle(three.subtract(two));
+  }
+
+  /**
   * Rotate a PolypeptideChain about one of its rotatable bonds, one of its defined dihedral angles.
   * <p>
   * All atoms after that bond are transformed.
@@ -434,6 +726,13 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>, Tra
         atomOne = atomTwo;
         atomTwo = temp;
       }
+    } else if(bond.containsAtom("CA") && bond.containsAtom("C")){
+      bondType = "Oxygen";
+      if(atomOne.getAtomName().equals("C")){
+        Atom temp = atomOne;
+        atomOne = atomTwo;
+        atomTwo = temp;
+      }
     }
 
     rotateAboutBond(atomOne, atomTwo, residueID, bondType, degrees);
@@ -458,6 +757,9 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>, Tra
       case "Psi":
         applyTransformationToPsiBond(t, residueID);
         break;
+      case "Oxygen":
+        applyTransformationToOxygenDihedralBond(t, residueID);
+        break;
     }
   }
 
@@ -472,7 +774,6 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>, Tra
                                     .add(coor1);
     Transformation t = new Transformation();
     t.addTranslation(newAtomTwoPosition.subtract(coor2));
-    System.out.printf("Residue %d - Goal Length %.2f, set %.2f\n", residueID, length, coor1.distance(newAtomTwoPosition));
     // Different bonds require different atoms to be rotated.
     switch(bondType){
       case "Omega":
@@ -501,18 +802,9 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>, Tra
 
   private void applyTransformationToPhiBond(Transformation t, int residueID){
     // In the Phi case, apply the transformation to all atoms in this residue except for
-    // N, H, and CA. Then apply the transformation to every residue after.
-    ArrayList<Atom> atomsInThisRes = new ArrayList<Atom>(getResidue(residueID).getHeavyAtoms());
-    atomsInThisRes.addAll(getResidue(residueID).getHydrogens());
-    Iterator<Atom> it = atomsInThisRes.iterator();
-    while(it.hasNext()){
-      Atom atom = it.next();
-      if(atom.getAtomName().equals("H")
-          || atom.getAtomName().equals("N")){
-          //|| atom.getAtomName().equals("CA")){
-        it.remove();
-      }
-    }
+    // N and H. Then apply the transformation to every residue after.
+    List<Atom> atomsInThisRes = getAllAtomsInResidueExcept(residueID, "H","N");
+
     for(Atom atom : atomsInThisRes){
       atom.applyTransformation(t);
     }
@@ -520,6 +812,23 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>, Tra
     for(Residue res : getResiduesToEnd(residueID+1)){
       res.applyTransformation(t);
     }
+  }
+
+  private List<Atom> getAllAtomsInResidueExcept(int residueID, String... names){
+    ArrayList<String> atoms = new ArrayList<String>();
+    for(String name : names){
+      atoms.add(name);
+    }
+    ArrayList<Atom> atomsInThisRes = new ArrayList<Atom>(getResidue(residueID).getHeavyAtoms());
+    atomsInThisRes.addAll(getResidue(residueID).getHydrogens());
+    Iterator<Atom> it = atomsInThisRes.iterator();
+    while(it.hasNext()){
+      Atom atom = it.next();
+      if(atoms.contains(atom.getAtomName())){
+        it.remove();
+      }
+    }
+    return atomsInThisRes;
   }
 
   private void applyTransformationToPsiBond(Transformation t, int residueID){
@@ -536,6 +845,15 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>, Tra
     // If the next residue is in a gap, getResiduesToEnd will return all Residues after the gap.
     for(Residue res : getResiduesToEnd(residueID+1)){
       res.applyTransformation(t);
+    }
+  }
+
+  private void applyTransformationToOxygenDihedralBond(Transformation t, int residueID){
+    // in the Psi case, apply the transformation to the O and OXT (if present) atoms,
+    // and then to every residue after this one.
+    Residue residue = getResidue(residueID);
+    if(residue.contains("O")){
+      residue.getAtom("O").applyTransformation(t);
     }
   }
 
@@ -606,6 +924,25 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>, Tra
   }
 
   /**
+  * Return the Oxygen Dihedral Angle for a residue.
+  * @param residueID the residue ID of the residue to return the omega angle of
+  * @return the oxygen dihedral angle - the angle defined by (N)-(CA)-(C)-(O) bond, in degrees,
+  * or 1000 if undefined
+  * @since 0.7.0
+  */
+  public double getOxygenDihedralAngle(int residueID){
+    if(!containsResidue(residueID)){
+      return 1000;
+    }
+    // get the N, CA and C from residueID and the N from residueID+1.
+    Residue current = getResidue(residueID);
+    return calculateDihedralAngle(current.getAtom("N").getCoordinates(),
+                                  current.getAtom("CA").getCoordinates(),
+                                  current.getAtom("C").getCoordinates(),
+                                  current.getAtom("O").getCoordinates());
+  }
+
+  /**
   * Return the Omega Bond Length for a residue.
   * <p>
   * This residue and the previous residue must both be present.
@@ -647,6 +984,20 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>, Tra
   public double getPsiBondLength(int residueID){
     Residue current = getResidue(residueID);
     return current.getAtom("CA").distance(current.getAtom("C"));
+  }
+
+  /**
+  * Return the Oxygen Bond Length for a residue.
+  * <p>
+  * This residue and the previous residue must both be present.
+  * @param residueID the residue ID of the residue to return the omega angle of
+  * @return the length of the omega bond - the (C-1) -- (N) bond, in Angstroms
+  * present
+  * @since 0.7.0
+  */
+  public double getOxygenBondLength(int residueID){
+    Residue current = getResidue(residueID);
+    return current.getAtom("C").distance(current.getAtom("O"));
   }
 
   /*
