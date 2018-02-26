@@ -69,6 +69,7 @@ public class JProtMetrics{
   private static boolean runAngularDistance = false;
   private static boolean runLocalSimilarity = false;
   private static boolean runGDT = false;
+  private static boolean runGDTHA = false;
   private static boolean usePDBs = false;
   private static boolean printChimera = false;
   private static double localSimilarityThreshold = 1.0;
@@ -108,11 +109,7 @@ public class JProtMetrics{
         runGDT = true;
       }
       if(args.contains("--gdt-ha")){
-        runGDT = true;
-        gdtThresholds[0] = 0.5;
-        gdtThresholds[1] = 1.0;
-        gdtThresholds[2] = 2.0;
-        gdtThresholds[3] = 4.0;
+        runGDTHA = true;
       }
       if(args.contains("--ls") || args.contains("--local-similarity")){
         runLocalSimilarity = true;
@@ -169,6 +166,11 @@ public class JProtMetrics{
       if(runAngularDistance) angularDistance();
       if(runLocalSimilarity) localSimilarity(localSimilarityThreshold);
       if(runGDT) globalDistanceTest(gdtThresholds);
+      gdtThresholds[0] = 0.5;
+      gdtThresholds[1] = 1.0;
+      gdtThresholds[2] = 2.0;
+      gdtThresholds[3] = 4.0;
+      if(runGDTHA) globalDistanceTest(gdtThresholds);
     } catch (FileNotFoundException e){
       System.out.println("Could not open required files. Check for existence.");
       System.exit(1);
