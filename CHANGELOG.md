@@ -49,15 +49,29 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - a test to TestProtein to check that all the angles for 1rop are calculated
     correctly.
 - setOmegaAngle(), setPhiAngle, and setPsiAngle() in PolypeptideChain
-- In Residue, the ability to get and set the angles for any of its Rotatable
-  bonds.
+- In Residue, the ability to get and set any of the dihedral and three-atom
+  angles.
 - Initial implementation for VirtualRibosome, constructs a single chain with
   correct bond angles and residues on opposite sides of the backbone.
+- JProtMetrics: new cmd line argument --chimera to specify to print out chimera
+  script instead of pymol script.
 ### Changed
 - Moved SequenceAligner into new package sequence
 - Protein and PolypeptideChain getSequence methods to use new sequence package
 - All structure classes are now transformable.
 - Atom constructors now take doubles for the coordinates rather than Strings.
+- In Metrics, changed the score calculation to be based on the number of
+  residues in the reference structure rather than the number of Residues
+  in the alignment. This makes the scores more stable and makes more
+  sense when evaluating models. If a model only includes a fraction of the
+  residues that are in the reference, it should be penalized for the
+  missing residues.
+### Deprecated
+- JProtMetrics no longer accepts csv files as input. Two pdb files must be
+  provided.
+### Removed
+- method getBondLength() and getBondStrength() in Bond. replaced with
+  getLength() and getStrength().
 
 ## [0.6.4] 2017-10-27
 ### Fixed

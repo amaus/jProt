@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * <p>Metrics is a collection of protein similarity metrics. It consists of Angular Distance,
@@ -57,6 +58,7 @@ public class Metrics{
   private String[] betaResidueIDs;
   private String alphaStrucID;
   private String betaStrucID;
+  private int numResiduesInReference;
 
   /**
   * A constructor that both the distance matrix files. It will calculate the values for the differences.
@@ -69,6 +71,7 @@ public class Metrics{
     // read in the residue IDs for both structures
     Scanner reader = new Scanner(new File(alphaDistancesFileName));
     this.alphaResidueIDs = reader.nextLine().split(",");
+    this.numResiduesInReference = this.alphaResidueIDs.length;
     reader = new Scanner(new File(betaDistancesFileName));
     this.betaResidueIDs = reader.nextLine().split(",");
 
@@ -95,12 +98,13 @@ public class Metrics{
   * It will first perform a sequence alignment and then build the carbon alpha distance
   * matrices out of the residues from that alignment that were matched.
   *
-  * @param prot1 one of the proteins in the comparison
-  * @param prot2 the other protein in the comparison
+  * @param reference the structure to serve as the base of comparison
+  * @param structure the the structure to compare against the reference
   */
-  public Metrics(Protein prot1, Protein prot2){
-    ProteinSequence prot1Sequence = prot1.getSequence();
-    ProteinSequence prot2Sequence = prot2.getSequence();
+  public Metrics(Protein reference, Protein structure){
+    ProteinSequence prot1Sequence = reference.getSequence();
+    ProteinSequence prot2Sequence = structure.getSequence();
+    this.numResiduesInReference = reference.getNumResidues();
     // first we need an alignment of the sequences of these proteins
     Alignment alignment = prot1Sequence.align(prot2Sequence);
     // get masks indicating which residues in each protein have a match in the other protein.
@@ -108,7 +112,7 @@ public class Metrics{
     boolean[] prot2Mask = alignment.getAlignmentMask(prot2Sequence);
 
     // get the residue ids from prot1 that were aligned with residues in prot2
-    Integer[] protOneResIDs = prot1.getResidueIDs(prot1Mask);
+    Integer[] protOneResIDs = reference.getResidueIDs(prot1Mask);
     this.alphaResidueIDs = new String[protOneResIDs.length];
     int i = 0;
     for(Integer id : protOneResIDs){
@@ -117,7 +121,7 @@ public class Metrics{
     }
 
     // get the residue ids from prot2 that were aligned with residues in prot1
-    Integer[] protTwoResIDs = prot2.getResidueIDs(prot2Mask);
+    Integer[] protTwoResIDs = structure.getResidueIDs(prot2Mask);
     this.betaResidueIDs = new String[protTwoResIDs.length];
     i = 0;
     for(Integer id : protTwoResIDs){
@@ -125,13 +129,13 @@ public class Metrics{
       i++;
     }
 
-    this.alphaStrucID = prot1.getProteinName();
-    this.betaStrucID = prot2.getProteinName();
+    this.alphaStrucID = reference.getProteinName();
+    this.betaStrucID = structure.getProteinName();
     // build the distance matrices out of the residues that were aligned
     //this.alphaDistancesMatrix = prot1.calculateCarbonAlphaDistanceMatrix(prot1Mask);
     //this.betaDistancesMatrix = prot2.calculateCarbonAlphaDistanceMatrix(prot2Mask);
-    this.alphaDistancesMatrix = DistanceMatrixCalculator.calculateDistanceMatrix(prot1, prot1Mask);
-    this.betaDistancesMatrix = DistanceMatrixCalculator.calculateDistanceMatrix(prot2, prot2Mask);
+    this.alphaDistancesMatrix = DistanceMatrixCalculator.calculateDistanceMatrix(reference, prot1Mask);
+    this.betaDistancesMatrix = DistanceMatrixCalculator.calculateDistanceMatrix(structure, prot2Mask);
     calculateDifferencesMatrix();
   }
 
@@ -230,12 +234,18 @@ public class Metrics{
   }
 
   /**
-  * A query to get the number of residues
+  * A query to get the number of residues in the alignment.
   * @return the number of residues
   * @since 0.5.0
   */
   public int getNumResidues(){
     return getAlphaResidueIDs().length;
+  }
+
+  // return the number of residues in the reference structure. The scores are based on the percent
+  // of residues that match those in the reference.
+  private int getNumResiduesInReferenceStructure(){
+    return this.numResiduesInReference;
   }
 
   /**
@@ -300,9 +310,9 @@ public class Metrics{
   */
   public ArrayList<UndirectedGraph<Integer>> getLocalSimilarityRegions(double threshold){
     UndirectedGraph<Integer> graph = buildSimilarityGraph(threshold);
-    System.out.println("\nGraph built for structures.");
-    System.out.println("Num Vertices: " + graph.size());
-    System.out.println("Num Edges: " + graph.numEdges());
+    System.out.printf("\nGraph built for structures under threshold %.2f.\n",threshold);
+    System.out.printf("Num Vertices: %d\n",graph.size());
+    System.out.printf("Num Edges: %d\n",graph.numEdges());
     System.out.printf("Density: %.2f\n",graph.density());
     MaxCliqueSolver<Integer> maxCliqueTool = new IncMaxCliqueAdapter();
     //MaxCliqueSolver<Integer> maxCliqueTool = new MausMaxCliqueSolver();
@@ -336,10 +346,14 @@ public class Metrics{
     for(int i = 0; i < thresholds.length; i++){
       double threshold = thresholds[i];
       UndirectedGraph<Integer> graph = buildSimilarityGraph(threshold);
+      //System.out.printf("Num Vertices: %d\n",graph.size());
+      //System.out.printf("Num Edges: %d\n",graph.numEdges());
+      //System.out.printf("Density: %.2f\n",graph.density());
       String fname = graph.getGraphFileName();
       UndirectedGraph<Integer> clique;
       MaxCliqueSolver<Integer> maxCliqueTool = new IncMaxCliqueAdapter();
       //MaxCliqueSolver<Integer> maxCliqueTool = new MausMaxCliqueSolver();
+      long startTime = new Date().getTime();
       if(i == 0){
         clique = maxCliqueTool.findMaxClique(graph);
       } else {
@@ -347,6 +361,10 @@ public class Metrics{
         graph.setGraphFileName(fname);
         clique = maxCliqueTool.findMaxClique(graph);
       }
+      long endTime = new Date().getTime();
+      System.out.printf("\nRegion Found for structures under threshold %.2f.\n",threshold);
+      System.out.printf("%10s |%13s | %10s | %10s | %10s\n", "Threshold", "Num Vertices", "Num Edges", "Density", "Runtime");
+      System.out.printf("%8.2f A | %12d | %10d | %10.2f | %10d\n", threshold, graph.size(), graph.numEdges(), graph.density(), endTime-startTime);
       regions.add(clique);
       lastClique = clique;
     }
@@ -366,9 +384,7 @@ public class Metrics{
   * @since 0.5.0
   */
   public double[][] getGlobalDistanceTestScore(ArrayList<UndirectedGraph<Integer>> regions){
-    // returns an array of 5 numbers, the first 4 are the percent residues under the
-    // thresholds. the last is the score.
-    double numRes = getNumResidues();
+    double numRes = getNumResiduesInReferenceStructure();
     int numRegions = regions.size();
     double[][] ret = new double[numRegions+1][2];
     double numResAve = 0;
@@ -423,6 +439,59 @@ public class Metrics{
       }
     }
     return pymolScript;
+  }
+
+  public ArrayList<String> getChimeraColoringScript(ArrayList<UndirectedGraph<Integer>> regions){
+    ArrayList<String> chimeraScript = new ArrayList<String>();
+    int numRes = getNumResidues();
+    int numRegions = regions.size();
+    int i = 0;
+    //                  Dark Blue  Light Blue  Yellow    Orange
+    //String[] colors = {"#2c7bb6", "#abd9e9", "#ffffbf", "#fdae61"};
+    String[] colors = {"green", "cyan", "yellow", "orange"};
+    for(UndirectedGraph<Integer> region : regions){
+      chimeraScript.add(String.format("color %s #0:%s; color %s #1:%s",
+                      colors[i], getNodesString(region, ",", getAlphaResidueIDs()),
+                      colors[i], getNodesString(region, ",", getBetaResidueIDs())));
+      i++;
+      if(i==3){
+        break;
+      }
+    }
+    //                      Red
+    chimeraScript.add("color #d7191c");
+    Collections.reverse(chimeraScript);
+    return chimeraScript;
+  }
+
+  /**
+  * Return the corresponding residue IDs for those residues in the first Protein in this region.
+  * The first protein is that passed as the first argument to the constructor.
+  * @param region one of the regions of similarity returned by either getGlobalDistanceRegions or
+  * getLocalSimilarityRegions
+  * @return an ArrayList containing the residue IDs of the residues in that region.
+  */
+  public ArrayList<Integer> getProt1ResIDsInRegion(UndirectedGraph<Integer> region){
+    return getResIDsInRegion(region, getAlphaResidueIDs());
+  }
+
+  /**
+  * Return the corresponding residue IDs for those residues in the second Protein in this region.
+  * The second protein is that passed as the second argument to the constructor.
+  * @param region one of the regions of similarity returned by either getGlobalDistanceRegions or
+  * getLocalSimilarityRegions
+  * @return an ArrayList containing the residue IDs of the residues in that region.
+  */
+  public ArrayList<Integer> getProt2ResIDsInRegion(UndirectedGraph<Integer> region){
+    return getResIDsInRegion(region, getBetaResidueIDs());
+  }
+
+  private ArrayList<Integer> getResIDsInRegion(UndirectedGraph<Integer> region, String[] resIDs){
+    ArrayList<Integer> ids = new ArrayList<Integer>();
+    for(Node<Integer> node : region){
+      ids.add(Integer.parseInt(resIDs[node.get()]));
+    }
+    return ids;
   }
 
   /*

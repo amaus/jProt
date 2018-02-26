@@ -16,6 +16,12 @@ CB   2HB
 OG   HG
 !defined dihedral angles
 N    CA    CB    OG
+!defined angle triplets
+N   CA  C
+CA  C   O
+CA  C   OXT
+N   CA  CB
+CA  CB  OG
 !atom types
 # column 1: atom name
 # column 2: AMBER all atom atomtype

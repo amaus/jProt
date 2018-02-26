@@ -224,7 +224,7 @@ public class Protein implements Iterable<PolypeptideChain>, Transformable{
   /**
   * Return the residue IDs of all the residues in this Protein
   *
-  * @return an array of Integers holding the residue IDs
+  * @return an array of Integers holding the residue IDs in order
   */
   public Integer[] getResidueIDs(){
     boolean[] mask = new boolean[getNumResidues()];

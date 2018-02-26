@@ -45,16 +45,18 @@ public class Bond {
     /**
      * Returns the length of the bond
      * @return the length of the bond in Angstroms.
+     * @since 0.7.0
     */
-    public double getBondLength(){
+    public double getLength(){
         return this.getAtomOne().distance(this.getAtomTwo());
     }
 
     /**
      * Returns the strength of the bond.
      * @return the strength of the bond, 1 for single, 2 for double, etc...
+     * @since 0.7.0
     */
-    public int getBondStrength(){
+    public int getStrength(){
         return this.bondStrength;
     }
 

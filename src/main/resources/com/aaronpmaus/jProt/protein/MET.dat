@@ -22,6 +22,14 @@ CE   2HE
 CE   3HE
 !defined dihedral angles
 N    CA    CB    CG    SD    CE
+!defined angle triplets
+N   CA  C
+CA  C   O
+CA  C   OXT
+N   CA  CB
+CA  CB  CG
+CB  CG  SD
+CG  SD  CE
 !atom types
 # column 1: atom name
 # column 2: AMBER all atom atomtype

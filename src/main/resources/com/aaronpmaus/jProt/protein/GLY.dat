@@ -10,6 +10,11 @@ N   2H
 N   3H
 CA  1HA
 CA  2HA
+!defined dihedral angles
+!defined angle triplets
+N   CA  C
+CA  C   O
+CA  C   OXT
 !atom types
 # column 1: atom name
 # column 2: AMBER all atom atomtype

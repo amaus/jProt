@@ -24,6 +24,15 @@ CD2  2HD2
 CD2  3HD2
 !defined dihedral angles
 N    CA    CB    CG    CD1
+!defined angle triplets
+N   CA  C
+CA  C   O
+CA  C   OXT
+N   CA  CB
+CA  CB  CG
+CB  CG  CD1
+# CB  CG  CD2
+CD1 CG  CD2
 !atom types
 # column 1: atom name
 # column 2: AMBER all atom atomtype

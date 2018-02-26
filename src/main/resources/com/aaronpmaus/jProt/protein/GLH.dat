@@ -23,6 +23,16 @@ CG   2HG
 OE2  HE2
 !defined dihedral angles
 N   CA   CB   CG   CD   OE2
+!defined angle triplets
+N   CA  C
+CA  C   O
+CA  C   OXT
+N   CA  CB
+CA  CB  CG
+CB  CG  CD
+CG  CD  OE1
+# CG  CD  OE2
+OE1 CD  OE2
 !atom types
 # column 1: atom name
 # column 2: AMBER all atom atomtype

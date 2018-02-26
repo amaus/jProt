@@ -28,6 +28,15 @@ NZ   1HZ
 NZ   2HZ
 !defined dihedral angles
 N    CA    CB   CG   CD   CE   NZ
+!defined angle triplets
+N   CA  C
+CA  C   O
+CA  C   OXT
+N   CA  CB
+CA  CB  CG
+CB  CG  CD
+CG  CD  CE
+CD  CE  NZ
 !atom types
 # column 1: atom name
 # column 2: AMBER all atom atomtype
