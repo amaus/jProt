@@ -39,14 +39,6 @@ import java.util.Collections;
  * relaxing out idea of "the same"). Taking the average of the percent of residues under each
  * threshold gives us a score (credit to Zemla for the recipe for this score).</p>
  *
- *
- * <p>A note on the file formats. All the distance matrix files use the same format. format: csv.
- * The first line is a comma separated list all all residue IDs. Each line after that is a row
- * containing that residues distances to every other residue. This file should only have values in
- * the upper right hand triangle of the matrix. every other value should be a single space. There
- * should be no value for a residues distance to itself. The differences file is formatted the same,
- * except the values contains the difference of the two elements from the distances matrices.</p>
- *
  * @version 0.5.0
  * @since 0.5.0
 */
