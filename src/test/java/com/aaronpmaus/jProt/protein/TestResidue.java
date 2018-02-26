@@ -1131,18 +1131,18 @@ public class TestResidue{
   }
 
   @Test
-  public void testSetRotatableBondAngle(){
+  public void testSetDihedralAngle(){
     Residue res = new Residue("ARG",1);
-    res.setRotatableBondAngle("CA", "CB", 30);
+    res.setDihedralAngle("CA", "CB", 30);
     assertTrue(Math.abs(res.getDihedralAngle("CA", "CB") - 30) < 0.0000000001);
 
-    res.setRotatableBondAngle("CB", "CG", 60);
+    res.setDihedralAngle("CB", "CG", 60);
     assertTrue(Math.abs(res.getDihedralAngle("CB", "CG") - 60) < 0.0000000001);
 
-    res.setRotatableBondAngle("CG", "CD", 90);
+    res.setDihedralAngle("CG", "CD", 90);
     assertTrue(Math.abs(res.getDihedralAngle("CG", "CD") - 90) < 0.0000000001);
 
-    res.setRotatableBondAngle("CD", "NE", 120);
+    res.setDihedralAngle("CD", "NE", 120);
     assertTrue(Math.abs(res.getDihedralAngle("CD", "NE") - 120) < 0.0000000001);
 
   }
@@ -1198,6 +1198,36 @@ public class TestResidue{
 
     assertEquals(bond4.getAtomOne().getAtomName(), "CD");
     assertEquals(bond4.getAtomTwo().getAtomName(), "NE");
+  }
+
+  @Test
+  public void testSetRotatableBondLength(){
+    Residue res = new Residue("ARG",1);
+    // ensure that setting the bond length for a pair of residues correctly sets their length and
+    // that the distance between the CB and another atom in the residue remains invariant.
+    double cbNeDistance = res.getDistance("CB", "NE");
+    double caCDistance = res.getDistance("CA", "C");
+    res.setRotatableBondLength("CA","CB",3.14);
+    assertTrue(Math.abs(res.getDistance("CA","CB") - 3.14) < 0.000000001);
+    assertTrue(Math.abs(res.getDistance("CB","NE") - cbNeDistance) < 0.000000001);
+    // Also ensure that changing the CA-CB distance did not affect backbone atoms after CA
+    assertTrue(Math.abs(res.getDistance("CA","C") - caCDistance) < 0.000000001);
+  }
+
+  @Test
+  public void testSetAngle(){
+    Residue res = new Residue("ARG", 1);
+    double dihedralAngle = res.getDihedralAngle("CA","CB");
+    res.setAngle("N", "CA", "CB", 30.0);
+    assertTrue(Math.abs(res.getAngle("N","CA","CB") - 30.0) < 0.000000001);
+    // ensure the dihedral angle hasn't changed
+    assertTrue(Math.abs(res.getDihedralAngle("CA","CB") - dihedralAngle) < 0.000000001);
+
+    dihedralAngle = res.getDihedralAngle("CB","CG");
+    res.setAngle("CA", "CB", "CG", 60.0);
+    assertTrue(Math.abs(res.getAngle("CA","CB","CG") - 60.0) < 0.000000001);
+    // ensure the dihedral angle hasn't changed
+    assertTrue(Math.abs(res.getDihedralAngle("CB","CG") - dihedralAngle) < 0.000000001);
   }
 
   private void assertAnglesInvariant(ArrayList<Double> before, ArrayList<Double> after){

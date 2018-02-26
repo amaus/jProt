@@ -26,6 +26,13 @@ CE1  HE1
 NE2  HE2
 !defined dihedral angles
 N    CA   CB   CG   ND1
+!defined angle triplets
+N   CA  C
+CA  C   O
+CA  C   OXT
+N   CA  CB
+CA  CB  CG
+CB  CG  ND1
 !atom types
 # column 1: atom name
 # column 2: AMBER all atom atomtype
