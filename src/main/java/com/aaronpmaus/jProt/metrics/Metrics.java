@@ -261,8 +261,6 @@ public class Metrics{
     }
     Vector alphaVec = buildVector(getAlphaDistancesMatrix());
     Vector betaVec = buildVector(getBetaDistancesMatrix());
-    System.out.println(alphaVec);
-    System.out.println(betaVec);
     return alphaVec.angle(betaVec)*100/90; // adjust the range to be 0-100
   }
 
@@ -312,9 +310,9 @@ public class Metrics{
   */
   public ArrayList<UndirectedGraph<Integer>> getLocalSimilarityRegions(double threshold){
     UndirectedGraph<Integer> graph = buildSimilarityGraph(threshold);
-    System.out.println("\nGraph built for structures.");
-    System.out.println("Num Vertices: " + graph.size());
-    System.out.println("Num Edges: " + graph.numEdges());
+    System.out.printf("\nGraph built for structures under threshold %.2f.\n",threshold);
+    System.out.printf("Num Vertices: %d\n",graph.size());
+    System.out.printf("Num Edges: %d\n",graph.numEdges());
     System.out.printf("Density: %.2f\n",graph.density());
     MaxCliqueSolver<Integer> maxCliqueTool = new IncMaxCliqueAdapter();
     //MaxCliqueSolver<Integer> maxCliqueTool = new MausMaxCliqueSolver();
@@ -348,10 +346,14 @@ public class Metrics{
     for(int i = 0; i < thresholds.length; i++){
       double threshold = thresholds[i];
       UndirectedGraph<Integer> graph = buildSimilarityGraph(threshold);
+      //System.out.printf("Num Vertices: %d\n",graph.size());
+      //System.out.printf("Num Edges: %d\n",graph.numEdges());
+      //System.out.printf("Density: %.2f\n",graph.density());
       String fname = graph.getGraphFileName();
       UndirectedGraph<Integer> clique;
       MaxCliqueSolver<Integer> maxCliqueTool = new IncMaxCliqueAdapter();
       //MaxCliqueSolver<Integer> maxCliqueTool = new MausMaxCliqueSolver();
+      long startTime = new Date().getTime();
       if(i == 0){
         clique = maxCliqueTool.findMaxClique(graph);
       } else {
@@ -359,6 +361,10 @@ public class Metrics{
         graph.setGraphFileName(fname);
         clique = maxCliqueTool.findMaxClique(graph);
       }
+      long endTime = new Date().getTime();
+      System.out.printf("\nRegion Found for structures under threshold %.2f.\n",threshold);
+      System.out.printf("%10s |%13s | %10s | %10s | %10s\n", "Threshold", "Num Vertices", "Num Edges", "Density", "Runtime");
+      System.out.printf("%8.2f A | %13d | %10d | %10.2f | %10d\n", threshold, graph.size(), graph.numEdges(), graph.density(), endTime-startTime);
       regions.add(clique);
       lastClique = clique;
     }
