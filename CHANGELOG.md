@@ -19,12 +19,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Security
 [None]
 
-## [0.7.0]
+## [0.7.0] - 2018-02-26
 ### Added
-- Feature to the JProtMetrics executable. It now takes the cmd line flag
-  --gdt-plot and prints out the percent of residues for each threshold in the
-  range 0.5 to 10.0 in 0.5 increments. This data can be used to produce
-  GDT Plots like those on prediction center.
 - package sequence
   -  Class Sequence w/ subclasses ProteinSequence, DNASequence, RNASequence
     - sequences of subclass types can be aligned
@@ -49,12 +45,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - a test to TestProtein to check that all the angles for 1rop are calculated
     correctly.
 - setOmegaAngle(), setPhiAngle, and setPsiAngle() in PolypeptideChain
-- In Residue, the ability to get and set any of the dihedral and three-atom
-  angles.
+- In Residue, the ability to get and set any of the dihedral angles, three-atom
+  angles, and bond lengths.
 - Initial implementation for VirtualRibosome, constructs a single chain with
   correct bond angles and residues on opposite sides of the backbone.
-- JProtMetrics: new cmd line argument --chimera to specify to print out chimera
-  script instead of pymol script.
+- JProtMetrics: new cmd line arguments
+  - --chimera to specify to print out chimera script instead of pymol script.
+  - --gdt-plot to and prints out the percent of residues for each threshold in
+    the range 0.5 to 10.0 in 0.5 increments. This data can be used to produce
+    GDT Plots like those on prediction center.
+
 ### Changed
 - Moved SequenceAligner into new package sequence
 - Protein and PolypeptideChain getSequence methods to use new sequence package
