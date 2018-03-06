@@ -32,13 +32,6 @@ import java.io.IOException;
 * {@code Protein prot = PDBFileIO.readInPDBFile(in, proteinName)}
 * <p>
 *
-* A protein by default has hydrogen atoms disabled. They can be enabled via the {@code
-* enableHydrogens()} method. When {@code enableHydrogens()} is called, all hydrogens read in from
-* the pdb structure will be added to the protein. TODO: Automatically build all hydrogens when when
-* a protein is constructed so that when they are enabled ({@code enableHydrogens()}), all hydrogens
-* in the structure are added to the protein. Hydrogens can also be disabled with the method {@code
-* disableHydrogens()}.
-* <p>
 * @version 0.6.0
 * @since 0.6.0
 */
@@ -48,7 +41,6 @@ public class Protein implements Iterable<PolypeptideChain>, Transformable{
   private ArrayList<Bond> disulfideBonds;
   private UndirectedGraph<Atom> atoms;
   private PDBFileIO pdbIO;
-  private boolean hydrogensEnabled = false;
 
   /**
   * Create an instance of a Protein. All chains will then have to be added to this instance.
@@ -290,38 +282,6 @@ public class Protein implements Iterable<PolypeptideChain>, Transformable{
     return false;
   }
 
-  public void enableHydrogens(){
-    // set the hydrogensEnabled flag in Protein (instance variable)
-    this.hydrogensEnabled = true;
-    // tell every chain to enable hydrogens, then rebuild the atoms graph
-    // getting all the bonds from each chain
-    this.atoms = new UndirectedGraph<Atom>();
-    for(PolypeptideChain chain : this){
-      chain.enableHydrogens();
-      addToProteinGraph(chain);
-    }
-    // Add all edges for inter-chain disulfide bonds.
-    for(Bond bond : this.disulfideBonds){
-      String atomOneChain = getAtomChainID(bond.getAtomOne());
-      String atomTwoChain = getAtomChainID(bond.getAtomTwo());
-      if(!atomOneChain.equals(atomTwoChain)){
-        atoms.addEdge(bond.getAtomOne(), bond.getAtomTwo());
-      }
-    }
-  }
-
-  public void disableHydrogens(){
-    // set the hydrogensEnabled flag in Protein (instance variable)
-    this.hydrogensEnabled = false;
-    // tell every chain to enable hydrogens, then rebuild the atoms graph
-    // getting all the bonds from each chain
-    this.atoms = new UndirectedGraph<Atom>();
-    for(PolypeptideChain chain : this){
-      chain.disableHydrogens();
-      addToProteinGraph(chain);
-    }
-  }
-
   private String getAtomChainID(Atom atom){
     String chainID;
     for(PolypeptideChain chain : this){
@@ -330,13 +290,6 @@ public class Protein implements Iterable<PolypeptideChain>, Transformable{
       }
     }
     throw new IllegalStateException(String.format("Atom \n%sNot in Protein",atom));
-  }
-
-  /**
-  * @return true if hydrogens are enabled for this protein
-  */
-  public boolean hydrogensEnabled(){
-    return this.hydrogensEnabled;
   }
 
   /**

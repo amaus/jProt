@@ -107,20 +107,6 @@ public class TestPolypeptideChain{
   }
 
   @Test
-  public void testHydrogensToggle(){
-    chain.enableHydrogens();
-    Collection<Bond> bonds = chain.getBonds();
-    assertEquals(bonds.size(), 172);
-
-    chain.disableHydrogens();
-    bonds = chain.getBonds();
-    assertEquals(bonds.size(), 87);
-    for(Bond bond : bonds){
-      assertFalse(bond.containsHydrogen());
-    }
-  }
-
-  @Test
   public void testDihedralAngles(){
     Protein prot = VirtualRibosome.synthesizeProtein(new ProteinSequence("IAMSTARSTFF"),
                                                      "strstf");

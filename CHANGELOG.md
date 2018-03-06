@@ -54,7 +54,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - --gdt-plot to and prints out the percent of residues for each threshold in
     the range 0.5 to 10.0 in 0.5 increments. This data can be used to produce
     GDT Plots like those on prediction center.
-
 ### Changed
 - Moved SequenceAligner into new package sequence
 - Protein and PolypeptideChain getSequence methods to use new sequence package
@@ -72,6 +71,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 - method getBondLength() and getBondStrength() in Bond. replaced with
   getLength() and getStrength().
+- all methods to do with enabling or disabling hydrogens in a protein. This was
+  too much extra complication. A protein by default will have all the atoms
+  included in the pdb if read in or all heavy atoms and hydrogens is built
+  synthetically.
 
 ## [0.6.4] 2017-10-27
 ### Fixed

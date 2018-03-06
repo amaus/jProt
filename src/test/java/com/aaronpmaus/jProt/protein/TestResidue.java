@@ -34,75 +34,23 @@ public class TestResidue{
   * setting it as the Carboxyl Terminus and enabling hydrogens
   *
   * @param res the Residue to test
-  * @param numHeavyAtoms the number of heavy atoms excluding the carboxyl terminus oxygen
   * @param numAllAtoms the number of atoms including the carboxyl terminus oxygen and all hydrogens
-  * @param numHeavyBonds the number of heavy atom bonds excluding the carboxyl terminus oxygen
   * @param numAllBonds the number of bonds including the carboxyl terminus oxygen and all hydrogens
   */
-  private void testResidueNumAtomsAndBonds(Residue res, int numHeavyAtoms, int numAllAtoms,
-      int numHeavyAtomBonds, int numAllBonds){
-
-    // res starts out with hydrogens disabled
-    assertEquals(res.getNumAtoms(), numHeavyAtoms);
-    assertEquals(res.getBonds().size(),numHeavyAtomBonds);
+  private void testResidueNumAtomsAndBonds(Residue res, int numAllAtoms, int numAllBonds){
 
     // res starts out not as Carboxyl Terminus
     assertFalse(res.contains("OXT"));
+    assertEquals(res.getNumAtoms(), numAllAtoms-1);
+    assertEquals(res.getBonds().size(),numAllBonds-1);
+
     // set as Carboxyl Terminus and test num atoms, bonds, and that it contains OXT
     res.setAsCarboxylTerminus();
-    assertEquals(res.getNumAtoms(), numHeavyAtoms+1);
-    assertEquals(res.getBonds().size(),numHeavyAtomBonds+1);
-    assertTrue(res.contains("OXT"));
-
-    // Enable Hydrogens and test that the Residue contains the correct # of atoms and bonds
-    res.enableHydrogens();
     assertEquals(res.getNumAtoms(), numAllAtoms);
     assertEquals(res.getBonds().size(),numAllBonds);
+    assertTrue(res.contains("OXT"));
 
-    // Disable Hydrogens and test that it still contains the correct # of atoms and bonds.
-    res.disableHydrogens();
-    assertEquals(res.getNumAtoms(), numHeavyAtoms+1);
-    assertEquals(res.getBonds().size(),numHeavyAtomBonds+1);
-  }
 
-  private void testResidueEnableDisableHydrogens(Residue res, int numHydrogens){
-    // DISABLE HYDROGENS and ensure that there are no hydrogens in this residue
-    res.disableHydrogens();
-    for(Atom atom : res){
-      assertFalse(atom.getElement().equals("H"));
-    }
-    for(Bond bond : res.getBonds()){
-      assertFalse(bond.containsHydrogen());
-    }
-
-    // ENABLE HYDROGENS and ensure that there are the correct number of hydrogens and bonds to
-    // to hydrogens
-    res.enableHydrogens();
-
-    int counter = 0;
-    for(Atom atom : res){
-      if(atom.getElement().equals("H")){
-        counter++;
-      }
-    }
-    assertEquals(counter, numHydrogens);
-
-    counter = 0;
-    for(Bond bond : res.getBonds()){
-      if(bond.containsHydrogen()){
-        counter++;
-      }
-    }
-    assertEquals(counter, numHydrogens);
-
-    // DISABLE HYDROGENS and ensure that there are once again no hydrogens in this residue
-    res.disableHydrogens();
-    for(Atom atom : res){
-      assertFalse(atom.getElement().equals("H"));
-    }
-    for(Bond bond : res.getBonds()){
-      assertFalse(bond.containsHydrogen());
-    }
   }
 
   // RES {HeavyAtoms, Hydrogens} {main-bonds, h-bonds)}
@@ -117,18 +65,14 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("ALA"));
     assertTrue(res.getName().equals("Alanine"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 5, 11, 4, 10);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 5);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 11, 10);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
     assertTrue(res.contains("O"));
     assertTrue(res.contains("N"));
     assertTrue(res.contains("CB"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -150,10 +94,8 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("ARG"));
     assertTrue(res.getName().equals("Arginine"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 11, 25, 10, 24);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 13);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 25, 24);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
@@ -166,8 +108,6 @@ public class TestResidue{
     assertTrue(res.contains("CZ"));
     assertTrue(res.contains("NH1"));
     assertTrue(res.contains("NH2"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -196,10 +136,8 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("ASN"));
     assertTrue(res.getName().equals("Asparagine"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 8, 15, 7, 14);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 6);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 15, 14);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
@@ -209,8 +147,6 @@ public class TestResidue{
     assertTrue(res.contains("CG"));
     assertTrue(res.contains("OD1"));
     assertTrue(res.contains("ND2"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -232,10 +168,8 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("ASP"));
     assertTrue(res.getName().equals("Aspartic Acid"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 8, 13, 7, 12);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 4);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 13, 12);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
@@ -245,8 +179,6 @@ public class TestResidue{
     assertTrue(res.contains("CG"));
     assertTrue(res.contains("OD1"));
     assertTrue(res.contains("OD2"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -266,10 +198,8 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("ASH"));
     assertTrue(res.getName().equals("Aspartic Acid"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 8, 14, 7, 13);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 5);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 14, 13);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
@@ -279,8 +209,6 @@ public class TestResidue{
     assertTrue(res.contains("CG"));
     assertTrue(res.contains("OD1"));
     assertTrue(res.contains("OD2"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -301,18 +229,14 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("CYS"));
     assertTrue(res.getName().equals("Cysteine"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 6, 11, 5, 10);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 4);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 11, 10);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
     assertTrue(res.contains("O"));
     assertTrue(res.contains("CB"));
     assertTrue(res.contains("SG"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -332,17 +256,13 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("CYH"));
     assertTrue(res.getName().equals("Cysteine"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 6, 12, 5, 11);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 5);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 12, 11);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
     assertTrue(res.contains("O"));
     assertTrue(res.contains("N"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -363,10 +283,8 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("GLN"));
     assertTrue(res.getName().equals("Glutamine"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 9, 18, 8, 17);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 8);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 18, 17);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
@@ -377,8 +295,6 @@ public class TestResidue{
     assertTrue(res.contains("CD"));
     assertTrue(res.contains("OE1"));
     assertTrue(res.contains("NE2"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -402,10 +318,8 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("GLU"));
     assertTrue(res.getName().equals("Glutamic Acid"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 9, 16, 8, 15);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 6);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 16, 15);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
@@ -416,8 +330,6 @@ public class TestResidue{
     assertTrue(res.contains("CD"));
     assertTrue(res.contains("OE1"));
     assertTrue(res.contains("OE2"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -438,10 +350,8 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("GLH"));
     assertTrue(res.getName().equals("Glutamic Acid"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 9, 17, 8, 16);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 7);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 17, 16);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
@@ -452,8 +362,6 @@ public class TestResidue{
     assertTrue(res.contains("CD"));
     assertTrue(res.contains("OE1"));
     assertTrue(res.contains("OE2"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -475,17 +383,13 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("GLY"));
     assertTrue(res.getName().equals("Glycine"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 4, 8, 3, 7);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 3);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 8, 7);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
     assertTrue(res.contains("O"));
     assertTrue(res.contains("N"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("1HA"));
@@ -503,10 +407,8 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("HIS"));
     assertTrue(res.getName().equals("Histidine"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 10, 18, 10, 18);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 7);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 18, 18);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
@@ -518,8 +420,6 @@ public class TestResidue{
     assertTrue(res.contains("CD2"));
     assertTrue(res.contains("CE1"));
     assertTrue(res.contains("NE2"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -542,10 +442,8 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("HID"));
     assertTrue(res.getName().equals("Histidine"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 10, 18, 10, 18);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 7);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 18, 18);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
@@ -557,8 +455,6 @@ public class TestResidue{
     assertTrue(res.contains("CD2"));
     assertTrue(res.contains("CE1"));
     assertTrue(res.contains("NE2"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -581,10 +477,8 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("HIE"));
     assertTrue(res.getName().equals("Histidine"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 10, 18, 10, 18);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 7);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 18, 18);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
@@ -596,8 +490,6 @@ public class TestResidue{
     assertTrue(res.contains("CD2"));
     assertTrue(res.contains("CE1"));
     assertTrue(res.contains("NE2"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -620,10 +512,8 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("HIP"));
     assertTrue(res.getName().equals("Histidine"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 10, 19, 10, 19);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 8);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 19, 19);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
@@ -635,8 +525,6 @@ public class TestResidue{
     assertTrue(res.contains("CD2"));
     assertTrue(res.contains("CE1"));
     assertTrue(res.contains("NE2"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -660,10 +548,8 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("ILE"));
     assertTrue(res.getName().equals("Isoleucine"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 8, 20, 7, 19);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 11);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 20, 19);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
@@ -673,8 +559,6 @@ public class TestResidue{
     assertTrue(res.contains("CG1"));
     assertTrue(res.contains("CG2"));
     assertTrue(res.contains("CD1"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -701,10 +585,8 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("LEU"));
     assertTrue(res.getName().equals("Leucine"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 8, 20, 7, 19);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 11);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 20, 19);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
@@ -714,8 +596,6 @@ public class TestResidue{
     assertTrue(res.contains("CG"));
     assertTrue(res.contains("CD1"));
     assertTrue(res.contains("CD2"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -742,10 +622,8 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("LYN"));
     assertTrue(res.getName().equals("Lysine"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 9, 22, 8, 21);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 12);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 22, 21);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
@@ -756,8 +634,6 @@ public class TestResidue{
     assertTrue(res.contains("CD"));
     assertTrue(res.contains("CE"));
     assertTrue(res.contains("NZ"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -785,10 +661,8 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("LYS"));
     assertTrue(res.getName().equals("Lysine"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 9, 23, 8, 22);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 13);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 23, 22);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
@@ -799,8 +673,6 @@ public class TestResidue{
     assertTrue(res.contains("CD"));
     assertTrue(res.contains("CE"));
     assertTrue(res.contains("NZ"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -829,10 +701,8 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("MET"));
     assertTrue(res.getName().equals("Methionine"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 8, 18, 7, 17);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 9);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 18, 17);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
@@ -842,8 +712,6 @@ public class TestResidue{
     assertTrue(res.contains("CG"));
     assertTrue(res.contains("SD"));
     assertTrue(res.contains("CE"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -868,10 +736,8 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("PHE"));
     assertTrue(res.getName().equals("Phenylalanine"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 11, 21, 11, 21);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 9);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 21, 21);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
@@ -884,8 +750,6 @@ public class TestResidue{
     assertTrue(res.contains("CE1"));
     assertTrue(res.contains("CE2"));
     assertTrue(res.contains("CZ"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -909,10 +773,8 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("PRO"));
     assertTrue(res.getName().equals("Proline"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 7, 15, 7, 15);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 7);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 15, 15);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
@@ -921,8 +783,6 @@ public class TestResidue{
     assertTrue(res.contains("CB"));
     assertTrue(res.contains("CG"));
     assertTrue(res.contains("CD"));
-
-    res.enableHydrogens();
 
     assertFalse(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -946,10 +806,8 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("SER"));
     assertTrue(res.getName().equals("Serine"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 6, 12, 5, 11);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 5);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 12, 11);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
@@ -957,8 +815,6 @@ public class TestResidue{
     assertTrue(res.contains("N"));
     assertTrue(res.contains("CB"));
     assertTrue(res.contains("OG"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -979,10 +835,8 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("THR"));
     assertTrue(res.getName().equals("Threonine"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 7, 15, 6, 14);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 7);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 15, 14);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
@@ -991,8 +845,6 @@ public class TestResidue{
     assertTrue(res.contains("CB"));
     assertTrue(res.contains("OG1"));
     assertTrue(res.contains("CG2"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -1015,10 +867,8 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("TRP"));
     assertTrue(res.getName().equals("Tryptophan"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 14, 25, 15, 26);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 10);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 25, 26);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
@@ -1034,8 +884,6 @@ public class TestResidue{
     assertTrue(res.contains("CZ2"));
     assertTrue(res.contains("CZ3"));
     assertTrue(res.contains("CH2"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -1061,10 +909,8 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("TYR"));
     assertTrue(res.getName().equals("Tyrosine"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 12, 22, 12, 22);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 9);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 22, 22);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
@@ -1078,8 +924,6 @@ public class TestResidue{
     assertTrue(res.contains("CE2"));
     assertTrue(res.contains("CZ"));
     assertTrue(res.contains("OH"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));
@@ -1104,10 +948,8 @@ public class TestResidue{
     assertTrue(res.getThreeLetterName().equals("VAL"));
     assertTrue(res.getName().equals("Valine"));
 
-    // (Residue, numHeavyAtoms, numAllAtoms, numHeavyAtomBonds, numAllBonds)
-    testResidueNumAtomsAndBonds(res, 7, 17, 6, 16);
-    // (Residue, numHydrogens)
-    testResidueEnableDisableHydrogens(res, 9);
+    // (Residue, numAllAtoms, numAllBonds)
+    testResidueNumAtomsAndBonds(res, 17, 16);
 
     assertTrue(res.contains("C"));
     assertTrue(res.contains("CA"));
@@ -1116,8 +958,6 @@ public class TestResidue{
     assertTrue(res.contains("CB"));
     assertTrue(res.contains("CG1"));
     assertTrue(res.contains("CG2"));
-
-    res.enableHydrogens();
 
     assertTrue(res.contains("H"));
     assertTrue(res.contains("HA"));

@@ -212,33 +212,6 @@ public class PolypeptideChain extends Molecule implements Iterable<Residue>, Tra
     return new ProteinSequence(seq);
   }
 
-  /**
-  * Add hydrogens to this PolypeptideChain.
-  */
-  public void enableHydrogens(){
-    // for each residue in this chain, get add all its bonds (now containing hydrogens) to
-    // this chain.
-    for(Residue residue : this){
-      residue.enableHydrogens();
-      addBondsFromResidue(residue);
-    }
-  }
-
-  /**
-  * Remove all hydrogens from this chain.
-  */
-  public void disableHydrogens(){
-    for(Residue residue : this){
-      for(Bond bond : residue.getBondsToHydrogens()){
-        this.removeBond(bond); // from superclass Molecule
-      }
-      for(Atom hydrogen : residue.getHydrogens()){
-        this.removeAtom(hydrogen); // from superclass Molecule
-      }
-      residue.disableHydrogens();
-    }
-  }
-
   private Collection<Residue> getResidues(){
     return this.residues;
   }

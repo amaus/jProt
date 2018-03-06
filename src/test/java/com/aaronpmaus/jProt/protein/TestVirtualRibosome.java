@@ -35,7 +35,6 @@ public class TestVirtualRibosome{
   public void setup() throws IOException{
     ProteinSequence seq = new ProteinSequence("IAMSTARSTFF");
     prot = VirtualRibosome.synthesizeProtein(seq, "strstf");
-    prot.enableHydrogens();
     chain = prot.getChain("A");
 
     Residue phe = chain.getResidue(10);

@@ -39,7 +39,6 @@ public class Residue implements Iterable<Atom>, Transformable{
   private final int residueID;
   private boolean residueComplete = true;
   private static int maxResidueID = 0;
-  private boolean hydrogensEnabled = false;
   private boolean isCarboxylTerminus = false;
 
   // valid keys are the atomNames: CA, CB, CD, CD1, CD2, CE, C, O, N, etc...
@@ -111,7 +110,6 @@ public class Residue implements Iterable<Atom>, Transformable{
   * @param atoms the atoms in this residue
   */
   public Residue(String threeLetterName, int residueID, Collection<Atom> atoms) {
-    this.hydrogensEnabled = true;
     this.threeLetterName = threeLetterName;
     this.oneLetterName = Residue.lookUpOneLetterName(this.threeLetterName);
     this.name = Residue.lookUpFullName(this.threeLetterName);
@@ -126,20 +124,19 @@ public class Residue implements Iterable<Atom>, Transformable{
     this.hydrogens = new HashMap<String, Atom>();
     this.bondsToHydrogens = new ArrayList<Bond>();
     this.definedDihedralAngles = new ArrayList<String>();
-    this.atomsInOrder = new ArrayList<String>();
-    this.atomsInOrder.add("N");
-    this.atomsInOrder.add("CA");
-    this.atomsInOrder.add("C");
-    this.atomsInOrder.add("O");
-    this.atomsInOrder.add("OXT");
     this.heavyAtomHydrogens = new HashMap<String, ArrayList<String>>();
     this.rotatableBonds = new ArrayList<Bond>();
     this.angleTriplets = new ArrayList<AngleTriple>();
     this.atomsGraph = new Graph<Atom>();
+    this.atomsInOrder = new ArrayList<String>();
+    this.atomsInOrder.add("N");
+    this.atomsInOrder.add("CA");
     initializeAminoAcid(this.threeLetterName+".dat", atoms);
+    this.atomsInOrder.add("C");
+    this.atomsInOrder.add("O");
+    this.atomsInOrder.add("OXT");
     Collections.sort(this.bonds, new ResidueBondComparator());
     Collections.sort(this.bondsToHydrogens, new ResidueBondComparator());
-    this.hydrogensEnabled = false;
   }
 
   // For Initializing all Residues:
@@ -272,7 +269,7 @@ public class Residue implements Iterable<Atom>, Transformable{
   */
   public Atom getAtom(String atomName){
     Atom atom = this.heavyAtoms.get(atomName);
-    if(this.hydrogensEnabled() && atom == null){
+    if(atom == null){
       atom = this.hydrogens.get(atomName);
     }
     if(atom == null){
@@ -291,7 +288,7 @@ public class Residue implements Iterable<Atom>, Transformable{
     if(this.heavyAtoms.containsKey(atomName)){
       return true;
     }
-    if(this.hydrogensEnabled() && this.hydrogens.containsKey(atomName)){
+    if(this.hydrogens.containsKey(atomName)){
       return true;
     }
     return false;
@@ -340,9 +337,7 @@ public class Residue implements Iterable<Atom>, Transformable{
   */
   public Collection<Bond> getBonds(){
     ArrayList<Bond> bonds = new ArrayList<Bond>(this.bonds);
-    if(this.hydrogensEnabled()){
-      bonds.addAll(getBondsToHydrogens());
-    }
+    bonds.addAll(getBondsToHydrogens());
     return bonds;
   }
 
@@ -362,9 +357,7 @@ public class Residue implements Iterable<Atom>, Transformable{
   */
   public Collection<Atom> getAtoms(){
     ArrayList<Atom> atoms = new ArrayList<Atom>(this.heavyAtoms.values());
-    if(this.hydrogensEnabled()){
-      atoms.addAll(this.getHydrogens());
-    }
+    atoms.addAll(this.getHydrogens());
     return atoms;
   }
 
@@ -390,9 +383,7 @@ public class Residue implements Iterable<Atom>, Transformable{
   */
   public int getNumAtoms(){
     int numAtoms = getNumHeavyAtoms();
-    if(this.hydrogensEnabled()){
-      numAtoms += getNumHydrogens();
-    }
+    numAtoms += getNumHydrogens();
     return numAtoms;
   }
 
@@ -525,22 +516,6 @@ public class Residue implements Iterable<Atom>, Transformable{
       }
     }
     throw new IllegalArgumentException(threeLetterName + ": not a valid residue name.");
-  }
-
-  /**
-  * Enable Hydrogens for this Residue. The methods {@code getAtoms()} and  {@code getBonds()} will
-  * now return Collections which include Hydrogens and Bonds containing hydrogens respectively.
-  */
-  public void enableHydrogens(){
-    this.hydrogensEnabled = true;
-  }
-
-  public void disableHydrogens(){
-    this.hydrogensEnabled = false;
-  }
-
-  public boolean hydrogensEnabled(){
-    return this.hydrogensEnabled;
   }
 
   /**
@@ -679,45 +654,45 @@ public class Residue implements Iterable<Atom>, Transformable{
   * Given two atom names that specify a rotatable bond, set that bond's dihedral angle as specified.
   * <p>
   * The order the atoms are passed in does not matter.
-  * @param atomOne one of the atoms in the bond
-  * @param atomTwo the other atom in the bond
+  * @param atomOneName one of the atoms in the bond
+  * @param atomTwoName the other atom in the bond
   * @param length the length (in Angstroms) to set the distance between these atoms to
   * @throws IllegalStateException if either atomOne or atomTwo are missing from this residue
   * @throws IllegalArgumentException if the bond is not one of the rotatable bonds
   * @since 0.7.0
   */
-  public void setRotatableBondLength(String atomOne, String atomTwo, double length){
-    if(!contains(atomOne)){
+  public void setRotatableBondLength(String atomOneName, String atomTwoName, double length){
+    if(!contains(atomOneName)){
       throw new IllegalStateException(String.format("Residue %d: Can't rotate about %s-%s bond,"
-          + "missing atom %s", getResidueID(), atomOne, atomTwo, atomOne));
+          + "missing atom %s", getResidueID(), atomOneName, atomTwoName, atomOneName));
     }
-    if(!contains(atomTwo)){
+    if(!contains(atomTwoName)){
       throw new IllegalStateException(String.format("Residue %d: Can't rotate about %s-%s bond,"
-          + "missing atom %s", getResidueID(), atomOne, atomTwo, atomTwo));
+          + "missing atom %s", getResidueID(), atomOneName, atomTwoName, atomTwoName));
     }
-    if(!isRotatableBond(atomOne, atomTwo)){
+    if(!isRotatableBond(atomOneName, atomTwoName)){
       throw new IllegalArgumentException(String.format("%s-%s are not a rotable bond in %s",
-          atomOne, atomTwo, this.getThreeLetterName()));
+          atomOneName, atomTwoName, this.getThreeLetterName()));
     }
     // ensure that the atoms are in the correct order, the second atom further from the backbone
-    int indexOfAtomOne = this.definedDihedralAngles.indexOf(atomOne);
-    int indexOfAtomTwo = this.definedDihedralAngles.indexOf(atomTwo);
+    int indexOfAtomOne = this.definedDihedralAngles.indexOf(atomOneName);
+    int indexOfAtomTwo = this.definedDihedralAngles.indexOf(atomTwoName);
     if(indexOfAtomOne > indexOfAtomTwo){
-      String temp = atomOne;
-      atomOne = atomTwo;
-      atomTwo = temp;
+      String temp = atomOneName;
+      atomOneName = atomTwoName;
+      atomTwoName = temp;
     }
     // construct the Translation Transformation
     Transformation t = new Transformation();
-    Vector3D a1 = getAtom(atomOne).getCoordinates();
-    Vector3D a2 = getAtom(atomTwo).getCoordinates();
+    Vector3D a1 = getAtom(atomOneName).getCoordinates();
+    Vector3D a2 = getAtom(atomTwoName).getCoordinates();
     Vector3D newAtomTwoPosition = a2.subtract(a1)
                                     .toUnitVector()
                                     .multiply(length)
                                     .add(a1);
     t.addTranslation(newAtomTwoPosition.subtract(a2));
     // get the atoms that need to be rotated, all those after this bond away from the backbone
-    Collection<Atom> atomsToTransform = getAtomsAfterAtom(atomTwo);
+    Collection<Atom> atomsToTransform = getAtomsAfterAtom(atomTwoName);
     for(Atom atom : atomsToTransform){
       atom.applyTransformation(t);
     }
@@ -743,62 +718,62 @@ public class Residue implements Iterable<Atom>, Transformable{
   * Rotate a residue about one of its rotatable bonds, one of its defined dihedral angles.
   * <p>
   * All atoms after that bond are transformed.
-  * @param atomOne the name of the first atom in the bond, the atom closer to the backbone
-  * @param atomTwo the name of the second atom in the bond, the atom further from the backbone
+  * @param atomOneName the name of the first atom in the bond, the atom closer to the backbone
+  * @param atomTwoName the name of the second atom in the bond, the atom further from the backbone
   * @param degrees the number of degrees to rotate the residue
   * @throws IllegalStateException if either atomOne or atomTwo are missing from this residue
   * @throws IllegalArgumentException if the atomOne and atomTwo are not a rotatable bond in this
   * residue
   * @since 0.7.0
   */
-  public void rotateAboutBond(String atomOne, String atomTwo, double degrees){
-    if(!contains(atomOne)){
+  public void rotateAboutBond(String atomOneName, String atomTwoName, double degrees){
+    if(!contains(atomOneName)){
       throw new IllegalStateException(String.format("Residue %d: Can't rotate about %s-%s bond,"
-          + "missing atom %s", getResidueID(), atomOne, atomTwo, atomOne));
+          + "missing atom %s", getResidueID(), atomOneName, atomTwoName, atomOneName));
     }
-    if(!contains(atomTwo)){
+    if(!contains(atomTwoName)){
       throw new IllegalStateException(String.format("Residue %d: Can't rotate about %s-%s bond,"
-          + "missing atom %s", getResidueID(), atomOne, atomTwo, atomTwo));
+          + "missing atom %s", getResidueID(), atomOneName, atomTwoName, atomTwoName));
     }
-    if(!isRotatableBond(atomOne, atomTwo)){
+    if(!isRotatableBond(atomOneName, atomTwoName)){
       throw new IllegalArgumentException(String.format("%s-%s are not a rotable bond in %s",
-          atomOne, atomTwo, this.getThreeLetterName()));
+          atomOneName, atomTwoName, this.getThreeLetterName()));
     }
     // ensure that the atoms are in the correct order, the second atom further from the backbone
-    int indexOfAtomOne = this.definedDihedralAngles.indexOf(atomOne);
-    int indexOfAtomTwo = this.definedDihedralAngles.indexOf(atomTwo);
+    int indexOfAtomOne = this.definedDihedralAngles.indexOf(atomOneName);
+    int indexOfAtomTwo = this.definedDihedralAngles.indexOf(atomTwoName);
     if(indexOfAtomOne > indexOfAtomTwo){
-      String temp = atomOne;
-      atomOne = atomTwo;
-      atomTwo = temp;
+      String temp = atomOneName;
+      atomOneName = atomTwoName;
+      atomTwoName = temp;
     }
     // construct the Rotation Transformation
     Transformation t = new Transformation();
-    Vector3D a1 = getAtom(atomOne).getCoordinates();
-    Vector3D a2 = getAtom(atomTwo).getCoordinates();
+    Vector3D a1 = getAtom(atomOneName).getCoordinates();
+    Vector3D a2 = getAtom(atomTwoName).getCoordinates();
     t.addRotationAboutAxis(a1, a2.subtract(a1), degrees);
     // get the atoms that need to be rotated, all those after this bond away from the backbone
-    Collection<Atom> atomsToTransform = getAtomsAfterAtom(atomTwo);
+    Collection<Atom> atomsToTransform = getAtomsAfterAtom(atomTwoName);
     for(Atom atom : atomsToTransform){
       atom.applyTransformation(t);
     }
   }
 
-  private boolean isRotatableBond(String atomOne, String atomTwo){
+  private boolean isRotatableBond(String atomOneName, String atomTwoName){
     // if the atoms of the bond are not in definedDihedralAngles, then they are not a rotatable bond
-    if(!this.definedDihedralAngles.contains(atomOne)
-        || !this.definedDihedralAngles.contains(atomTwo)){
+    if(!this.definedDihedralAngles.contains(atomOneName)
+        || !this.definedDihedralAngles.contains(atomTwoName)){
       return false;
     }
-    int indexOfAtomOne = this.definedDihedralAngles.indexOf(atomOne);
-    int indexOfAtomTwo = this.definedDihedralAngles.indexOf(atomTwo);
+    int indexOfAtomOne = this.definedDihedralAngles.indexOf(atomOneName);
+    int indexOfAtomTwo = this.definedDihedralAngles.indexOf(atomTwoName);
     // the first and last elements in definedDihedralAngles are not rotatable bond atoms
     String first = this.definedDihedralAngles.get(0);
     String last = this.definedDihedralAngles.get(this.definedDihedralAngles.size()-1);
     // if the atoms are either the first or last atoms in definedDihedralAngles, then they are not
     // a rotable bond
-    if(atomOne.equals(first) || atomTwo.equals(first)
-        || atomOne.equals(last) || atomTwo.equals(last)){
+    if(atomOneName.equals(first) || atomTwoName.equals(first)
+        || atomOneName.equals(last) || atomTwoName.equals(last)){
       return false;
     }
     // if they are not consecutive in definedDihedralAngles, then they are not a rotatable bond
@@ -839,37 +814,37 @@ public class Residue implements Iterable<Atom>, Transformable{
 
   /**
   * Get the distance between two atoms in this residue
-  * @param atomOne one atom in this residue
-  * @param atomTwo the other atom in this residue
+  * @param atomOneName one atom in this residue
+  * @param atomTwoName the other atom in this residue
   * @return the distance between these two atoms
   * @since 0.7.0
   */
-  public double getDistance(String atomOne, String atomTwo){
-    return this.getAtom(atomOne).distance(this.getAtom(atomTwo));
+  public double getDistance(String atomOneName, String atomTwoName){
+    return this.getAtom(atomOneName).distance(this.getAtom(atomTwoName));
   }
 
   /**
   * Get the value for one of the dihedral angles in this Residue.
-  * @param atomOne the name of the first atom in the bond, the atom closer to the backbone
-  * @param atomTwo the name of the second atom in the bond, the atom further from the backbone
+  * @param atomOneName the name of the first atom in the bond, the atom closer to the backbone
+  * @param atomTwoName the name of the second atom in the bond, the atom further from the backbone
   * @return the degree value of the dihedral angle about this bond, or 1000 if any of the atoms
   * required to calculate the angle are missing.
   * @since 0.7.0
   */
-  public double getDihedralAngle(String atomOne, String atomTwo){
+  public double getDihedralAngle(String atomOneName, String atomTwoName){
     try{
-      int indexOfAtomOne = this.definedDihedralAngles.indexOf(atomOne);
-      int indexOfAtomTwo = this.definedDihedralAngles.indexOf(atomTwo);
+      int indexOfAtomOne = this.definedDihedralAngles.indexOf(atomOneName);
+      int indexOfAtomTwo = this.definedDihedralAngles.indexOf(atomTwoName);
       int indexOfB = indexOfAtomOne;
       if(indexOfAtomOne > indexOfAtomTwo){
         indexOfB = indexOfAtomTwo;
-        String temp = atomOne;
-        atomOne = atomTwo;
-        atomTwo = temp;
+        String temp = atomOneName;
+        atomOneName = atomTwoName;
+        atomTwoName = temp;
       }
       Vector3D a = this.getAtom(this.definedDihedralAngles.get(indexOfB-1)).getCoordinates();
-      Vector3D b = this.getAtom(atomOne).getCoordinates();
-      Vector3D c = this.getAtom(atomTwo).getCoordinates();
+      Vector3D b = this.getAtom(atomOneName).getCoordinates();
+      Vector3D c = this.getAtom(atomTwoName).getCoordinates();
       Vector3D d = this.getAtom(this.definedDihedralAngles.get(indexOfB+2)).getCoordinates();
       return -1 * Vector3D.calculateDihedralAngle(a,b,c,d);
     } catch(NoSuchElementException e){
@@ -882,15 +857,15 @@ public class Residue implements Iterable<Atom>, Transformable{
   /**
   * Return the angle formed by 3 atoms in this residue. The angle is that between atomOne and
   * atomThree using atomTwo as the pivot.
-  * @param atomOne one of the atoms in the angle
-  * @param atomTwo the pivot atom
+  * @param atomOneName one of the atoms in the angle
+  * @param atomTwoName the pivot atom
   * @param atomThree the other atom in the angle
   * @return the angle defined by atomOne-atomTwo-atomThree, in degrees
   * @since 0.7.0
   */
-  public double getAngle(String atomOne, String atomTwo, String atomThree){
-    Vector3D one = getAtom(atomOne).getCoordinates();
-    Vector3D two = getAtom(atomTwo).getCoordinates();
+  public double getAngle(String atomOneName, String atomTwoName, String atomThree){
+    Vector3D one = getAtom(atomOneName).getCoordinates();
+    Vector3D two = getAtom(atomTwoName).getCoordinates();
     Vector3D three = getAtom(atomThree).getCoordinates();
     return one.subtract(two).angle(three.subtract(two));
   }

@@ -112,54 +112,6 @@ public class TestProtein{
   }
 
   @Test
-  public void testEnableDisableHydrogens(){
-    // TODO Test that whether a pdb includes hydrogens or not,
-    // when a protein is constructed, the hydrogens are constructed so that they can
-    // be enabled. Ensure that after reading in 1rop (which does not include hydrogens),
-    // when hydrogens are enabled, it has the correct number of atoms and bonds.
-    PolypeptideChain chain = new PolypeptideChain("A");
-                                          //{HeavyAtoms, Hydrogens} {main-bonds, h-bonds}
-    chain.addResidue(new Residue('I',1)); //  {8,11}  {7,11}
-
-    chain.addResidue(new Residue('A',6)); //  {5,5}   {4,5}
-    chain.addResidue(new Residue('M',3)); //  {8,9}   {7,9}
-
-    chain.addResidue(new Residue('S',8)); //  {6,5}   {5,5}
-    chain.addResidue(new Residue('T',9)); //  {7,7}   {6,7}
-    chain.addResidue(new Residue('A',2)); //  {5,5}   {4,5}
-    chain.addResidue(new Residue('R',7)); //  {11,13} {10,13}
-
-    chain.addResidue(new Residue('S',4)); //  {6,5}   {5,5}
-    chain.addResidue(new Residue('T',5)); //  {7,7}   {6,7}
-    Residue phe = new Residue('F',11); //     {12,9}  {12,9}
-    phe.setAsCarboxylTerminus();
-    chain.addResidue(phe);
-    chain.addResidue(new Residue('F',10)); // {11,9}  {11,9}
-                              // TOTALS       {86,85} {77,85}
-                              // TOTAL of      171     172 (includes 10 peptide bonds)
-
-    Protein starStuff = new Protein("starStuff");
-    starStuff.addChain(chain);
-
-    // Hydrogens start out disabled.
-    assertEquals(starStuff.getNumAtoms(), 86);
-    assertEquals(starStuff.getNumBonds(), 87);
-    // Protein keeps an atoms graph where the edges are bonds
-    // ensure that the Proteins number of Bonds matches the
-    // number of bonds in the chain
-    assertEquals(starStuff.getNumBonds(), chain.getNumBonds());
-    starStuff.enableHydrogens();
-    assertEquals(starStuff.getNumAtoms(), 171);
-    assertEquals(starStuff.getNumBonds(), 172);
-    assertEquals(starStuff.getNumBonds(), chain.getNumBonds());
-
-    starStuff.disableHydrogens();
-    assertEquals(starStuff.getNumAtoms(), 86);
-    assertEquals(starStuff.getNumBonds(), 87);
-    assertEquals(starStuff.getNumBonds(), chain.getNumBonds());
-  }
-
-  @Test
   public void testAddingDisulfideBond(){
     // Ensure that disulfide bonds are handled correctly whether they are
     // First Case: between residues in separate chains
@@ -172,8 +124,6 @@ public class TestProtein{
     prot.addChain(chainA);
     prot.addChain(chainB);
     prot.addDisulfideBond("A", 1, "B", 1);
-    assertEquals(prot.getNumBonds(), 11);
-    prot.enableHydrogens();
     assertEquals(prot.getNumBonds(), 19);
 
     // Second Case: between residues in the same chain
@@ -183,8 +133,6 @@ public class TestProtein{
     chainA.addResidue(new Residue('C',2));
     prot.addChain(chainA);
     prot.addDisulfideBond("A", 1, "A", 2);
-    assertEquals(prot.getNumBonds(), 12);
-    prot.enableHydrogens();
     assertEquals(prot.getNumBonds(), 20);
   }
 
