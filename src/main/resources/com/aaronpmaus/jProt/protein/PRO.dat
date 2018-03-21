@@ -18,7 +18,7 @@ CG   2HG
 CD   1HD
 CD   2HD
 !defined dihedral angles
-N    CA    CB    CG    CD
+# N    CA    CB    CG    CD
 !defined angle triplets
 CA  C   O
 CA  C   OXT

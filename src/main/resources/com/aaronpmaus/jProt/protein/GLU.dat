@@ -28,8 +28,7 @@ N   CA  CB
 CA  CB  CG
 CB  CG  CD
 CG  CD  OE1
-# CG  CD  OE2
-OE1 CD  OE2
+CG  CD  OE2
 !atom types
 # column 1: atom name
 # column 2: AMBER all atom atomtype

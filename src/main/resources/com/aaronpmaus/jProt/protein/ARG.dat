@@ -39,8 +39,7 @@ CB  CG  CD
 CG  CD  NE
 CD  NE  CZ
 NE  CZ  NH1
-# NE  CZ  NH2
-NH1 CZ  NH2
+NE  CZ  NH2
 !atom types
 # column 1: atom name
 # column 2: AMBER all atom atomtype

@@ -32,6 +32,7 @@ CA  C   O
 CA  C   OXT
 N   CA  CB
 CA  CB  CG
+CB  CG  CD1
 CB  CG  CD2
 !atom types
 # column 1: atom name

@@ -30,8 +30,7 @@ N   CA  CB
 CA  CB  CG
 CB  CG  CD
 CG  CD  OE1
-# CG  CD  NE2
-OE1 CD  NE2
+CG  CD  NE2
 !atom types
 # column 1: atom name
 # column 2: AMBER all atom atomtype

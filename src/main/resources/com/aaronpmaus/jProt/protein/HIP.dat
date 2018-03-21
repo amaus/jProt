@@ -33,6 +33,7 @@ CA  C   OXT
 N   CA  CB
 CA  CB  CG
 CB  CG  ND1
+CB  CG  CD1
 !atom types
 # column 1: atom name
 # column 2: AMBER all atom atomtype
