@@ -3,6 +3,10 @@ package com.aaronpmaus.jProt.sequence;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+/**
+* A biological sequence. A Sequence can specify either the bases that make up DNA or RNA or
+* the Amino Acids that make up Proteins.
+*/
 public class Sequence implements Iterable<Character>{
   String seq;
 
@@ -15,6 +19,13 @@ public class Sequence implements Iterable<Character>{
   */
   public String getSequenceString(){
     return this.seq;
+  }
+
+  /**
+  * @return the number of characters in the sequence
+  */
+  public int getLength(){
+    return seq.length();
   }
 
   @Override
