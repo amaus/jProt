@@ -21,13 +21,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.7.0] - 2018-02-26
 ### Added
-- package sequence
+- Package sequence
   -  Class Sequence w/ subclasses ProteinSequence, DNASequence, RNASequence
     - sequences of subclass types can be aligned
   - Class Alignment
     - Holds the results of aligning two sequences
-- Executable AlignSequences that can align the sequences of 2 PDBs or FASTA
-  files.
+  - Executable AlignSequences that can align the sequences of 2 PDBs or FASTA
+    files.
 - Constructor to Residue that takes a char to indicate which amino acid to build
 - Feature to PDDFileIO: can now write out bare bones PDB files.
 - Residue of Type UNK to residue class and templates.
@@ -44,9 +44,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   otherwise.
   - a test to TestProtein to check that all the angles for 1rop are calculated
     correctly.
-- setOmegaAngle(), setPhiAngle, and setPsiAngle() in PolypeptideChain
-- In Residue, the ability to get and set any of the dihedral angles, three-atom
-  angles, and bond lengths.
 - Initial implementation for VirtualRibosome, constructs a single chain with
   correct bond angles and residues on opposite sides of the backbone.
 - JProtMetrics: new cmd line arguments
@@ -54,6 +51,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - --gdt-plot to and prints out the percent of residues for each threshold in
     the range 0.5 to 10.0 in 0.5 increments. This data can be used to produce
     GDT Plots like those on prediction center.
+- Package manipulators
+  - ConformationManipulator
+    - Abstract super class of the package. Allows three-atom angles, bond
+      lengths, and dihedral angles of a protein to be modified.
+  - CascadeConformationManipulator
+    - Transforms all atoms after the those that define the Bond, Angle, or
+      Dihedral Angle to be manipulated.
+  - LocalConformationManipulator
+    - Only transforms the atoms that define the Bond, Angle, or Dihedral Angle
+      to be manipulated.
 ### Changed
 - Moved SequenceAligner into new package sequence
 - Protein and PolypeptideChain getSequence methods to use new sequence package
@@ -65,6 +72,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   sense when evaluating models. If a model only includes a fraction of the
   residues that are in the reference, it should be penalized for the
   missing residues.
+- several method names to avoid redundancy
+  - Protein::containsChain(String chainID) to contains(String chainID)
+  - PolypeptideChain:containsResidueWithID(int resID) to contains(int resID)
+  - Atom:getAtomName() to getName()
 ### Deprecated
 - JProtMetrics no longer accepts csv files as input. Two pdb files must be
   provided.
@@ -72,7 +83,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - method getBondLength() and getBondStrength() in Bond. replaced with
   getLength() and getStrength().
 - all methods to do with enabling or disabling hydrogens in a protein. This was
-  too much extra complication. A protein by default will have all the atoms
+  unnecessary extra complication. A protein by default will have all the atoms
   included in the pdb if read in or all heavy atoms and hydrogens is built
   synthetically.
 
