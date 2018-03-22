@@ -36,11 +36,9 @@ public class TestProtein{
   @Before
   public void setup(){
     InputStream stream = TestProtein.class.getResourceAsStream("1rop.pdb");
-    //PDBFileIO pdb = new PDBFileIO(stream);
     rop = new PDBFileIO().readInPDBFile(stream, "1rop");
 
     stream = TestProtein.class.getResourceAsStream("5m2j.pdb");
-    //pdb = new PDBFileIO(stream);
     m2j = new PDBFileIO().readInPDBFile(stream, "5m2j");
     dihedrals = readInDihedrals();
   }
@@ -77,38 +75,6 @@ public class TestProtein{
     sequence = "QVQLVESGGGLVQPGGSLRLSCAASGFTFSNYWMYWVRQAPGKGLEWVSEINTNGLITKYPDSVKGRFTISRDNAKNTLYLQ"
              + "MNSLKPEDTALYYCARSPSGFNRGQGTQVTVSS";
     assertTrue(chain.getSequence().toString().equals(sequence));
-  }
-
-  @Test
-  public void testBondSeparation(){
-    PolypeptideChain chainA = m2j.getChain("A");
-    Residue ser = chainA.getResidue(9);
-    Residue cys69 = chainA.getResidue(69);
-    Residue cys101 = chainA.getResidue(101);
-
-    Atom atomOne = ser.getAtom("N");
-    Atom atomTwo = ser.getAtom("C");
-    assertEquals(m2j.getBondSeparation(atomOne, atomTwo), 2);
-
-    atomOne = cys69.getAtom("SG");
-    atomTwo = cys101.getAtom("SG");
-    assertEquals(m2j.getBondSeparation(atomOne, atomTwo), 1);
-
-    atomOne = cys69.getAtom("CB");
-    atomTwo = cys101.getAtom("CB");
-    assertEquals(m2j.getBondSeparation(atomOne, atomTwo), 3);
-
-    Residue one = chainA.getResidue(10);
-    Residue two = chainA.getResidue(11);
-    atomOne = one.getAtom("O");
-    atomTwo = two.getAtom("N");
-    assertEquals(m2j.getBondSeparation(atomOne, atomTwo), 2);
-
-    one = chainA.getResidue(10);
-    two = chainA.getResidue(12);
-    atomOne = one.getAtom("C");
-    atomTwo = two.getAtom("C");
-    assertEquals(m2j.getBondSeparation(atomOne, atomTwo), 6);
   }
 
   @Test

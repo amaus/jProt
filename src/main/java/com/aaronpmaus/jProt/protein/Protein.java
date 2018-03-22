@@ -38,7 +38,8 @@ import java.io.IOException;
 public class Protein implements Iterable<PolypeptideChain>, Transformable{
   private ArrayList<PolypeptideChain> chains;
   private String proteinName;
-  private ArrayList<Bond> disulfideBonds;
+  private ArrayList<Bond> disulfideBondsBetweenChains;
+  private ArrayList<Bond> disulfideBondsWithinChains;
   private UndirectedGraph<Atom> atoms;
   private PDBFileIO pdbIO;
 
@@ -50,8 +51,8 @@ public class Protein implements Iterable<PolypeptideChain>, Transformable{
   */
   public Protein(String proteinName, PDBFileIO pdbIO){
     this.chains = new ArrayList<PolypeptideChain>();
-    this.atoms = new UndirectedGraph<Atom>();
-    this.disulfideBonds = new ArrayList<Bond>();
+    this.disulfideBondsBetweenChains = new ArrayList<Bond>();
+    this.disulfideBondsWithinChains = new ArrayList<Bond>();
     this.proteinName = proteinName;
     this.pdbIO = pdbIO;
   }
@@ -79,14 +80,6 @@ public class Protein implements Iterable<PolypeptideChain>, Transformable{
   */
   public void addChain(PolypeptideChain chain){
     this.chains.add(chain);
-    addToProteinGraph(chain);
-  }
-
-  private void addToProteinGraph(PolypeptideChain chain){
-    Collection<Bond> bonds = chain.getBonds();
-    for(Bond bond : chain.getBonds()){
-      atoms.addEdge(bond.getAtomOne(), bond.getAtomTwo());
-    }
   }
 
   /**
@@ -108,12 +101,24 @@ public class Protein implements Iterable<PolypeptideChain>, Transformable{
       throw new IllegalArgumentException("Atoms in disulfide bond must be different atoms.");
     }
     Bond disulfideBond = new Bond(atomOne, atomTwo);
-    disulfideBonds.add(disulfideBond);
-    atoms.addEdge(atomOne, atomTwo);
     // if the disulfide bond is within the same chain, add it to that chain.
     if(chainID1.equals(chainID2)){
       getChain(chainID1).addBond(disulfideBond);
+      this.disulfideBondsWithinChains.add(disulfideBond);
+    } else {
+      this.disulfideBondsBetweenChains.add(disulfideBond);
     }
+  }
+
+  /**
+  * Return all the disulfide bonds in this Protein.
+  * @return a {@code List<Bond>} of all the disulfide bonds.
+  * @since 0.7.0
+  */
+  public List<Bond> getDisulfideBonds(){
+    ArrayList<Bond> allDisulfideBonds = new ArrayList<Bond>(this.disulfideBondsWithinChains);
+    allDisulfideBonds.addAll(this.disulfideBondsBetweenChains);
+    return allDisulfideBonds;
   }
 
   /**
@@ -127,8 +132,49 @@ public class Protein implements Iterable<PolypeptideChain>, Transformable{
         return chain;
       }
     }
-    throw new IllegalArgumentException("There is no chain "
-    +chainID+ " in the protein.");
+    throw new IllegalArgumentException("There is no chain " + chainID + " in the protein.");
+  }
+
+  /**
+  * Get the Chain ID of the chain that contains a Residue.
+  * @param residue a Residue in this Protein
+  * @return the chain ID of the chain that contains residue
+  * @throws IllegalStateException if no chain contains the residue
+  * @since 0.7.0
+  */
+  public String getChainID(Residue residue){
+    String chainID = null;
+    for(PolypeptideChain chain : this){
+      if(chain.contains(residue)){
+        chainID = chain.getChainID();
+      }
+    }
+    if(chainID == null){
+      throw new IllegalStateException(
+          String.format("Residue: %s Not contained in any chain.",residue));
+    }
+    return chainID;
+  }
+
+  /**
+  * Get the Chain ID of the chain that contains an Atom.
+  * @param atom an Atom in this Protein
+  * @return the chain ID of the chain that contains atom
+  * @throws IllegalStateException if no chain contains the residue
+  * @since 0.7.0
+  */
+  public String getChainID(Atom atom){
+    String chainID = null;
+    for(PolypeptideChain chain : this){
+      if(chain.contains(atom)){
+        chainID = chain.getChainID();
+      }
+    }
+    if(chainID == null){
+      throw new IllegalStateException(
+          String.format("Atom: %s Not contained in any chain.",atom));
+    }
+    return chainID;
   }
 
   /**
@@ -137,38 +183,6 @@ public class Protein implements Iterable<PolypeptideChain>, Transformable{
   */
   public int getNumChains(){
     return this.chains.size();
-  }
-
-  /**
-  * Return the number of bonds between the two atoms via the shortest path from a
-  * starting atom to an ending atom.
-  *
-  * @param atomStart one of the end points in the path
-  * @param atomEnd the other end point in the path
-  * @return the number of bonds between them
-  */
-  public int getBondSeparation(Atom atomStart, Atom atomEnd){
-    int pathSize = this.getShortestPath(atomStart, atomEnd).size();
-    if(pathSize == 0){
-      return 0;
-    }
-    return pathSize-1;
-  }
-
-  /**
-  * Return the shortest path from one atom to another in this protein.
-  *
-  * @param atomStart the atom to calculate the path from
-  * @param atomEnd the atom to calculate the path to.
-  * @return the collection of atoms starting with atomStart and ending with atomEnd or an empty
-  * collection if no path exists.
-  */
-  private List<Atom> getShortestPath(Atom atomStart, Atom atomEnd){
-    LinkedList<Atom> list = new LinkedList<Atom>();
-    for(Node<Atom> n : this.atoms.shortestPath(atomStart, atomEnd)){
-      list.add(n.get());
-    }
-    return list;
   }
 
   /**
@@ -195,8 +209,28 @@ public class Protein implements Iterable<PolypeptideChain>, Transformable{
     return numAtoms;
   }
 
+  /**
+  * @return the number of covalent bonds in this Protein
+  */
   public int getNumBonds(){
-    return this.atoms.numEdges();
+    int numBonds = 0;
+    for(PolypeptideChain chain : this){
+      numBonds += chain.getNumBonds();
+    }
+    numBonds += this.disulfideBondsBetweenChains.size();
+    return numBonds;
+  }
+
+  /**
+  * @return a Collection of all the covalent bonds in this Protein
+  */
+  public List<Bond> getBonds(){
+    ArrayList<Bond> bonds = new ArrayList<Bond>();
+    for(PolypeptideChain chain : this){
+      bonds.addAll(chain.getBonds());
+    }
+    bonds.addAll(this.disulfideBondsBetweenChains);
+    return bonds;
   }
 
   /**
@@ -262,7 +296,12 @@ public class Protein implements Iterable<PolypeptideChain>, Transformable{
   * @return true if this protein contains the atom
   */
   private boolean contains(Atom atom){
-    return this.atoms.contains(atom);
+    for(PolypeptideChain chain : this){
+      if(chain.contains(atom)){
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -273,7 +312,7 @@ public class Protein implements Iterable<PolypeptideChain>, Transformable{
     return this.chains.contains(chain);
   }
 
-  public boolean containsChain(String chainID){
+  public boolean contains(String chainID){
     for(PolypeptideChain chain: this){
       if(chain.getChainID().equals(chainID)){
         return true;
