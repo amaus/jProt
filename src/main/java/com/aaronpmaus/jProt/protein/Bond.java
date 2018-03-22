@@ -2,7 +2,7 @@ package com.aaronpmaus.jProt.protein;
 import java.lang.IllegalArgumentException;
 
 /**
- * A bond is the covalent bond between two atoms.
+ * A covalent bond between two atoms.
  * @version 0.6.0
  * @since 0.6.0
 */
