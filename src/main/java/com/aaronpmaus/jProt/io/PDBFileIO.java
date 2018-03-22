@@ -110,7 +110,7 @@ public class PDBFileIO{
           String altLoc = " ";
           String iCode = " ";
           Vector3D loc = atom.getCoordinates();
-          AtomRecord atomRecord = new AtomRecord(serialNum, atom.getAtomName(), altLoc,
+          AtomRecord atomRecord = new AtomRecord(serialNum, atom.getName(), altLoc,
               resName, chainID, resID, iCode, loc.getX().doubleValue(), loc.getY().doubleValue(),
               loc.getZ().doubleValue(), atom.getOccupancy(), atom.getTempFactor(),
               atom.getElement(), atom.getCharge());
@@ -382,13 +382,13 @@ public class PDBFileIO{
     boolean ca = false;
     boolean c = false;
     for(Atom atom : atoms){
-      if(atom.getAtomName().equals("N")){
+      if(atom.getName().equals("N")){
         n = true;
       }
-      if(atom.getAtomName().equals("CA")){
+      if(atom.getName().equals("CA")){
         ca = true;
       }
-      if(atom.getAtomName().equals("C")){
+      if(atom.getName().equals("C")){
         c = true;
       }
     }
@@ -397,7 +397,7 @@ public class PDBFileIO{
 
   private boolean containsCarboxylOxygen(Collection<Atom> atoms){
     for(Atom a: atoms){
-      if(a.getAtomName().equals("OXT")){
+      if(a.getName().equals("OXT")){
         return true;
       }
     }
@@ -410,8 +410,8 @@ public class PDBFileIO{
       String chainID2 = ssBondRec.getChainID2();
       int resID1 = ssBondRec.getResID1();
       int resID2 = ssBondRec.getResID2();
-      if(protein.containsChain(chainID1) && protein.getChain(chainID1).containsResidue(resID2)){
-        if(protein.containsChain(chainID2) && protein.getChain(chainID2).containsResidue(resID2)){
+      if(protein.contains(chainID1) && protein.getChain(chainID1).contains(resID2)){
+        if(protein.contains(chainID2) && protein.getChain(chainID2).contains(resID2)){
           if(!chainID1.equals(chainID2) || resID1 != resID2){
             protein.addDisulfideBond(chainID1, resID1, chainID2, resID2);
           }
@@ -433,7 +433,7 @@ public class PDBFileIO{
   }
 
   private static Atom constructAtom(AtomRecord rec){
-    return new Atom(rec.getAtomName(), rec.getSerial(), rec.getOccupancy(),
+    return new Atom(rec.getName(), rec.getSerial(), rec.getOccupancy(),
         rec.getTempFactor(), rec.getCharge(),
         rec.getX(), rec.getY(), rec.getZ());
   }
@@ -477,7 +477,7 @@ public class PDBFileIO{
     }
 
     public int getSerial(){ return this.serial; }
-    public String getAtomName(){ return this.atomName; }
+    public String getName(){ return this.atomName; }
     public String getAltLoc(){ return this.altLoc; }
     public String getResName(){ return this.resName; }
     public String getChainID(){ return this.chainID; }
@@ -498,7 +498,7 @@ public class PDBFileIO{
     @Override
     public String toString(){
       String record = String.format("%-6s%5d %-4s%s%3s %s%4d%s   %8.3f%8.3f%8.3f%6.2f%6.2f          %2s%2s\n",
-          "ATOM", getSerial(), getAtomName(), getAltLoc(), getResName(), getChainID(),
+          "ATOM", getSerial(), getName(), getAltLoc(), getResName(), getChainID(),
           getResSeq(), getICode(), getX(), getY(), getZ(), getOccupancy(), getTempFactor(),
           getElement(), getChargeString());
       return record;

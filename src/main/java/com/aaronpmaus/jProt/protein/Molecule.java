@@ -121,7 +121,7 @@ public class Molecule {
   public String toString(){
     String str = "";
     for(Atom a : this.atoms){
-      str += String.format(a.getAtomName() + " ");
+      str += String.format(a.getName() + " ");
     }
     str += "Center Of Mass: " + getCenterOfMass() + "\n";
     str += "Mass: " + getMass() + "\n";

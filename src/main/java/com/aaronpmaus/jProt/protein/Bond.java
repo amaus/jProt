@@ -82,7 +82,7 @@ public class Bond {
      * @return true if atom is in this bond
     */
     public boolean containsAtom(Atom atom){
-      return containsAtom(atom.getAtomName());
+      return containsAtom(atom.getName());
     }
 
     /**
@@ -90,8 +90,8 @@ public class Bond {
     * @return true if an atom with this name in in this bond, false otherwise
     */
     public boolean containsAtom(String atomName){
-      if(getAtomOne().getAtomName().equals(atomName)
-          || getAtomTwo().getAtomName().equals(atomName)){
+      if(getAtomOne().getName().equals(atomName)
+          || getAtomTwo().getName().equals(atomName)){
         return true;
       }
       return false;
@@ -133,6 +133,6 @@ public class Bond {
 
     @Override
     public String toString(){
-      return getAtomOne().getAtomName() + " - " + getAtomTwo().getAtomName();
+      return getAtomOne().getName() + " - " + getAtomTwo().getName();
     }
   }

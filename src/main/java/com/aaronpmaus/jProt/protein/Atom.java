@@ -201,7 +201,7 @@ public class Atom implements Comparable<Atom>, Transformable{
   * @return the name of this atom.
   * @since 0.6.0
   */
-  public String getAtomName(){
+  public String getName(){
     return this.atomName;
   }
 
@@ -243,7 +243,7 @@ public class Atom implements Comparable<Atom>, Transformable{
   */
   @Override
   public String toString(){
-    String str = String.format("Atom Name: %s\n",getAtomName()) +
+    String str = String.format("Atom Name: %s\n",getName()) +
     String.format("Element: %s\n", getElement()) +
     String.format("Serial Number: %d\n", getSerialNumber()) +
     String.format("Mass: %.2f\n",getMass()) +
