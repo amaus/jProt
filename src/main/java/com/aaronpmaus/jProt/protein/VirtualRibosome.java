@@ -1,6 +1,9 @@
 package com.aaronpmaus.jProt.protein;
 
 import com.aaronpmaus.jProt.sequence.ProteinSequence;
+import com.aaronpmaus.jProt.protein.*;
+import com.aaronpmaus.jProt.manipulators.*;
+
 import com.aaronpmaus.jMath.transformations.Transformation;
 import com.aaronpmaus.jMath.linearAlgebra.*;
 
@@ -9,8 +12,17 @@ import java.math.MathContext;
 
 import java.util.List;
 
+/**
+* A VirtualRibosome constructs Proteins from Sequences. These proteins are unfolded, a linear chain
+* of Residues. They can then be manipulated into different conformations. VirtualRibosome can
+* produce single multi chain Proteins.
+* <p>
+* Usage: <br>
+* {code // Construct a custom protein from the sequence IAMSTARSTFF}<br>
+* {code Protein prot = VirtualRibosome.synthesizeProtein(new ProteinSequence("IAMSTARSTFF"), "strstf");}<br>}
+*/
 public class VirtualRibosome {
-
+  private static int outFileIndex = 1;
   /**
   * Construct a Protein with multiple chains. Each chain is unfolded, linear, all phi, psi, and
   * omega angles are either 180 or -180. At construction, the chains will occupy the same space.
@@ -28,6 +40,7 @@ public class VirtualRibosome {
           + "maintainer to increase this limit!",sequences.size()));
     }
     Protein prot = new Protein(pdbFileNameBase);
+    ConformationManipulator manip = new CascadeConformationManipulator(prot);
     String[] chainIDs = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
                          "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
                          "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
@@ -35,7 +48,9 @@ public class VirtualRibosome {
                          "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
     int i = 0;
     for(ProteinSequence sequence : sequences){
-      prot.addChain(synthesizeChain(sequence, chainIDs[i]));
+      PolypeptideChain chain = synthesizeChain(sequence, chainIDs[1]);
+      prot.addChain(chain);
+      manip.update();
       i++;
     }
     return prot;
@@ -50,27 +65,55 @@ public class VirtualRibosome {
   */
   public static Protein synthesizeProtein(ProteinSequence sequence, String pdbFileNameBase){
     Protein prot = new Protein(pdbFileNameBase);
-    prot.addChain(synthesizeChain(sequence, "A"));
+    ConformationManipulator manip = new CascadeConformationManipulator(prot);
+    PolypeptideChain chain = synthesizeChain(sequence, "A");
+    prot.addChain(chain);
+    manip.update();
+    // set all omega angles to 180
+    for(int resID = 2; resID <= chain.getNumResidues(); resID++){
+      Atom ca1 = chain.getResidue(resID-1).getAtom("CA");
+      Atom c1 = chain.getResidue(resID-1).getAtom("C");
+      Atom o1 = chain.getResidue(resID-1).getAtom("O");
+      Atom n = chain.getResidue(resID).getAtom("N");
+      Atom ca2 = chain.getResidue(resID).getAtom("CA");
+      Atom c2 = chain.getResidue(resID).getAtom("C");
+      Atom o2 = chain.getResidue(resID).getAtom("O");
+      manip.setDihedralAngle(c1, n, 180); // omega
+      manip.setDihedralAngle(n, ca2, 180); // phi
+      manip.setAngle(ca1, c1, n, 114);
+      if(resID == 2){
+        manip.setAngle(ca1, c1, o1, 121);
+      }
+      manip.setAngle(ca2, c2, o2, 121);
+    }
     return prot;
   }
 
+  /*
+  * Construct a PolypeptideChain from the a ProteinSequence.
+  * @return a PolypeptideChain containing all the residues specified by the sequence. The last
+  * residue is set as the carboxyl terminus.
+  */
   private static PolypeptideChain synthesizeChain(ProteinSequence sequence, String chainID){
+
     PolypeptideChain chain = new PolypeptideChain(chainID);
     Residue prevResidue = null;
     Residue newResidue = null;
     int resID = 1;
     // For every residue, rotate it and translate it so that its peptide bond with the previous
     // residue is physically reasonable
+    int lastResidueID = sequence.getLength();
     for(Character resString : sequence){
       if(resID == 1){
         prevResidue = new Residue(resString, resID);
-        //geometryExperiments(prevResidue);
         chain.addResidue(prevResidue);
       } else {
         newResidue = new Residue(resString, resID);
-        moveResidueIntoPlace(prevResidue, newResidue);
+        if(resID == lastResidueID){
+          newResidue.setAsCarboxylTerminus();
+        }
         chain.addResidue(newResidue);
-        chain.setOmegaAngle(resID, 180);
+        moveResidueIntoPlace(prevResidue, newResidue);
         prevResidue = newResidue;
       }
       resID++;
@@ -114,7 +157,7 @@ public class VirtualRibosome {
     translateResIntoPlace.addTranslation(translation);
     nextResidue.applyTransformation(translateResIntoPlace);
 
-    // Rotate the next Residue so that the CA-N-C angle is 123 degrees
+    // Rotate the next Residue so that the C-N-CA2 angle is 123 degrees
     Vector3D n_c = c.getCoordinates().subtract(n.getCoordinates());
     Vector3D n_ca2 = ca2.getCoordinates().subtract(n.getCoordinates());
     normal = n_c.crossProduct(n_ca2);
@@ -127,4 +170,20 @@ public class VirtualRibosome {
     rotateAboutNitrogen.addRotationAboutAxis(n.getCoordinates(), normal, angleToRotate);
     nextResidue.applyTransformation(rotateAboutNitrogen);
   }
+
+  private static double getAngle(Atom atomOne, Atom atomTwo, Atom atomThree){
+    Vector3D one = atomOne.getCoordinates();
+    Vector3D two = atomTwo.getCoordinates();
+    Vector3D three = atomThree.getCoordinates();
+    return one.subtract(two).angle(three.subtract(two));
+  }
+
+  private static double getDihedralAngle(Atom atomOne, Atom atomTwo, Atom atomThree, Atom atomFour){
+    Vector3D one = atomOne.getCoordinates();
+    Vector3D two = atomTwo.getCoordinates();
+    Vector3D three = atomThree.getCoordinates();
+    Vector3D four = atomFour.getCoordinates();
+    return -1 * Vector3D.calculateDihedralAngle(one, two, three, four);
+  }
+
 }

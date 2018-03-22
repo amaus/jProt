@@ -1,7 +1,7 @@
 package com.aaronpmaus.jProt;
 
 import com.aaronpmaus.jProt.protein.*;
-import com.aaronpmaus.jProt.io.*;
+import com.aaronpmaus.jProt.manipulators.*;
 import com.aaronpmaus.jProt.sequence.*;
 import com.aaronpmaus.jMath.linearAlgebra.*;
 
@@ -34,12 +34,31 @@ public class TestVirtualRibosome{
   @Before
   public void setup() throws IOException{
     ProteinSequence seq = new ProteinSequence("IAMSTARSTFF");
+    //ProteinSequence seq = new ProteinSequence("GGGGGG");
     prot = VirtualRibosome.synthesizeProtein(seq, "strstf");
     chain = prot.getChain("A");
 
+    // Pose pretty for picture
+    CascadeConformationManipulator manip = new CascadeConformationManipulator(prot);
     Residue phe = chain.getResidue(10);
-    phe.rotateAboutBond("CA", "CB", 30);
-    phe.rotateAboutBond("CB", "CG", -90);
+    manip.rotateAboutBond(phe.getAtom("CA"), phe.getAtom("CB"), 30);
+    manip.rotateAboutBond(phe.getAtom("CB"), phe.getAtom("CG"), -90);
+    Residue thr = chain.getResidue(5);
+    manip.rotateAboutBond(thr.getAtom("CA"), thr.getAtom("CB"), -90);
+    thr = chain.getResidue(9);
+    manip.rotateAboutBond(thr.getAtom("CA"), thr.getAtom("CB"), -160);
+    /*
+    int numResidues = chain.getNumResidues();
+    System.out.printf("Res ID   | Phi      Psi      Omega    |   CA1-C-O  CA1-C-N  O-C-N    C-N-CA2  C-N-H    H-N-CA2\n");
+    System.out.printf("---------|----------------------------|-------------------------------------------------------\n");
+    for(int i = 1; i <= numResidues; i++){
+      double phi = Math.abs(chain.getPhiAngle(i));
+      double psi = Math.abs(chain.getPsiAngle(i));
+      double omega = Math.abs(chain.getOmegaAngle(i));
+      System.out.printf("Res %-5d| %7.2f  %7.2f  %7.2f  |%s\n", i, phi, psi, omega, getAnglesString(getPeptideBondAngles(chain, i)));
+    }
+    */
+    //prot.writeToFile("out.pdb"); // take picture
   }
 
   @Test
@@ -61,10 +80,10 @@ public class TestVirtualRibosome{
 
   @Test
   public void TestPeptideBondAngles(){
-    for(int i = 2; i < chain.getNumResidues(); i++){
+    for(int i = 1; i < chain.getNumResidues(); i++){
       double[] angles = getPeptideBondAngles(chain, i);
-      assertTrue(Math.abs(angles[0] - 114.50) < 0.01);
-      assertTrue(Math.abs(angles[1] - 120.50) < 0.01);
+      assertTrue(Math.abs(angles[0] - 121.00) < 0.01);
+      assertTrue(Math.abs(angles[1] - 114.00) < 0.01);
       assertTrue(Math.abs(angles[2] - 125.00) < 0.01);
       assertTrue(Math.abs(angles[3] - 123.00) < 0.01);
       assertTrue(Math.abs(angles[4] - 118.67) < 0.01);
@@ -76,16 +95,24 @@ public class TestVirtualRibosome{
     Atom ca1 = chain.getResidue(resID).getAtom("CA");
     Atom c = chain.getResidue(resID).getAtom("C");
     Atom o = chain.getResidue(resID).getAtom("O");
-    Atom n = chain.getResidue(resID+1).getAtom("N");
-    Atom h = chain.getResidue(resID+1).getAtom("H");
-    Atom ca2 = chain.getResidue(resID+1).getAtom("CA");
     double[] angles = new double[6];
-    angles[0] = getAngle(ca1, c, n);
-    angles[1] = getAngle(ca1, c, o);
-    angles[2] = getAngle(o, c, n);
-    angles[3] = getAngle(c, n, ca2);
-    angles[4] = getAngle(c, n, h);
-    angles[5] = getAngle(h, n, ca2);
+    angles[0] = getAngle(ca1, c, o);
+    if(chain.contains(resID+1)){
+      Atom n = chain.getResidue(resID+1).getAtom("N");
+      Atom h = chain.getResidue(resID+1).getAtom("H");
+      Atom ca2 = chain.getResidue(resID+1).getAtom("CA");
+      angles[1] = getAngle(ca1, c, n);
+      angles[2] = getAngle(o, c, n);
+      angles[3] = getAngle(c, n, ca2);
+      angles[4] = getAngle(c, n, h);
+      angles[5] = getAngle(h, n, ca2);
+    } else {
+      angles[1] = 1000;
+      angles[2] = 1000;
+      angles[3] = 1000;
+      angles[4] = 1000;
+      angles[5] = 1000;
+    }
     return angles;
   }
 
