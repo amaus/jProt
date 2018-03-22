@@ -16,8 +16,10 @@ import java.io.InputStream;
 * penalty are -10 to start a gap and -2 to extend it. The similarity scores matchMatrix used in the
 * BLOSUM62 matrix.
 * <p>
-* It is intended that sequences are aligned using the align method from the subclasses
-* of Sequence. For example, to perform a sequence alignment of two protein sequences:
+* It is unnecessary to directly use this class unless you wish to customize the Gap Extend and Gap
+* Start Penalties (default values of -2 and -10 respectively). Rather, sequences can be aligned
+* using the align method provided by  Sequence. For example, to perform a sequence alignment of two
+* protein sequences:
 * <p>
 * {@code InputStream prot1Stream = new FileInputStream(new File(pathToProt1));}<br>
 * {@code InputStream prot2Stream = new FileInputStream(new File(pathToProt2));}<br>
@@ -29,14 +31,44 @@ import java.io.InputStream;
 * {@code Alignment alignment = prot1Seq.align(prot2Seq);}<br>
 * {@code String prot1Alignment = alignment.getAlignment(prot1Seq;}<br>
 * {@code String prot1Alignment = alignment.getAlignment(prot2Seq;}<br>
+* <p>
+* If you wish to use this class explicitly, instead of calling align() from Sequence as above:
+* <p>
+* {@code Alignment alignment = SequenceAligner.align(prot1Seq, prot2Seq, "BLOSUM62", -2, -10);}
+* <p>
+* Valid options for the Scoring Matrix Name are "BLOSUM62", "DNA", and "RNA".
 * @see com.aaronpmaus.jProt.sequence.ProteinSequence
 * @see com.aaronpmaus.jProt.sequence.Alignment
-* @version 0.6.0
+* @version 0.7.0
 * @since 0.6.0
 */
 public class SequenceAligner{
-  private static int gapExtendPenalty = -2; //-2
-  private static int gapStartPenalty = -10; //-10
+  private static int gapExtendPenalty = -2; // the default is -2
+  private static int gapStartPenalty = -10; // the default is -10
+
+  /**
+  * Calculate and return an alignment of the two sequences.
+  *
+  * @param seq1 one of the sequences to align
+  * @param seq2 the other sequence to align
+  * @param matrixName the name of the Scoring Matrix to use, must be either "BLOSUM62.txt",
+  * "DNA.txt", or "RNA.txt"
+  * @param gapExtendPenalty the gap extend penalty for the Needleman-Wuncsh algorithm, must be a
+  * negative number
+  * @param gapStartPenalty the gap start penalty for the Needleman-Wuncsh algorithm, must be a
+  * negative number
+  * @return an object of type Alignment which can be queried to get the results of this alignment
+  * @throws IllegalArgumentException if either the gapExtendPenalty or gapStartPenalty is
+  * non-negative
+  * @since 0.7.0
+  */
+  public static Alignment align(Sequence seq1, Sequence seq2, String matrixName,
+                                int gapExtendPenalty, int gapStartPenalty){
+    ScoringMatrix scoringMatrix = new ScoringMatrix(String.format("%s.dat",matrixName));
+    setGapExtendPenalty(gapExtendPenalty);
+    setGapStartPenalty(gapStartPenalty);
+    return align(seq1, seq2, scoringMatrix);
+  }
 
   /**
   * Calculate and return an alignment of the two sequences.
@@ -48,8 +80,7 @@ public class SequenceAligner{
   * @return an object of type Alignment which can be queried to get the results of this alignment
   */
   public static Alignment align(Sequence seq1, Sequence seq2, String matrixName){
-    ScoringMatrix scoringMatrix = new ScoringMatrix(matrixName);
-    return align(seq1, seq2, scoringMatrix);
+    return align(seq1, seq2, matrixName, -2, -10);
   }
 
   /**
@@ -162,7 +193,7 @@ public class SequenceAligner{
       cell.addLeft(matchMatrix[0][j-1]);
       matchMatrix[0][j] = cell;
       // Fill in first row of xGapMatrix
-      value = getGapStartPenalty() + (j) * getGapExtendPenalty();
+      value = gapStartPenalty + (j) * gapExtendPenalty;
       cell  = new Cell(value, leftSeq.charAt(0), upSeq.charAt(j-1), 2);
       cell.addLeft(xGapMatrix[0][j-1]);
       xGapMatrix[0][j] = cell;
@@ -187,7 +218,7 @@ public class SequenceAligner{
       cell.addUp(xGapMatrix[i-1][0]);
       xGapMatrix[i][0] = cell;
       // Fill in first column of yGapMatrix
-      value = getGapStartPenalty() + (i) * getGapExtendPenalty();
+      value = gapStartPenalty + (i) * gapExtendPenalty;
       cell  = new Cell(value, leftSeq.charAt(i-1), upSeq.charAt(0), 3);
       cell.addUp(yGapMatrix[i-1][0]);
       yGapMatrix[i][0] = cell;
@@ -284,9 +315,9 @@ public class SequenceAligner{
   */
   private static void calculateXGapValue(int i, int j, Character leftSeqChar, Character upSeqChar,
                                   Cell[][] matchMatrix, Cell[][] xGapMatrix, Cell[][] yGapMatrix){
-    int matchVal = getGapStartPenalty() + getGapExtendPenalty() + matchMatrix[i][j-1].getValue();
-    int xVal = getGapExtendPenalty() + xGapMatrix[i][j-1].getValue();
-    int yVal = getGapStartPenalty() + getGapExtendPenalty() + yGapMatrix[i][j-1].getValue();
+    int matchVal = gapStartPenalty + gapExtendPenalty + matchMatrix[i][j-1].getValue();
+    int xVal = gapExtendPenalty + xGapMatrix[i][j-1].getValue();
+    int yVal = gapStartPenalty + gapExtendPenalty + yGapMatrix[i][j-1].getValue();
     int max = max(matchVal, xVal, yVal);
     Cell cell = new Cell(max, leftSeqChar, upSeqChar, 2);
     if(matchVal == max){
@@ -316,9 +347,9 @@ public class SequenceAligner{
   */
   private static void calculateYGapValue(int i, int j, Character leftSeqChar, Character upSeqChar,
                                   Cell[][] matchMatrix, Cell[][] xGapMatrix, Cell[][] yGapMatrix){
-    int matchVal = getGapStartPenalty() + getGapExtendPenalty() + matchMatrix[i-1][j].getValue();
-    int xVal = getGapStartPenalty() + getGapExtendPenalty() + xGapMatrix[i-1][j].getValue();
-    int yVal = getGapExtendPenalty() + yGapMatrix[i-1][j].getValue();
+    int matchVal = gapStartPenalty + gapExtendPenalty + matchMatrix[i-1][j].getValue();
+    int xVal = gapStartPenalty + gapExtendPenalty + xGapMatrix[i-1][j].getValue();
+    int yVal = gapExtendPenalty + yGapMatrix[i-1][j].getValue();
     int max = max(matchVal, xVal, yVal);
     Cell cell = new Cell(max, leftSeqChar, upSeqChar, 3);
     if(matchVal == max){
@@ -462,31 +493,12 @@ public class SequenceAligner{
   }
 
   /**
-  * The gap start penalty is the given to starting a new gap when using affine gap penalties
-  *
-  * @return the gap start penalty
-  */
-  public static int getGapStartPenalty(){
-    return SequenceAligner.gapStartPenalty;
-  }
-
-  /**
-  * The gap start penalty is the given to extending a gap by one space when using affine gap
-  * penalties
-  *
-  * @return the gap extend penalty
-  */
-  public static int getGapExtendPenalty(){
-    return SequenceAligner.gapExtendPenalty;
-  }
-
-  /**
   * The default value of the gap extend penalty is -2. I don't have informed recommendations
   * on reasonable values.
   *
   * @param penalty the value to set the gap extend penalty to
   */
-  public static void setGapExtendPenalty(int penalty){
+  private static void setGapExtendPenalty(int penalty){
     if(penalty > 0){
       throw new IllegalArgumentException("Gap Extend Penalty must be less than or equal 0.");
     }
@@ -499,7 +511,7 @@ public class SequenceAligner{
   *
   * @param penalty the value to set the gap start penalty to
   */
-  public static void setGapStartPenalty(int penalty){
+  private static void setGapStartPenalty(int penalty){
     if(penalty > 0){
       throw new IllegalArgumentException("Gap Start Penalty must be less than or equal 0.");
     }

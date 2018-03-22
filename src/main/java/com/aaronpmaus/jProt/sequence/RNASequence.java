@@ -20,13 +20,9 @@ public class RNASequence extends Sequence {
     validateSequence(seq);
   }
 
-  /**
-  * Calculate and return an alignment of the two RNA sequences.
-  * @param other the other sequence to align to this one
-  * @return an object of type Alignment which can be queried to get the results of this alignment
-  */
-  public Alignment align(RNASequence other){
-    return SequenceAligner.align(this, other, "RNA.txt");
+  @Override
+  public Alignment align(Sequence other){
+    return SequenceAligner.align(this, other, "RNA");
   }
 
   /**

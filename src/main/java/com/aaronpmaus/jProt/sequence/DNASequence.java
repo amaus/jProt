@@ -20,13 +20,9 @@ public class DNASequence extends Sequence {
     validateSequence(seq);
   }
 
-  /**
-  * Calculate and return an alignment of the two DNA sequences.
-  * @param other the other sequence to align to this one
-  * @return an object of type Alignment which can be queried to get the results of this alignment
-  */
-  public Alignment align(DNASequence other){
-    return SequenceAligner.align(this, other, "DNA.txt");
+  @Override
+  public Alignment align(Sequence other){
+    return SequenceAligner.align(this, other, "DNA");
   }
 
   /**

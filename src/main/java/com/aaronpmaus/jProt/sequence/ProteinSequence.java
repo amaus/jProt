@@ -45,13 +45,9 @@ public class ProteinSequence extends Sequence {
     validateSequence(seq);
   }
 
-  /**
-  * Calculate and return an alignment of the two protein sequences.
-  * @param other the other sequence to align to this one
-  * @return an object of type Alignment which can be queried to get the results of this alignment
-  */
-  public Alignment align(ProteinSequence other){
-    return SequenceAligner.align(this, other, "BLOSUM62.txt");
+  @Override
+  public Alignment align(Sequence other){
+    return SequenceAligner.align(this, other, "BLOSUM62");
   }
 
   /**

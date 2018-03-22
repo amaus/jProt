@@ -33,8 +33,8 @@ public class TestSequenceAligner{
 
   @Test
   public void testDifferentCharacterMatchAlignment(){
-    ProteinSequence seq1 = new ProteinSequence("SHAKE");
-    ProteinSequence seq2 = new ProteinSequence("SPEARE");
+    Sequence seq1 = new ProteinSequence("SHAKE");
+    Sequence seq2 = new ProteinSequence("SPEARE");
     alignment = seq1.align(seq2);
     // The H should align with the E because histidine is more similar to Glutamic Acid than
     // Proline. Lysine and Arginine are also similar enough for the K and R to align.
