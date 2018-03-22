@@ -136,14 +136,13 @@ public class TestSequenceAligner{
 
   @Test
   public void testGetSequenceMatchMasks(){
-    boolean[][] masks = SequenceAligner.getSequenceMatchMasks("AA-EYE","AAP-E-");
-    boolean[] mask0 = {true, true, false, true, false};
-    boolean[] mask1 = {true, true, false, true};
-    assertTrue(Arrays.equals(masks[0],mask0));
-    assertTrue(Arrays.equals(masks[1],mask1));
-    String seq1 = "AAA----TCA";
-    String seq2 = "AAAGAATTCA";
-    masks = SequenceAligner.getSequenceMatchMasks(seq1,seq2);
+    DNASequence seq1 = new DNASequence("AAATCA");
+    // Expected Alignment:             "AAA----TCA"
+    DNASequence seq2 = new DNASequence("AAAGAATTCA");
+    Alignment alignment = seq1.align(seq2);
+    boolean[][] masks = new boolean[2][];
+    masks[0] = alignment.getAlignmentMask(seq1);
+    masks[1] = alignment.getAlignmentMask(seq2);
     boolean[] mask2 = {true, true, true, true, true, true};
     boolean[] mask3 = {true, true, true, false, false, false, false, true, true, true};
     assertTrue(Arrays.equals(masks[0],mask2));

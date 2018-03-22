@@ -51,8 +51,8 @@ public class SequenceAligner{
   *
   * @param seq1 one of the sequences to align
   * @param seq2 the other sequence to align
-  * @param matrixName the name of the Scoring Matrix to use, must be either "BLOSUM62.txt",
-  * "DNA.txt", or "RNA.txt"
+  * @param matrixName the name of the Scoring Matrix to use, must be either "BLOSUM62", "DNA", or
+  * "RNA"
   * @param gapExtendPenalty the gap extend penalty for the Needleman-Wuncsh algorithm, must be a
   * negative number
   * @param gapStartPenalty the gap start penalty for the Needleman-Wuncsh algorithm, must be a
@@ -72,11 +72,10 @@ public class SequenceAligner{
 
   /**
   * Calculate and return an alignment of the two sequences.
-  *
   * @param seq1 one of the sequences to align
   * @param seq2 the other sequence to align
-  * @param matrixName the name of the Scoring Matrix to use, must be either "BLOSUM62.txt",
-  * "DNA.txt", or "RNA.txt"
+  * @param matrixName the name of the Scoring Matrix to use, must be either "BLOSUM62", "DNA", or
+  * "RNA"
   * @return an object of type Alignment which can be queried to get the results of this alignment
   */
   public static Alignment align(Sequence seq1, Sequence seq2, String matrixName){
@@ -401,22 +400,21 @@ public class SequenceAligner{
 
   /**
   * Get a mask for each alignment string indicating the matches in its alignment to the other.
-  *
+  * <p>
   * The alignment strings are those produced by the alignment methods above and must be the
   * same length.
-  *
+  * <p>
   * The size of the mask is the number of elements in that alignment string exluding gaps. The
   * idea is to return a mask for the original sequence indicating which parts of it were able to
   * find a match in the other sequence.
-  *
   * @param alignmentSequenceOne the top sequence in the alignment. Can contain element ids and gaps
   * @param alignmentSequenceTwo the bottom sequence in the alignment. Can contain element ids and
-  *   gaps
+  * gaps
   * @return a array containing 2 arrays of booleans. The first is the mask for sequenceOne, and
-  *   the second the mask for sequenceTwo
+  * the second the mask for sequenceTwo
   */
-  public static boolean[][] getSequenceMatchMasks(String alignmentSequenceOne,
-    String alignmentSequenceTwo){
+  private static boolean[][] getSequenceMatchMasks(String alignmentSequenceOne,
+                                                   String alignmentSequenceTwo){
     boolean[][] masks = new boolean[2][];
     masks[0] = getMask(alignmentSequenceOne, alignmentSequenceTwo);
     masks[1] = getMask(alignmentSequenceTwo, alignmentSequenceOne);
