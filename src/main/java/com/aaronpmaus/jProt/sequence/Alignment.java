@@ -6,6 +6,8 @@ package com.aaronpmaus.jProt.sequence;
 * <p>
 * It can not be constructed by clients outside of this package. Rather it is the object returned as
 * the result of Sequence::align().
+* @see com.aaronpmaus.jProt.sequence.Sequence
+* @see com.aaronpmaus.jProt.sequence.SequenceAligner
 */
 public class Alignment {
   private final Sequence seqOne;

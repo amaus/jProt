@@ -37,7 +37,7 @@ import java.io.InputStream;
 * {@code Alignment alignment = SequenceAligner.align(prot1Seq, prot2Seq, "BLOSUM62", -2, -10);}
 * <p>
 * Valid options for the Scoring Matrix Name are "BLOSUM62", "DNA", and "RNA".
-* @see com.aaronpmaus.jProt.sequence.ProteinSequence
+* @see com.aaronpmaus.jProt.sequence.Sequence
 * @see com.aaronpmaus.jProt.sequence.Alignment
 * @version 0.7.0
 * @since 0.6.0
