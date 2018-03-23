@@ -85,6 +85,7 @@ public class JProtMetrics{
   private static boolean mol1FileProvided = false;
   private static boolean mol2FileProvided = false;
   private static boolean runningGDTHA = false;
+  private static boolean runningGDTPlot = false;
   private static Metrics theTool;
   /**
   * Runs the metrics of this program.
@@ -117,13 +118,7 @@ public class JProtMetrics{
         runGDTHA = true;
       }
       if(args.contains("--gdt-plot")){
-        runGDT = true;
-        runGDTHA = false;
         printGDTPlotData = true;
-        gdtThresholds = new double[20];
-        for(int i = 0; i < 20; i++){
-          gdtThresholds[i] = (i / 2.0) + 0.5;
-        }
       }
       if(args.contains("--ls") || args.contains("--local-similarity")){
         runLocalSimilarity = true;
@@ -180,13 +175,23 @@ public class JProtMetrics{
       if(runAngularDistance) angularDistance();
       if(runLocalSimilarity) localSimilarity(localSimilarityThreshold);
       if(runGDT) globalDistanceTest(gdtThresholds);
-      gdtThresholds[0] = 0.5;
-      gdtThresholds[1] = 1.0;
-      gdtThresholds[2] = 2.0;
-      gdtThresholds[3] = 4.0;
       if(runGDTHA) {
+        gdtThresholds[0] = 0.5;
+        gdtThresholds[1] = 1.0;
+        gdtThresholds[2] = 2.0;
+        gdtThresholds[3] = 4.0;
         runningGDTHA = true;
         globalDistanceTest(gdtThresholds);
+        runningGDTHA = false;
+      }
+      if(printGDTPlotData){
+        gdtThresholds = new double[20];
+        for(int i = 0; i < 20; i++){
+          gdtThresholds[i] = (i / 2.0) + 0.5;
+        }
+        runningGDTPlot = true;
+        globalDistanceTest(gdtThresholds);
+        runningGDTPlot = false;
       }
     } catch (FileNotFoundException e){
       System.out.println("Could not open required files. Check for existence.");
@@ -268,7 +273,13 @@ public class JProtMetrics{
   * @since 0.5.0
   */
   private static void globalDistanceTest(double[] thresholds){
-    System.out.println("############################# Global Distance Test ############################");
+    if(runningGDTHA){
+      System.out.println("##################### Global Distance Test - High Accuracy ####################");
+    } else if (runningGDTPlot){
+      System.out.println("####################### Global Distance Test - Plot Data ######################");
+    } else {
+      System.out.println("############################# Global Distance Test ############################");
+    }
     long start = new Date().getTime();
     ArrayList<UndirectedGraph<Integer>> globalDistanceRegions;
     int numThresholds = thresholds.length;
@@ -290,7 +301,13 @@ public class JProtMetrics{
     System.out.println("#End of Script\n");
 
     double[][] globalDistanceTest = theTool.getGlobalDistanceTestScore(globalDistanceRegions);
-    System.out.println("Global Distance Test:");
+    if(runningGDTHA){
+      System.out.println("RoS - Global Distance Test - High Accuracy:");
+    } else if(runningGDTPlot){
+      System.out.println("RoS - Global Distance Test - Print Plot Data:");
+    } else {
+      System.out.println("RoS - Global Distance Test:");
+    }
     System.out.println("Total num residues: " + theTool.getNumResidues());
     String thresholdsStr = "Thresholds:";
     String resNumStr = "Num Res:";
@@ -304,9 +321,9 @@ public class JProtMetrics{
     System.out.println(resNumStr);
     System.out.println(percentsStr);
 
-    if(printGDTPlotData){
+    if(runningGDTPlot){
       System.out.println();
-      System.out.println("GDT Plot Data:");
+      System.out.println("RoS-GDT Plot Data:");
       System.out.println("Percent Res, Threshold");
       for(int i = 0; i < thresholds.length; i++){
         System.out.printf("%.2f, %.2f\n", globalDistanceTest[i][1]*100, thresholds[i]);
@@ -318,9 +335,14 @@ public class JProtMetrics{
       double eight = globalDistanceTest[15][1]*100;
       double mcdtScore_ha = ( half + one + two + four ) / 4.0;
       double mcdtScore = ( one + two + four + eight) / 4.0;
-      System.out.println();
-      System.out.printf("RoS-GDT-HA Score: %.4f\n", mcdtScore_ha);
-      System.out.printf("RoS-GDT Score: %.4f\n", mcdtScore);
+
+      // Don't report the scores, not accurate
+      // The GDT score can vary from the score if it were calculated starting with the graph under
+      // the threshold of 1.0. If the first graph is built from 0.5, and then expanded to 1.0,
+      // it can hold differnt residues than the graph simply built from 1.0
+      //System.out.println();
+      //System.out.printf("RoS-GDT-HA Score: %.4f\n", mcdtScore_ha);
+      //System.out.printf("RoS-GDT Score: %.4f\n", mcdtScore);
     } else {
       // The last row in the array holds the averages. If there are 4 thresholds,
       // rows 0-3 hold the number and percents of residues for each threshold. Row
