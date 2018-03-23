@@ -19,7 +19,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Security
 [None]
 
-## [0.7.0]  2018-03-22
+## Unreleased
+### Added
+
+## [0.7.0] 2018-03-22
 ### Added
 - Package sequence
   -  Class Sequence w/ subclasses ProteinSequence, DNASequence, RNASequence
