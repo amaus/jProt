@@ -328,21 +328,6 @@ public class JProtMetrics{
       for(int i = 0; i < thresholds.length; i++){
         System.out.printf("%.2f, %.2f\n", globalDistanceTest[i][1]*100, thresholds[i]);
       }
-      double half = globalDistanceTest[0][1]*100;
-      double one = globalDistanceTest[1][1]*100;
-      double two = globalDistanceTest[3][1]*100;
-      double four = globalDistanceTest[7][1]*100;
-      double eight = globalDistanceTest[15][1]*100;
-      double mcdtScore_ha = ( half + one + two + four ) / 4.0;
-      double mcdtScore = ( one + two + four + eight) / 4.0;
-
-      // Don't report the scores, not accurate
-      // The GDT score can vary from the score if it were calculated starting with the graph under
-      // the threshold of 1.0. If the first graph is built from 0.5, and then expanded to 1.0,
-      // it can hold differnt residues than the graph simply built from 1.0
-      //System.out.println();
-      //System.out.printf("RoS-GDT-HA Score: %.4f\n", mcdtScore_ha);
-      //System.out.printf("RoS-GDT Score: %.4f\n", mcdtScore);
     } else {
       // The last row in the array holds the averages. If there are 4 thresholds,
       // rows 0-3 hold the number and percents of residues for each threshold. Row
