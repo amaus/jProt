@@ -259,9 +259,9 @@ public class JProtMetrics{
     System.out.println(resNumStr);
     System.out.println(percentsStr);
     System.out.println("The Local Similarity Score is the percent of residues in the top four regions.");
-    System.out.printf("LS Score: %.2f\n", percentInTopFourCliques*100);
+    System.out.printf("RoS-LS Score: %.2f\n", percentInTopFourCliques*100);
     long end = new Date().getTime();
-    System.out.println("Total Time for Local Similarity Covering: " + (end - start) + " milleseconds.");
+    System.out.println("Total Time for RoS-LS: " + (end - start) + " milleseconds.");
   }
 
   /**
