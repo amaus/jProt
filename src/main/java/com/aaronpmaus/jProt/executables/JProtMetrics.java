@@ -339,6 +339,12 @@ public class JProtMetrics{
       }
     }
     long end = new Date().getTime();
-    System.out.println("Total Time for Global Distance Test: " + (end - start) + " milleseconds.");
+    if(runningGDTHA){
+      System.out.println("Total Time for RoS-GDT-HA: " + (end - start) + " milleseconds.");
+    } else if(runningGDTPlot){
+      System.out.println("Total Time for RoS-GDT-Plot: " + (end - start) + " milleseconds.");
+    } else {
+      System.out.println("Total Time for RoS-GDT: " + (end - start) + " milleseconds.");
+    }
   }
 }
