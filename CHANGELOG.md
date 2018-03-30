@@ -20,7 +20,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [None]
 
 ## Unreleased
-### Added
+### Changed
+- Minor updates in the text output of the executable JProtMetrics
+### Removed
+- Constructor in Metrics that takes a csv file as input for the CA distance
+  matrices.
 
 ## [0.7.0] 2018-03-22
 ### Added
