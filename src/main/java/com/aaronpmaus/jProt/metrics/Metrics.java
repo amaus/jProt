@@ -53,38 +53,6 @@ public class Metrics{
   private int numResiduesInReference;
 
   /**
-  * A constructor that both the distance matrix files. It will calculate the values for the differences.
-  * @param alphaDistancesFileName the file containing the distances matrix for the first structure
-  * @param betaDistancesFileName the file containing the distances matrix for the second structure
-  * @throws FileNotFoundException if any of the files are not found
-  * @since 0.5.0
-  */
-  public Metrics(String alphaDistancesFileName, String betaDistancesFileName) throws FileNotFoundException{
-    // read in the residue IDs for both structures
-    Scanner reader = new Scanner(new File(alphaDistancesFileName));
-    this.alphaResidueIDs = reader.nextLine().split(",");
-    this.numResiduesInReference = this.alphaResidueIDs.length;
-    reader = new Scanner(new File(betaDistancesFileName));
-    this.betaResidueIDs = reader.nextLine().split(",");
-
-    // get the structure name from each file. Will need this name for building
-    // the pymol selection commands later.
-    // This requires that the distance matrix file begin with the PDB id.
-    // something like PDBid.pdb.CADistanceMatrix.csv is a good idea.
-    String[] fileNameTokens = alphaDistancesFileName.split("/"); // all but last element is path.
-    String fileName = fileNameTokens[fileNameTokens.length-1]; // get the last element
-    this.alphaStrucID = fileName.split("\\.")[0]; // split the filename on . and take the zeroth.
-    fileNameTokens = betaDistancesFileName.split("/"); // all but last element is path.
-    fileName = fileNameTokens[fileNameTokens.length-1]; // get the last element
-    this.betaStrucID = fileName.split("\\.")[0];
-
-    // read in the distance matrices and calculate the differences
-    this.alphaDistancesMatrix = readInDistanceFile(alphaDistancesFileName);
-    this.betaDistancesMatrix = readInDistanceFile(betaDistancesFileName);
-    calculateDifferencesMatrix();
-  }
-
-  /**
   * Build Metrics object taking in the two proteins to compare.
   *
   * It will first perform a sequence alignment and then build the carbon alpha distance
@@ -148,36 +116,6 @@ public class Metrics{
         this.differencesMatrix[i][j] = Math.abs(this.alphaDistancesMatrix[i][j] - this.betaDistancesMatrix[i][j]);
       }
     }
-  }
-
-  /*
-  * a private helper method that takes in a distances file and returns a 2D array with the
-  * values.
-  * @param fileName the file to read the distances from.
-  */
-  private Double[][] readInDistanceFile(String fileName) throws FileNotFoundException{
-    Scanner fileReader = new Scanner(new File(fileName));
-    fileReader.nextLine(); // throw away the first line. it's the residue IDs.
-
-    ArrayList<String> dataLines = new ArrayList<String>();
-    while(fileReader.hasNext()){
-      dataLines.add(fileReader.nextLine());
-    }
-    int numResidues = dataLines.size();
-    Double[][] data = new Double[numResidues][numResidues];
-    for(int i = 0; i < numResidues; i++){
-      for(int j = 0; j < numResidues; j++){
-        data[i][j] = Double.NaN;
-      }
-    }
-    // only use the values from the upper right hand side of the matrix.
-    for(int i = 0; i < dataLines.size(); i++){
-      String[] tokens = dataLines.get(i).split(",");
-      for(int j = i+1; j < tokens.length; j++){
-        data[i][j] = Double.parseDouble(tokens[j]);
-      }
-    }
-    return data;
   }
 
   /**
