@@ -60,8 +60,10 @@ import java.util.Date;
 *          {0.5, 1.0, 1.5, ..., 9.5, 10.0}
 *      --chimera
 *          Print out a chimera script to color the regions of similarity
-*          found by either local similarity or gdt. By default, a pymol
-*          script is printed. This changes that behavior.
+*          found by either local similarity or gdt.
+*      --pymol
+*          Print out a pymol script to color the regions of similarity
+*          found by either local similarity or gdt.
 * </code>
 * </pre>
 *
@@ -76,6 +78,7 @@ public class JProtMetrics{
   private static boolean runGDTHA = false;
   private static boolean usePDBs = false;
   private static boolean printChimera = false;
+  private static boolean printPymol = false;
   private static double localSimilarityThreshold = 1.0;
   private static double[] gdtThresholds;
   private static String mol1FilePath;
@@ -137,6 +140,9 @@ public class JProtMetrics{
       }
       if(args.contains("--chimera")){
         printChimera = true;
+      }
+      if(args.contains("--pymol")){
+        printPymol = true;
       }
     }
 
@@ -227,20 +233,8 @@ public class JProtMetrics{
     ArrayList<UndirectedGraph<Integer>> localSimilarityRegions;
     localSimilarityRegions = theTool.getLocalSimilarityRegions(threshold);
 
-    ArrayList<String> script;
-
-    if(printChimera){
-      script = theTool.getChimeraColoringScript(localSimilarityRegions);
-      System.out.println("\n#Chimera Script:");
-    } else {
-      script = theTool.getPymolColoringScript(localSimilarityRegions);
-      System.out.println("\n#Pymol Script:");
-    }
-
-    for(String cmd: script){
-      System.out.println(cmd);
-    }
-    System.out.println("#End of Script\n");
+    // print out the pymol and/or chimera scripts if the user has specified to do so
+    printScripts(localSimilarityRegions);
 
     double[][] globalDistanceTest = theTool.getGlobalDistanceTestScore(localSimilarityRegions);
     String cliquesStr = "Cliques:";
@@ -285,20 +279,8 @@ public class JProtMetrics{
     int numThresholds = thresholds.length;
     globalDistanceRegions = theTool.getGlobalDistanceRegions(thresholds);
 
-    ArrayList<String> script;
-
-    if(printChimera){
-      script = theTool.getChimeraColoringScript(globalDistanceRegions);
-      System.out.println("\n#Chimera Script:");
-    } else {
-      script = theTool.getPymolColoringScript(globalDistanceRegions);
-      System.out.println("\n#Pymol Script:");
-    }
-
-    for(String cmd: script){
-      System.out.println(cmd);
-    }
-    System.out.println("#End of Script\n");
+    // print out the pymol and/or chimera scripts if the user has specified to do so
+    printScripts(globalDistanceRegions);
 
     double[][] globalDistanceTest = theTool.getGlobalDistanceTestScore(globalDistanceRegions);
     if(runningGDTHA){
@@ -345,6 +327,32 @@ public class JProtMetrics{
       System.out.println("Total Time for RoS-GDT-Plot: " + (end - start) + " milleseconds.");
     } else {
       System.out.println("Total Time for RoS-GDT: " + (end - start) + " milleseconds.");
+    }
+  }
+
+  /**
+  * Private helper method to print out the pymol and/or chimera scripts if those options are
+  * specified.
+  */
+  private static void printScripts(ArrayList<UndirectedGraph<Integer>> regionsOfSimilarity){
+    ArrayList<String> script;
+
+    if(printChimera){
+      script = theTool.getChimeraColoringScript(regionsOfSimilarity);
+      System.out.println("\n#Chimera Script:");
+      for(String cmd: script){
+        System.out.println(cmd);
+      }
+      System.out.println("#End of Chimera Script\n");
+    }
+
+    if(printPymol){
+      script = theTool.getPymolColoringScript(regionsOfSimilarity);
+      System.out.println("\n#Pymol Script:");
+      for(String cmd: script){
+        System.out.println(cmd);
+      }
+      System.out.println("#End of Pymol Script\n");
     }
   }
 }

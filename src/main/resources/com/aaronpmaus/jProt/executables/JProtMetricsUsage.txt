@@ -37,5 +37,7 @@ Usage: JProtMetrics [<options>] <mol1-f fname> <mol2-f fname>
           for both gdt and gdt-ha.
       --chimera
           Print out a chimera script to color the regions of similarity
-          found by either local similarity or gdt. By default, a pymol
-          script is printed. This changes that behavior.
+          found by either local similarity or gdt.
+      --pymol
+          Print out a pymol script to color the regions of similarity
+          found by either local similarity or gdt.
