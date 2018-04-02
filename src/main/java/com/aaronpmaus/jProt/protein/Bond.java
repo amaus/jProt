@@ -37,7 +37,10 @@ public class Bond {
             this.ATOM_TWO = a1;
             this.ATOM_ONE = a2;
         } else {
-            throw new IllegalArgumentException("Atoms added to a bond must be different.");
+            throw new IllegalArgumentException(
+                String.format("Cannot add Atoms %s-%d and %s-%d to a Bond."
+                + " They must be different Atoms with different Serial Numbers.",
+                a1.getName(), a1.getSerialNumber(), a2.getName(), a2.getSerialNumber()));
         }
         this.bondStrength = bondStrength;
     }

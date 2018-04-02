@@ -359,11 +359,17 @@ public class PDBFileIO{
         Collection<Atom> residueAtoms = constructAtoms(residueAtomRecords);
         // only build and add the residue if it contains the backbone atoms N CA C
         if(resContainsBackboneAtoms(residueAtoms)){
-          Residue res = new Residue(resName, resSeq, residueAtoms);
-          if(containsCarboxylOxygen(residueAtoms)){
-            res.setAsCarboxylTerminus();
+          try{
+            Residue res = new Residue(resName, resSeq, residueAtoms);
+            if(containsCarboxylOxygen(residueAtoms)){
+              res.setAsCarboxylTerminus();
+            }
+            chain.addResidue(res);
+          } catch (IllegalArgumentException e){
+            throw new IllegalStateException(
+                String.format("Problem when trying to construct Residue %s-%d for Protein %s",
+                              resName, resSeq, pdbName), e);
           }
-          chain.addResidue(res);
         }
       }
       protein.addChain(chain);
