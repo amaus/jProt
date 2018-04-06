@@ -303,7 +303,8 @@ public class Metrics{
 
   /**
   * Calculates and returns the percent of residues in each region of similarity along with
-  * the average of those percents.
+  * the average of those percents. The percents are calculated with respect to the number of
+  * residues in the reference structure.
   * @param regions an ArrayList of the graphs of the regions of similarity. Each graph
   *                  consists of nodes residues in that region of similarity.
   * @return a 2D array. The number of rows is regions.size()+1. Each row has 2 columns.
