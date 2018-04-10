@@ -385,7 +385,7 @@ public class Metrics{
                       colors[i], getNodesString(region, ",", getAlphaResidueIDs()),
                       colors[i], getNodesString(region, ",", getBetaResidueIDs())));
       i++;
-      if(i==3){
+      if(i==4){
         break;
       }
     }
