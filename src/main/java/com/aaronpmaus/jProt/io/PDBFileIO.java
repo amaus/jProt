@@ -18,9 +18,10 @@ import java.io.OutputStreamWriter;
 import java.io.IOException;
 
 /**
-* Provides the ability to read in and write out PDB Files. Every protein has its own
-* instance of PDBFileIO, even proteins that aren't read in from a PDB, but are built from
-* sequence data alone. Those proteins will need the ability to write themselves out to file.
+* Provides the ability to read in and write out PDB Files. Every protein has its own instance of
+* PDBFileIO. Even proteins that aren't read in from a PDB file, but are built from sequence data
+* alone, have an instance of PDBFileIO because they will need the ability to write themselves out to
+* file.
 * <p>
 * Example Usage:
 * <p>

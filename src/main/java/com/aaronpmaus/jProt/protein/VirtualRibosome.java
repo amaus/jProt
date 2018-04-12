@@ -18,8 +18,8 @@ import java.util.List;
 * produce single multi chain Proteins.
 * <p>
 * Usage: <br>
-* {code // Construct a custom protein from the sequence IAMSTARSTFF}<br>
-* {code Protein prot = VirtualRibosome.synthesizeProtein(new ProteinSequence("IAMSTARSTFF"), "strstf");}<br>}
+* {@code // Construct a custom protein from the sequence IAMSTARSTFF}<br>
+* {@code Protein prot = VirtualRibosome.synthesizeProtein(new ProteinSequence("IAMSTARSTFF"), "strstf");}<br>
 */
 public class VirtualRibosome {
   private static int outFileIndex = 1;
