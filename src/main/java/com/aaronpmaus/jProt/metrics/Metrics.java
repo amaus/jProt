@@ -14,6 +14,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 
 /**
  * <p>Metrics is a collection of protein similarity metrics. It consists of Angular Distance,
@@ -276,29 +277,109 @@ public class Metrics{
     for(int i = 0; i < thresholds.length; i++){
       double threshold = thresholds[i];
       UndirectedGraph<Integer> graph = buildSimilarityGraph(threshold);
-      //System.out.printf("Num Vertices: %d\n",graph.size());
-      //System.out.printf("Num Edges: %d\n",graph.numEdges());
-      //System.out.printf("Density: %.2f\n",graph.density());
-      String fname = graph.getGraphFileName();
+      String graphFileName = graph.getGraphFileName();
       UndirectedGraph<Integer> clique;
       MaxCliqueSolver<Integer> maxCliqueTool = new IncMaxCliqueAdapter();
-      //MaxCliqueSolver<Integer> maxCliqueTool = new MausMaxCliqueSolver();
-      long startTime = new Date().getTime();
       if(i == 0){
+        long startTime = new Date().getTime();
         clique = maxCliqueTool.findMaxClique(graph);
+        long endTime = new Date().getTime();
+        System.out.printf("\nRegion Found for structures under threshold %.2f.\n",threshold);
+        System.out.printf("%10s |%13s | %10s | %10s | %10s\n", "Threshold", "Num Vertices", "Num Edges", "Density", "Runtime");
+        System.out.printf("%8.2f A | %12d | %10d | %10.2f | %10d\n", threshold, graph.size(), graph.numEdges(), graph.density(), endTime-startTime);
       } else {
-        graph = graph.getNeighborhood(lastClique.getNodes());
-        graph.setGraphFileName(fname);
-        clique = maxCliqueTool.findMaxClique(graph);
+        //graph = graph.getNeighborhood(lastClique.getNodes());
+        //graph = getNeighborhood(graph, lastClique);
+        //graph.setGraphFileName(graphFileName);
+        //clique = maxCliqueTool.findMaxClique(graph);
+        clique = getNextRegionOfSimilarity(graph, lastClique, graphFileName, threshold);
+        if(!isSubset(lastClique, clique)){
+          throw new IllegalStateException("In RoS-GDT, the next region found should completely contain the last region");
+        }
       }
-      long endTime = new Date().getTime();
-      System.out.printf("\nRegion Found for structures under threshold %.2f.\n",threshold);
-      System.out.printf("%10s |%13s | %10s | %10s | %10s\n", "Threshold", "Num Vertices", "Num Edges", "Density", "Runtime");
-      System.out.printf("%8.2f A | %12d | %10d | %10.2f | %10d\n", threshold, graph.size(), graph.numEdges(), graph.density(), endTime-startTime);
       regions.add(clique);
       lastClique = clique;
     }
     return regions;
+  }
+
+  /**
+  * Return the neighborhood of the clique in the graph. This Graph contains all the nodes in the
+  * clique, all the nodes in graph that have an edge to every node in the clique, and all the edges
+  * between all these nodes.
+  */
+  private UndirectedGraph<Integer> getNextRegionOfSimilarity(UndirectedGraph<Integer> graph,
+                                                             UndirectedGraph<Integer> lastClique,
+                                                             String graphFileName,
+                                                             double threshold){
+    // First, get the neighborhood of the lastClique in the new graph: the subset of graph
+    // containing all the nodes of the last clique along with all of their neighbors.
+    UndirectedGraph<Integer> neighborhood = graph.getNeighborhood(lastClique.getNodes());
+    // sort neighborhood into the nodes that correspond to those in lastClique and the neighbors of
+    // those nodes
+    ArrayList<Node<Integer>> lastCliqueNodes = new ArrayList<Node<Integer>>();
+    ArrayList<Node<Integer>> neighboringNodes = new ArrayList<Node<Integer>>();
+    for(Node<Integer> node : neighborhood){
+      if(lastClique.contains(node.get())){
+        lastCliqueNodes.add(node);
+      } else {
+        neighboringNodes.add(node);
+      }
+    }
+
+    // for each neighboring node, ensure it has an edge to every node in the the last clique.
+    // If it doesn't, remove it from the list of neighboringNodes.
+    Iterator<Node<Integer>> it = neighboringNodes.iterator();
+    while(it.hasNext()){
+      Node<Integer> neighboringNode = it.next();
+      for(Node<Integer> lastCliqueNode : lastCliqueNodes){
+        if(!neighboringNode.hasNeighbor(lastCliqueNode)){
+          //neighborhood.removeNode(neighboringNode);
+          it.remove(); // remove this node from neighboringNodes
+          break;
+        }
+      }
+    }
+
+    // Find the MAX CLIQUE on the list of neighboringNodes
+    MaxCliqueSolver<Integer> maxCliqueTool = new IncMaxCliqueAdapter();
+    UndirectedGraph<Integer> neighboringNodesGraph = new UndirectedGraph<Integer>(neighboringNodes);
+    neighboringNodesGraph.setGraphFileName(graphFileName);
+    long startTime = new Date().getTime();
+    UndirectedGraph<Integer> neighboringNodesClique = maxCliqueTool.findMaxClique(neighboringNodesGraph);
+    long endTime = new Date().getTime();
+    System.out.printf("\nRegion Found for structures under threshold %.2f.\n",threshold);
+    System.out.printf("%10s |%13s | %10s | %10s | %10s\n", "Threshold", "Num Vertices", "Num Edges", "Density", "Runtime");
+    System.out.printf("%8.2f A | %12d | %10d | %10.2f | %10d\n", threshold,
+                                                                 neighboringNodesGraph.size(),
+                                                                 neighboringNodesGraph.numEdges(),
+                                                                 neighboringNodesGraph.density(),
+                                                                 endTime-startTime);
+
+    // Build up a list of all the nodes in the new Region of Similarity. This includes all the nodes
+    // in the last clique and all the nodes in the neighboring nodes clique. The Max Clique Tool
+    // returns a deep copy of those nodes so pull them from the nodes that came from neighborhood.
+    ArrayList<Node<Integer>> newCliqueNodes = new ArrayList<Node<Integer>>();
+    // lastCliqueNodes contians nodes from neighborhood, contains edges to neighboring nodes
+    newCliqueNodes.addAll(lastCliqueNodes);
+    for(Node<Integer> neighboringNode : neighboringNodes){
+      if(neighboringNodesClique.contains(neighboringNode.get())){
+        // neighboringNode is from neighborhood and contains edges to lastCliqueNodes
+        newCliqueNodes.add(neighboringNode);
+      }
+    }
+    // build and return a graph containing all the nodes in lastCliqueNodes and
+    // neighboringNodesClique.
+    return new UndirectedGraph<Integer>(newCliqueNodes);
+  }
+
+  private boolean isSubset(UndirectedGraph<Integer> possibleSubset, UndirectedGraph<Integer> graph){
+    for(Node<Integer> node : possibleSubset){
+      if(!graph.contains(node)){
+        return false;
+      }
+    }
+    return true;
   }
 
   /**
