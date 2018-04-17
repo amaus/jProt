@@ -5,39 +5,41 @@ Usage: JProtMetrics [<options>] <mol1-f fname> <mol2-f fname>
       -a, --angular-distance
           Calculate and print the angular distance.
       --mol1-f fname
-          This file must either be a PDB file. If it is a PDB file it
-          must end in the .pdb extension and conform to the PDB File
+          This file must be a PDB file. It must conform to the PDB File
           Format Version 3.30.
       --mol2-f fname
           The file for molecule two. The format is the same as mol1-f.
-      --ls, --local-similarity
-          Find the regions of local similarity between the structures
-          using  a default threshold of 1.0 angstroms. These are the
-          sets of residues that are internally consistent, that is, the
-          intra structure distances between all residues are the same
-          (that is their distance is under the default threshold of 1.0
-          angstroms) in both structures. A pymol script to select and
-          color these regions is printed to the screen.
-      --ls-t d
-          Find the regions of local similarity between the structures
-          using the threshold d specified.
+      --ros
+          Find the regions of similarity between the structures using  a
+          default threshold of 1.0 angstroms. These are the sets of
+          residues that are internally consistent. That is, the intra
+          structure distances between the CA's of all pairs of residues
+          this this set are the same (under a default tolerance of 1.0
+          angstroms) in both structures.
+      --ros-t d
+          Find the regions of similarity between the structures using
+          the tolerance d.
+      --diff
+          Find the regions of dissimilarity between the structures.
+          These are the sets of residues where none of their intra
+          structure distances are preserved between the structures. By
+          default, the similarity threshold is 1.0 angstroms.
+      --diff-t d
+          Find the regions of dissimilarity between the structures using
+          the threshold d.
       --gdt
           Global Distance Test: Iteratively find the largest regions of
           similarity between the two structures under increasing
-          thresholds. Print out a pymol script that selects and colors
-          these regions and prints out the number and percent of
-          residues within each region along with the average of the
-          percents. The default thresholds are {1.0, 2.0, 4.0, 8.0}.
+          thresholds. The thresholds are {1.0, 2.0, 4.0, 8.0}.
       --gdt-ha
           Global Distance Test - High Accuracy: the same as gdt except
           with thresholds: {0.5, 1.0, 2.0, 4.0}.
       --gdt-plot
           Global Distance Test: Operates as --gdt but with thresholds
-          {0.5, 1.0, 1.5, ..., 9.5, 10.0}. Will calculate the statistics
-          for both gdt and gdt-ha.
+          {0.5, 1.0, 1.5, ..., 9.5, 10.0}.
       --chimera
           Print out a chimera script to color the regions of similarity
-          found by either local similarity or gdt.
+          found by ros, gdt, gdt-ha, or diff.
       --pymol
           Print out a pymol script to color the regions of similarity
-          found by either local similarity or gdt.
+          found by ros, gdt, gdt-ha, or diff.

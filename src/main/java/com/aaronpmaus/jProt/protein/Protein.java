@@ -45,8 +45,7 @@ public class Protein implements Iterable<PolypeptideChain>, Transformable{
 
   /**
   * Create an instance of a Protein. All chains will then have to be added to this instance.
-  * @param proteinName the name of the protein, recommended: the PDB filename base (the part before
-  * the extension).
+  * @param proteinName the name of the protein, recommended: the PDB filename base 
   * @param pdbIO a PDBFileIO instance that this protein can use to write out to file
   */
   public Protein(String proteinName, PDBFileIO pdbIO){

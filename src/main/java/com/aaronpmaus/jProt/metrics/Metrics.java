@@ -180,9 +180,9 @@ public class Metrics{
   }
 
   /**
-  * A method to calculate the Angular Distance. Given two structure distance matrices, it
-  * flattens them into a vector and calculates the angle between them. It scales the angle
-  * to be in the range 0-100 where 0 is identical and returns that value.
+  * A method to calculate the Angular Distance. It calculates the carbon-alpha distance matrices,
+  * flattens them into a vector, and calculates the angle between them. It scales the angle
+  * to be in the range 0-100 where 0 indicates identical structures and returns that value.
   * @return the angular distance between the two structures. range 0-100. 0 is identical.
   * @since 0.5.0
   */
@@ -227,6 +227,17 @@ public class Metrics{
     return getLocalSimilarityRegions(1.0);
   }
 
+  public ArrayList<UndirectedGraph<Integer>> getRegionsOfDissimilarity(double threshold){
+    UndirectedGraph<Integer> graph = buildSimilarityGraph(threshold).getComplement();
+    System.out.printf("\nGraph built for structures under threshold %.2f.\n",threshold);
+    System.out.printf("Num Vertices: %d\n",graph.size());
+    System.out.printf("Num Edges: %d\n",graph.numEdges());
+    System.out.printf("Density: %.2f\n",graph.density());
+    MaxCliqueSolver<Integer> maxCliqueTool = new IncMaxCliqueAdapter();
+    //MaxCliqueSolver<Integer> maxCliqueTool = new MausMaxCliqueSolver();
+    ArrayList<UndirectedGraph<Integer>> cliques = maxCliqueTool.getCliqueCovering(graph);
+    return cliques;
+  }
   /**
   * Returns an ArrayList of UndirectedGraphs representing the similarity regions
   * under the threshold passed in as an argument. That is, if the difference of
@@ -418,13 +429,63 @@ public class Metrics{
   }
 
   /**
-  * Builds and returns an ArrayList containing the pymol commands to color a protein given
+  * Builds and returns an ArrayList containing the Pymol commands to color a protein given
   * a set of regions of similarity.
   * @param regions an ArrayList of the graphs representing the regions of similarity.
-  * @return the set of pymol commands to properly color the structure.
+  * @return the set of Pymol commands to properly color the structure.
   * @since 0.5.0
   */
   public ArrayList<String> getPymolColoringScript(ArrayList<UndirectedGraph<Integer>> regions){
+    //                  Dark Blue  Light Blue  Yellow    Orange
+    //String[] colors = {"#2c7bb6", "#abd9e9", "#ffffbf", "#fdae61"};
+    String[] colors = {"green", "cyan", "yellow", "orange"};
+    return getPymolColoringScript(regions, colors);
+  }
+
+  /**
+  * Builds and returns an ArrayList containing the Pymol commands to color a protein given
+  * a set of regions of dissimilarity
+  * @param regions an ArrayList of the graphs representing the regions of dissimilarity.
+  * @return the set of Pymol commands to properly color the structure.
+  * @since 0.5.0
+  */
+  public ArrayList<String> getDiffPymolColoringScript(ArrayList<UndirectedGraph<Integer>> regions){
+    //                  Dark Blue  Light Blue  Yellow    Orange
+    //String[] colors = {"#2c7bb6", "#abd9e9", "#ffffbf", "#fdae61"};
+    String[] colors = {"red", "red", "red", "red"};
+    return getPymolColoringScript(regions, colors);
+  }
+
+  /**
+  * Builds and returns an ArrayList containing the Chimera commands to color a protein given
+  * a set of regions of similarity.
+  * @param regions an ArrayList of the graphs representing the regions of similarity.
+  * @return the set of Chimera commands to properly color the structure.
+  * @since 0.5.0
+  */
+  public ArrayList<String> getChimeraColoringScript(ArrayList<UndirectedGraph<Integer>> regions){
+    //                  Dark Blue  Light Blue  Yellow    Orange
+    //String[] colors = {"#2c7bb6", "#abd9e9", "#ffffbf", "#fdae61"};
+    String[] colors = {"green", "cyan", "yellow", "orange"};
+    return getChimeraColoringScript(regions, colors);
+  }
+
+  /**
+  * Builds and returns an ArrayList containing the Chimera commands to color a protein given
+  * a set of regions of dissimilarity.
+  * @param regions an ArrayList of the graphs representing the regions of dissimilarity.
+  * @return the set of Chimera commands to properly color the structure.
+  * @since 0.5.0
+  */
+  public ArrayList<String> getDiffChimeraColoringScript(ArrayList<UndirectedGraph<Integer>> regions){
+    //                  Dark Blue  Light Blue  Yellow    Orange
+    //String[] colors = {"#2c7bb6", "#abd9e9", "#ffffbf", "#fdae61"};
+    String[] colors = {"red", "red", "red", "red"};
+    return getChimeraColoringScript(regions, colors);
+  }
+
+  private ArrayList<String> getPymolColoringScript(ArrayList<UndirectedGraph<Integer>> regions,
+                                                   String[] colors){
     ArrayList<String> pymolScript = new ArrayList<String>();
     int numRes = getNumResidues();
     int numRegions = regions.size();
@@ -437,30 +498,25 @@ public class Metrics{
       + betaStrucID + " and i. " + getNodesString(region, "+", getBetaResidueIDs()));
       counter++;
     }
-    if(regions.size() > 3){
-      pymolScript.add("color red");
-      pymolScript.add("color orange, clique4");
-      pymolScript.add("color yellow, clique3");
-      pymolScript.add("color cyan, clique2");
-      pymolScript.add("color green, clique1");
-    } else {
-      pymolScript.add("color red");
-      String[] colors = {"green", "cyan", "yellow", "orange"};
-      for(int i = regions.size(); i > 0; i--){
-        pymolScript.add("color " + colors[i-1] + ", clique"+i);
+    ArrayList<String> coloringScript = new ArrayList<String>();
+    for(int i = 0; i < regions.size(); i++){
+      coloringScript.add("color " + colors[i] + ", clique"+(i+1));
+      if(i==3){
+        break;
       }
     }
+    coloringScript.add("color red");
+    Collections.reverse(coloringScript);
+    pymolScript.addAll(coloringScript);
     return pymolScript;
   }
 
-  public ArrayList<String> getChimeraColoringScript(ArrayList<UndirectedGraph<Integer>> regions){
+  private ArrayList<String> getChimeraColoringScript(ArrayList<UndirectedGraph<Integer>> regions,
+                                                    String[] colors){
     ArrayList<String> chimeraScript = new ArrayList<String>();
     int numRes = getNumResidues();
     int numRegions = regions.size();
     int i = 0;
-    //                  Dark Blue  Light Blue  Yellow    Orange
-    //String[] colors = {"#2c7bb6", "#abd9e9", "#ffffbf", "#fdae61"};
-    String[] colors = {"green", "cyan", "yellow", "orange"};
     for(UndirectedGraph<Integer> region : regions){
       chimeraScript.add(String.format("color %s #0:%s; color %s #1:%s",
                       colors[i], getNodesString(region, ",", getAlphaResidueIDs()),

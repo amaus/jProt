@@ -28,42 +28,44 @@ import java.util.Date;
 *      -a, --angular-distance
 *          Calculate and print the angular distance.
 *      --mol1-f fname
-*          This file must either be a PDB file. If it is a PDB file it
-*          must end in the .pdb extension and conform to the PDB File
+*          This file must be a PDB file. It must conform to the PDB File
 *          Format Version 3.30.
 *      --mol2-f fname
 *          The file for molecule two. The format is the same as mol1-f.
-*      --ls, --local-similarity
-*          Find the regions of local similarity between the structures
-*          using  a default threshold of 1.0 angstroms. These are the
-*          sets of residues that are internally consistent, that is, the
-*          intra structure distances between all residues are the same
-*          (that is their distance is under the default threshold of 1.0
-*          angstroms) in both structures. A pymol script to select and
-*          color these regions is printed to the screen.
-*      --ls-t d
-*          Find the regions of local similarity between the structures
-*          using the threshold d specified.
+*      --ros
+*          Find the regions of similarity between the structures using  a
+*          default threshold of 1.0 angstroms. These are the sets of
+*          residues that are internally consistent. That is, the intra
+*          structure distances between the CA's of all pairs of residues
+*          this this set are the same (under a default tolerance of 1.0
+*          angstroms) in both structures.
+*      --ros-t d
+*          Find the regions of similarity between the structures using
+*          the tolerance d.
+*      --diff
+*          Find the regions of dissimilarity between the structures.
+*          These are the sets of residues where none of their intra
+*          structure distances are preserved between the structures. By
+*          default, the similarity threshold is 1.0 angstroms.
+*      --diff-t d
+*          Find the regions of dissimilarity between the structures using
+*          the threshold d.
 *      --gdt
 *          Global Distance Test: Iteratively find the largest regions of
 *          similarity between the two structures under increasing
-*          thresholds. Print out a pymol script that selects and colors
-*          these regions and prints out the number and percent of
-*          residues within each region along with the average of the
-*          percents. The default thresholds are {1.0, 2.0, 4.0, 8.0}.
+*          thresholds. The thresholds are {1.0, 2.0, 4.0, 8.0}.
 *      --gdt-ha
 *          Global Distance Test - High Accuracy: the same as gdt except
-*          with thresholds: {0.5, 1.0, 2.0, 4.0}. Warning: This may take
-*          a long time to run depending on the structures.
+*          with thresholds: {0.5, 1.0, 2.0, 4.0}.
 *      --gdt-plot
 *          Global Distance Test: Operates as --gdt but with thresholds
-*          {0.5, 1.0, 1.5, ..., 9.5, 10.0}
+*          {0.5, 1.0, 1.5, ..., 9.5, 10.0}.
 *      --chimera
 *          Print out a chimera script to color the regions of similarity
-*          found by either local similarity or gdt.
+*          found by ros, gdt, gdt-ha, or diff.
 *      --pymol
 *          Print out a pymol script to color the regions of similarity
-*          found by either local similarity or gdt.
+*          found by ros, gdt, gdt-ha, or diff.
 * </code>
 * </pre>
 *
@@ -80,6 +82,7 @@ public class JProtMetrics{
   private static boolean printChimera = false;
   private static boolean printPymol = false;
   private static double localSimilarityThreshold = 1.0;
+  private static double dissimilarityThreshold = 1.0;
   private static double[] gdtThresholds;
   private static String mol1FilePath;
   private static String mol2FilePath;
@@ -89,6 +92,7 @@ public class JProtMetrics{
   private static boolean mol2FileProvided = false;
   private static boolean runningGDTHA = false;
   private static boolean runningGDTPlot = false;
+  private static boolean runDissimilarity = false;
   private static Metrics theTool;
   /**
   * Runs the metrics of this program.
@@ -102,6 +106,7 @@ public class JProtMetrics{
     gdtThresholds[2] = 4.0;
     gdtThresholds[3] = 8.0;
     localSimilarityThreshold = 1.0;
+    dissimilarityThreshold = 1.0;
     CommandLineParser args = new CommandLineParser(arguments);
     if(arguments.length == 0 || args.contains("-h")){
       InputStream stream = JProtMetrics.class.getResourceAsStream("JProtMetricsUsage.txt");
@@ -123,12 +128,19 @@ public class JProtMetrics{
       if(args.contains("--gdt-plot")){
         printGDTPlotData = true;
       }
-      if(args.contains("--ls") || args.contains("--local-similarity")){
+      if(args.contains("--ros")){
         runLocalSimilarity = true;
       }
-      if(args.contains("--ls-t")){
+      if(args.contains("--ros-t")){
         runLocalSimilarity = true;
-        localSimilarityThreshold = Double.parseDouble(args.getValue("--ls-t"));
+        localSimilarityThreshold = Double.parseDouble(args.getValue("--ros-t"));
+      }
+      if(args.contains("--diff")){
+        runDissimilarity = true;
+      }
+      if(args.contains("--diff-t")){
+        runDissimilarity = true;
+        dissimilarityThreshold = Double.parseDouble(args.getValue("--diff-t"));
       }
       if(args.contains("--mol1-f")){
         mol1FilePath = args.getValue("--mol1-f");
@@ -153,33 +165,17 @@ public class JProtMetrics{
         File mol2File = new File(mol2FilePath);
         String mol1FileName = mol1File.getName();
         String mol2FileName = mol2File.getName();
-        String mol1Ext = mol1FileName.substring(mol1FileName.length()-3);
-        String mol2Ext = mol2FileName.substring(mol2FileName.length()-3);
-        String mol1Base = mol1FileName.substring(0,mol1FileName.length()-4);
-        String mol2Base = mol2FileName.substring(0,mol2FileName.length()-4);
 
-        if(mol1Ext.equals("pdb") && mol2Ext.equals("pdb")){
-          usePDBs = true;
-        } else {
-          System.out.println("Both files must either be PDBs with extension .pdb");
-          System.out.println("You provided files: \n" + mol1FileName + "\n" + mol2FileName);
-          System.exit(1);
-        }
-
-        if(usePDBs){
-          //PDBFileIO pdb = new PDBFileIO();
-          //Protein prot1 = pdb.readInPDBFile(mol1FileName);
-          Protein prot1 = new PDBFileIO().readInPDBFile(new FileInputStream(mol1FileName),mol1Base);
-          Protein prot2 = new PDBFileIO().readInPDBFile(new FileInputStream(mol2FileName),mol2Base);
-          //Protein prot2 = pdb.readInPDBFile(mol2FileName);
-          theTool = new Metrics(prot1, prot2);
-        }
+        Protein prot1 = new PDBFileIO().readInPDBFile(new FileInputStream(mol1FileName),mol1FileName);
+        Protein prot2 = new PDBFileIO().readInPDBFile(new FileInputStream(mol2FileName),mol2FileName);
+        theTool = new Metrics(prot1, prot2);
       } else {
         System.out.println("You must provide the two protein data files.");
         System.exit(1);
       }
       if(runAngularDistance) angularDistance();
       if(runLocalSimilarity) localSimilarity(localSimilarityThreshold);
+      if(runDissimilarity)   dissimilarity(dissimilarityThreshold);
       if(runGDT) globalDistanceTest(gdtThresholds);
       if(runGDTHA) {
         gdtThresholds[0] = 0.5;
@@ -227,7 +223,7 @@ public class JProtMetrics{
   * @since 0.5.0
   */
   private static void localSimilarity(double threshold){
-    System.out.println("########################### Local Similarity Covering #########################");
+    System.out.println("############################## Regions of Similarity ##########################");
     System.out.printf("\nUnder a threshold of: %.2f\n",threshold);
     long start = new Date().getTime();
     ArrayList<UndirectedGraph<Integer>> localSimilarityRegions;
@@ -256,6 +252,38 @@ public class JProtMetrics{
     System.out.printf("RoS-LS Score: %.2f\n", percentInTopFourCliques*100);
     long end = new Date().getTime();
     System.out.println("Total Time for RoS-LS: " + (end - start) + " milleseconds.");
+  }
+
+  private static void dissimilarity(double threshold){
+    System.out.println("############################ Regions of Dissimilarity #########################");
+    System.out.printf("\nUnder a threshold of: %.2f\n",threshold);
+    long start = new Date().getTime();
+    ArrayList<UndirectedGraph<Integer>> localSimilarityRegions;
+    localSimilarityRegions = theTool.getRegionsOfDissimilarity(threshold);
+
+    // print out the pymol and/or chimera scripts if the user has specified to do so
+    printDiffScripts(localSimilarityRegions);
+
+    double[][] globalDistanceTest = theTool.getGlobalDistanceTestScore(localSimilarityRegions);
+    String cliquesStr = "Cliques:";
+    String resNumStr = "Num Res:";
+    String percentsStr = "Percents:";
+    double percentInTopFourCliques = 0;
+    for(int i = 0; i < localSimilarityRegions.size(); i++){
+      cliquesStr += String.format("\tclique%d",i+1);
+      resNumStr += String.format("\t%.0f",globalDistanceTest[i][0]);
+      percentsStr += String.format("\t%.2f%%",globalDistanceTest[i][1]*100);
+      if(i < 4){
+        percentInTopFourCliques += globalDistanceTest[i][1];
+      }
+    }
+    System.out.println(cliquesStr);
+    System.out.println(resNumStr);
+    System.out.println(percentsStr);
+    System.out.println("The Local Dissimilarity Score is the percent of residues in the top four regions.");
+    System.out.printf("RoS-DIFF Score: %.2f\n", percentInTopFourCliques*100);
+    long end = new Date().getTime();
+    System.out.println("Total Time for RoS-DIFF: " + (end - start) + " milleseconds.");
   }
 
   /**
@@ -355,4 +383,31 @@ public class JProtMetrics{
       System.out.println("#End of Pymol Script\n");
     }
   }
+
+  /**
+  * Private helper method to print out the pymol and/or chimera scripts if those options are
+  * specified.
+  */
+  private static void printDiffScripts(ArrayList<UndirectedGraph<Integer>> regionsOfSimilarity){
+    ArrayList<String> script;
+
+    if(printChimera){
+      script = theTool.getDiffChimeraColoringScript(regionsOfSimilarity);
+      System.out.println("\n#Chimera Script:");
+      for(String cmd: script){
+        System.out.println(cmd);
+      }
+      System.out.println("#End of Chimera Script\n");
+    }
+
+    if(printPymol){
+      script = theTool.getPymolColoringScript(regionsOfSimilarity);
+      System.out.println("\n#Pymol Script:");
+      for(String cmd: script){
+        System.out.println(cmd);
+      }
+      System.out.println("#End of Pymol Script\n");
+    }
+  }
+
 }

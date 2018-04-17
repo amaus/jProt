@@ -56,11 +56,11 @@ public class PDBFileIO{
   * This method does not close the InputStream. It is the clients job to do so.
   * <p>
   * @param inputStream the inputStream to read from
-  * @param pdbFileNameBase the base name of the PDB file (the part before the extension).
+  * @param pdbName the name of the PDB file
   * @return the Protein built from the information in this PDB
   * @throws IllegalStateException if this method is attempted to be called more than once.
   */
-  public Protein readInPDBFile(InputStream inputStream, String pdbFileNameBase){
+  public Protein readInPDBFile(InputStream inputStream, String pdbName){
     if(this.proteinReadIn){
       throw new IllegalStateException("A PDBFileIO Object can only read in a single PDB. " +
           " If you wish to read in a second PDB file, you must instantiate another PDBFileIO.");
@@ -87,7 +87,7 @@ public class PDBFileIO{
           break;
       }
     }
-    return constructProtein(pdbFileNameBase);
+    return constructProtein(pdbName);
   }
 
   /**
