@@ -33,7 +33,7 @@ import java.util.Date;
 *      --mol2-f fname
 *          The file for molecule two. The format is the same as mol1-f.
 *      --ros
-*          Find the regions of similarity between the structures using  a
+*          Find the regions of similarity between the structures using a
 *          default threshold of 1.0 angstroms. These are the sets of
 *          residues that are internally consistent. That is, the intra
 *          structure distances between the CA's of all pairs of residues
@@ -249,9 +249,9 @@ public class JProtMetrics{
     System.out.println(resNumStr);
     System.out.println(percentsStr);
     System.out.println("The Local Similarity Score is the percent of residues in the top four regions.");
-    System.out.printf("RoS-LS Score: %.2f\n", percentInTopFourCliques*100);
+    System.out.printf("RoS Score: %.2f\n", percentInTopFourCliques*100);
     long end = new Date().getTime();
-    System.out.println("Total Time for RoS-LS: " + (end - start) + " milleseconds.");
+    System.out.println("Total Time for RoS: " + (end - start) + " milleseconds.");
   }
 
   private static void dissimilarity(double threshold){
