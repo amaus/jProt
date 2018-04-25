@@ -26,7 +26,7 @@ import java.util.Iterator;
  *
  * <p>Local similarity takes the difference of the two distance matrices, builds a graph out of the
  * differences, finds the max clique (that is, max region where all residues are the same distance
- * apart in both structures) of that graph, removes all those nodes from the graph, finds the next
+ * apart in both structures) of that graph, removes all those vertices from the graph, finds the next
  * max clique and continues to find a clique covering of the graph. That is, a set of regions that
  * are all internally consistent and cover the protein structure. To build the graph, if two
  * residues are the same distance apart in the two structures, we draw an edge between vertices
@@ -94,8 +94,6 @@ public class Metrics{
     this.alphaStrucID = reference.getProteinName();
     this.betaStrucID = structure.getProteinName();
     // build the distance matrices out of the residues that were aligned
-    //this.alphaDistancesMatrix = prot1.calculateCarbonAlphaDistanceMatrix(prot1Mask);
-    //this.betaDistancesMatrix = prot2.calculateCarbonAlphaDistanceMatrix(prot2Mask);
     this.alphaDistancesMatrix = DistanceMatrixCalculator.calculateDistanceMatrix(reference, prot1Mask);
     this.betaDistancesMatrix = DistanceMatrixCalculator.calculateDistanceMatrix(structure, prot2Mask);
     calculateDifferencesMatrix();
@@ -221,7 +219,7 @@ public class Metrics{
   * the similarity graph of the structures and use it to find regions of internal
   * consistency.
   * @return an ArrayList of the graphs of the regions of local similarity. Each graph
-  *          consists of nodes representing the residues in the region of similarity.
+  *          consists of vertices representing the residues in the region of similarity.
   * @since 0.5.0
   */
   public ArrayList<UndirectedGraph<Integer>> getLocalSimilarityRegions(){
@@ -248,7 +246,7 @@ public class Metrics{
   * consistency.
   * @param threshold the threshold to use when building the similarity graph.
   * @return an ArrayList of the graphs of the regions of local similarity. Each graph
-  *          consists of nodes representing the residues in the region of similarity.
+  *          consists of vertices representing the residues in the region of similarity.
   * @since 0.5.0
   */
   public ArrayList<UndirectedGraph<Integer>> getLocalSimilarityRegions(double threshold){
@@ -300,10 +298,6 @@ public class Metrics{
         System.out.printf("%10s |%13s | %10s | %10s | %10s\n", "Threshold", "Num Vertices", "Num Edges", "Density", "Runtime");
         System.out.printf("%8.2f A | %12d | %10d | %10.2f | %10d\n", threshold, graph.size(), graph.numEdges(), graph.density(), endTime-startTime);
       } else {
-        //graph = graph.getNeighborhood(lastClique.getNodes());
-        //graph = getNeighborhood(graph, lastClique);
-        //graph.setGraphFileName(graphFileName);
-        //clique = maxCliqueTool.findMaxClique(graph);
         clique = getNextRegionOfSimilarity(graph, lastClique, graphFileName, threshold);
         if(!isSubset(lastClique, clique)){
           throw new IllegalStateException("In RoS-GDT, the next region found should completely contain the last region");
@@ -316,81 +310,76 @@ public class Metrics{
   }
 
   /**
-  * Return the neighborhood of the clique in the graph. This Graph contains all the nodes in the
-  * clique, all the nodes in graph that have an edge to every node in the clique, and all the edges
-  * between all these nodes.
+  * Find the next region of similarity for a GDT test. This region contains the previous one.
+  * Use this condition to our advantage. Search for a clique in the set of vertices that are
+  * adjacent to every vertex in the previous region. The union of that clique and the previous
+  * region is the next region of similarity.
   */
   private UndirectedGraph<Integer> getNextRegionOfSimilarity(UndirectedGraph<Integer> graph,
                                                              UndirectedGraph<Integer> lastClique,
                                                              String graphFileName,
                                                              double threshold) {
     // First, get the neighborhood of the lastClique in the new graph: the subset of graph
-    // containing all the nodes of the last clique along with all of their neighbors.
+    // containing all the elements of the last clique along with all of their neighbors.
     UndirectedGraph<Integer> neighborhood = graph.getNeighborhood(lastClique.getNodes());
-    // sort neighborhood into the nodes that correspond to those in lastClique and the neighbors of
-    // those nodes
-    ArrayList<Integer> lastCliqueNodes = new ArrayList<Integer>();
-    ArrayList<Integer> neighboringNodes = new ArrayList<Integer>();
+    // sort neighborhood into the elements that correspond to those in lastClique and the neighbors of
+    // those elements
+    ArrayList<Integer> lastCliqueElements = new ArrayList<Integer>();
+    ArrayList<Integer> neighboringElements = new ArrayList<Integer>();
     for(Integer vertex : neighborhood.getElements()) {
       if(lastClique.contains(vertex)) {
-        lastCliqueNodes.add(vertex);
+        lastCliqueElements.add(vertex);
       } else {
-        neighboringNodes.add(vertex);
+        neighboringElements.add(vertex);
       }
     }
 
-    // for each neighboring node, ensure it has an edge to every node in the the last clique.
-    // If it doesn't, remove it from the list of neighboringNodes.
-    Iterator<Integer> it = neighboringNodes.iterator();
+    // for each neighbor, ensure it has an edge to every vertex in the the last clique.
+    // If it doesn't, remove it from the list of neighboringElements.
+    Iterator<Integer> it = neighboringElements.iterator();
     while(it.hasNext()) {
       Integer neighboringVertex = it.next();
-      for(Integer lastCliqueVertex : lastCliqueNodes) {
-        //if(!neighboringVertex.hasNeighbor(lastCliqueVertex)) {
+      for(Integer lastCliqueVertex : lastCliqueElements) {
         if(!graph.hasEdge(neighboringVertex, lastCliqueVertex)) {
-          //neighborhood.removeNode(neighboringNode);
-          it.remove(); // remove this node from neighboringNodes
+          it.remove(); // remove this element from neighboringElements
           break;
         }
       }
     }
 
-    // Find the MAX CLIQUE on the list of neighboringNodes
+    // Find the MAX CLIQUE on the list of neighboringElements
     MaxCliqueSolver<Integer> maxCliqueTool = new IncMaxCliqueAdapter();
-    UndirectedGraph<Integer> neighboringNodesGraph = graph.subset(neighboringNodes);
-    neighboringNodesGraph.setGraphFileName(graphFileName);
+    UndirectedGraph<Integer> neighborsGraph = graph.subset(neighboringElements);
+    neighborsGraph.setGraphFileName(graphFileName);
     long startTime = new Date().getTime();
-    UndirectedGraph<Integer> neighboringNodesClique = maxCliqueTool.findMaxClique(neighboringNodesGraph);
+    UndirectedGraph<Integer> neighborsClique = maxCliqueTool.findMaxClique(neighborsGraph);
     long endTime = new Date().getTime();
     System.out.printf("\nRegion Found for structures under threshold %.2f.\n",threshold);
     System.out.printf("%10s |%13s | %10s | %10s | %10s\n", "Threshold", "Num Vertices", "Num Edges", "Density", "Runtime");
     System.out.printf("%8.2f A | %12d | %10d | %10.2f | %10d\n", threshold,
-                                                                 neighboringNodesGraph.size(),
-                                                                 neighboringNodesGraph.numEdges(),
-                                                                 neighboringNodesGraph.density(),
+                                                                 neighborsGraph.size(),
+                                                                 neighborsGraph.numEdges(),
+                                                                 neighborsGraph.density(),
                                                                  endTime-startTime);
 
-    // Build up a list of all the nodes in the new Region of Similarity. This includes all the nodes
-    // in the last clique and all the nodes in the neighboring nodes clique. The Max Clique Tool
-    // returns a deep copy of those nodes so pull them from the nodes that came from neighborhood.
-    LinkedList<Integer> newCliqueNodes = new LinkedList<Integer>();
-    // lastCliqueNodes contians nodes from neighborhood, contains edges to neighboring nodes
-    newCliqueNodes.addAll(lastCliqueNodes);
-    newCliqueNodes.addAll(neighboringNodesClique.getElements());
-    //for(Node<Integer> neighboringNode : neighboringNodes){
-      //if(neighboringNodesClique.contains(neighboringNode.get())){
-        //// neighboringNode is from neighborhood and contains edges to lastCliqueNodes
-        //newCliqueNodes.add(neighboringNode);
-      //}
-    //}
-    // build and return a graph containing all the nodes in lastCliqueNodes and
-    // neighboringNodesClique.
-    //return new UndirectedGraph<Integer>(newCliqueNodes);
-    return graph.subset(newCliqueNodes);
+    // Build up a list of all the elements in the new Region of Similarity. This includes all the
+    // elements in the last clique and all the elements in the neighbors clique.
+    LinkedList<Integer> newCliqueElements = new LinkedList<Integer>();
+
+    newCliqueElements.addAll(lastCliqueElements);
+    newCliqueElements.addAll(neighborsClique.getElements());
+
+    // return the subset of the graph that contains all the elements in the last clique and in the
+    // clique found in the neighbors
+    return graph.subset(newCliqueElements);
   }
 
+  /**
+  * Weak test: does the graph contain every element in the possible subset
+  */
   private boolean isSubset(UndirectedGraph<Integer> possibleSubset, UndirectedGraph<Integer> graph){
-    for(Node<Integer> node : possibleSubset){
-      if(!graph.contains(node)){
+    for(Integer element : possibleSubset.getElements()){
+      if(!graph.contains(element)){
         return false;
       }
     }
@@ -402,7 +391,7 @@ public class Metrics{
   * the average of those percents. The percents are calculated with respect to the number of
   * residues in the reference structure.
   * @param regions an ArrayList of the graphs of the regions of similarity. Each graph
-  *                  consists of nodes residues in that region of similarity.
+  *                  consists of residues in that region of similarity.
   * @return a 2D array. The number of rows is regions.size()+1. Each row has 2 columns.
   *          The i-th row contains at index 0 the number of residues in that region and
   *          at index 1 the percent of residues in that regions.
@@ -498,8 +487,8 @@ public class Metrics{
     int counter = 1;
     for(UndirectedGraph<Integer> region : regions){
       pymolScript.add("select clique"+counter+", " + alphaStrucID + " and i. "
-      + getNodesString(region, "+", getAlphaResidueIDs()) + " or "
-      + betaStrucID + " and i. " + getNodesString(region, "+", getBetaResidueIDs()));
+      + getIDsString(region, "+", getAlphaResidueIDs()) + " or "
+      + betaStrucID + " and i. " + getIDsString(region, "+", getBetaResidueIDs()));
       counter++;
     }
     ArrayList<String> coloringScript = new ArrayList<String>();
@@ -523,8 +512,8 @@ public class Metrics{
     int i = 0;
     for(UndirectedGraph<Integer> region : regions){
       chimeraScript.add(String.format("color %s #0:%s; color %s #1:%s",
-                      colors[i], getNodesString(region, ",", getAlphaResidueIDs()),
-                      colors[i], getNodesString(region, ",", getBetaResidueIDs())));
+                      colors[i], getIDsString(region, ",", getAlphaResidueIDs()),
+                      colors[i], getIDsString(region, ",", getBetaResidueIDs())));
       i++;
       if(i==4){
         break;
@@ -560,17 +549,17 @@ public class Metrics{
 
   private ArrayList<Integer> getResIDsInRegion(UndirectedGraph<Integer> region, String[] resIDs){
     ArrayList<Integer> ids = new ArrayList<Integer>();
-    for(Node<Integer> node : region){
-      ids.add(Integer.parseInt(resIDs[node.get()]));
+    for(Integer element : region.getElements()){
+      ids.add(Integer.parseInt(resIDs[element]));
     }
     return ids;
   }
 
-  /*
+  /**
   * a private helper method to build a similarity graph from the differences matrix given
   * a threshold.
   * @param threshold the threshold to use when determining whether to add an edge or not
-  * @return the similarity graph built from that threshold. It consists of a node for each
+  * @return the similarity graph built from that threshold. It consists of a vertex for each
   *          residue and an edge between two residues if the difference of their distance
   *          within each of the structures is less than the threshold.
   */
@@ -590,7 +579,7 @@ public class Metrics{
           if(val < threshold){
             //dataString += " -";
             //dataString += " "+val;
-            graph.addEdge(new Node<Integer>(row), new Node<Integer>(col));
+            graph.addEdge(row, col);
           } else if(val >= threshold){
             //dataString += " O";
             //dataString += " "+val;
@@ -604,27 +593,27 @@ public class Metrics{
     return graph;
   }
 
-  /*
-  * a private helper method to build a string containing all the residue IDs of the nodes
-  * in an similarity graph.
+  /**
+  * a private helper method to build a string containing all the residue IDs of the vertices in a
+  * similarity graph.
   * @param graph the similarity graph
   * @param delimiter the delimiter to use between residue IDs.
   * @return the string that contains all the residue IDs of the residues in this graph separated
   *          by the delimiter
   */
-  private String getNodesString(UndirectedGraph<Integer> graph, String delimiter, String[] resIDs){
-    Collection<Node<Integer>> nodes = graph.getNodes();
+  private String getIDsString(UndirectedGraph<Integer> graph, String delimiter, String[] resIDs){
+    Collection<Integer> elements = graph.getElements();
     String ret = "";
     int i = 0;
-    for(Node<Integer> node : nodes){
+    for(Integer element : elements){
       if(i == 0){
         i++;
-        if(node.get() instanceof Integer){
-          ret += resIDs[node.get()].trim();
+        if(element instanceof Integer){
+          ret += resIDs[element].trim();
         }
       } else {
-        if(node.get() instanceof Integer){
-          ret += delimiter+resIDs[node.get()].trim();
+        if(element instanceof Integer){
+          ret += delimiter+resIDs[element].trim();
         }
       }
     }
