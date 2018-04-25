@@ -12,6 +12,7 @@ import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -322,29 +323,30 @@ public class Metrics{
   private UndirectedGraph<Integer> getNextRegionOfSimilarity(UndirectedGraph<Integer> graph,
                                                              UndirectedGraph<Integer> lastClique,
                                                              String graphFileName,
-                                                             double threshold){
+                                                             double threshold) {
     // First, get the neighborhood of the lastClique in the new graph: the subset of graph
     // containing all the nodes of the last clique along with all of their neighbors.
     UndirectedGraph<Integer> neighborhood = graph.getNeighborhood(lastClique.getNodes());
     // sort neighborhood into the nodes that correspond to those in lastClique and the neighbors of
     // those nodes
-    ArrayList<Node<Integer>> lastCliqueNodes = new ArrayList<Node<Integer>>();
-    ArrayList<Node<Integer>> neighboringNodes = new ArrayList<Node<Integer>>();
-    for(Node<Integer> node : neighborhood){
-      if(lastClique.contains(node.get())){
-        lastCliqueNodes.add(node);
+    ArrayList<Integer> lastCliqueNodes = new ArrayList<Integer>();
+    ArrayList<Integer> neighboringNodes = new ArrayList<Integer>();
+    for(Integer vertex : neighborhood.getElements()) {
+      if(lastClique.contains(vertex)) {
+        lastCliqueNodes.add(vertex);
       } else {
-        neighboringNodes.add(node);
+        neighboringNodes.add(vertex);
       }
     }
 
     // for each neighboring node, ensure it has an edge to every node in the the last clique.
     // If it doesn't, remove it from the list of neighboringNodes.
-    Iterator<Node<Integer>> it = neighboringNodes.iterator();
-    while(it.hasNext()){
-      Node<Integer> neighboringNode = it.next();
-      for(Node<Integer> lastCliqueNode : lastCliqueNodes){
-        if(!neighboringNode.hasNeighbor(lastCliqueNode)){
+    Iterator<Integer> it = neighboringNodes.iterator();
+    while(it.hasNext()) {
+      Integer neighboringVertex = it.next();
+      for(Integer lastCliqueVertex : lastCliqueNodes) {
+        //if(!neighboringVertex.hasNeighbor(lastCliqueVertex)) {
+        if(!graph.hasEdge(neighboringVertex, lastCliqueVertex)) {
           //neighborhood.removeNode(neighboringNode);
           it.remove(); // remove this node from neighboringNodes
           break;
@@ -354,7 +356,7 @@ public class Metrics{
 
     // Find the MAX CLIQUE on the list of neighboringNodes
     MaxCliqueSolver<Integer> maxCliqueTool = new IncMaxCliqueAdapter();
-    UndirectedGraph<Integer> neighboringNodesGraph = new UndirectedGraph<Integer>(neighboringNodes);
+    UndirectedGraph<Integer> neighboringNodesGraph = graph.subset(neighboringNodes);
     neighboringNodesGraph.setGraphFileName(graphFileName);
     long startTime = new Date().getTime();
     UndirectedGraph<Integer> neighboringNodesClique = maxCliqueTool.findMaxClique(neighboringNodesGraph);
@@ -370,18 +372,20 @@ public class Metrics{
     // Build up a list of all the nodes in the new Region of Similarity. This includes all the nodes
     // in the last clique and all the nodes in the neighboring nodes clique. The Max Clique Tool
     // returns a deep copy of those nodes so pull them from the nodes that came from neighborhood.
-    ArrayList<Node<Integer>> newCliqueNodes = new ArrayList<Node<Integer>>();
+    LinkedList<Integer> newCliqueNodes = new LinkedList<Integer>();
     // lastCliqueNodes contians nodes from neighborhood, contains edges to neighboring nodes
     newCliqueNodes.addAll(lastCliqueNodes);
-    for(Node<Integer> neighboringNode : neighboringNodes){
-      if(neighboringNodesClique.contains(neighboringNode.get())){
-        // neighboringNode is from neighborhood and contains edges to lastCliqueNodes
-        newCliqueNodes.add(neighboringNode);
-      }
-    }
+    newCliqueNodes.addAll(neighboringNodesClique.getElements());
+    //for(Node<Integer> neighboringNode : neighboringNodes){
+      //if(neighboringNodesClique.contains(neighboringNode.get())){
+        //// neighboringNode is from neighborhood and contains edges to lastCliqueNodes
+        //newCliqueNodes.add(neighboringNode);
+      //}
+    //}
     // build and return a graph containing all the nodes in lastCliqueNodes and
     // neighboringNodesClique.
-    return new UndirectedGraph<Integer>(newCliqueNodes);
+    //return new UndirectedGraph<Integer>(newCliqueNodes);
+    return graph.subset(newCliqueNodes);
   }
 
   private boolean isSubset(UndirectedGraph<Integer> possibleSubset, UndirectedGraph<Integer> graph){
