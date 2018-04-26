@@ -321,7 +321,7 @@ public class Metrics{
                                                              double threshold) {
     // First, get the neighborhood of the lastClique in the new graph: the subset of graph
     // containing all the elements of the last clique along with all of their neighbors.
-    UndirectedGraph<Integer> neighborhood = graph.getNeighborhood(lastClique.getNodes());
+    UndirectedGraph<Integer> neighborhood = graph.getNeighborhood(lastClique.getElements());
     // sort neighborhood into the elements that correspond to those in lastClique and the neighbors of
     // those elements
     ArrayList<Integer> lastCliqueElements = new ArrayList<Integer>();
