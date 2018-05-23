@@ -53,6 +53,7 @@ public class Metrics{
   private String alphaStrucID;
   private String betaStrucID;
   private int numResiduesInReference;
+  private MaxCliqueSolver<Integer> maxCliqueTool;
 
   /**
   * Build Metrics object taking in the two proteins to compare.
@@ -64,6 +65,12 @@ public class Metrics{
   * @param structure the the structure to compare against the reference
   */
   public Metrics(Protein reference, Protein structure){
+    //maxCliqueTool = new MausMaxCliqueSolver();
+    //System.out.println("Using MAUS");
+    //maxCliqueTool = new IncMaxCliqueSolver();
+    //System.out.println("Using Inc Max Clique Solver");
+    maxCliqueTool = new IncMaxCliqueAdapter();
+    System.out.println("Using Inc Max Clique Adapter");
     ProteinSequence prot1Sequence = reference.getSequence();
     ProteinSequence prot2Sequence = structure.getSequence();
     this.numResiduesInReference = reference.getNumResidues();
@@ -232,7 +239,7 @@ public class Metrics{
     System.out.printf("Num Vertices: %d\n",graph.size());
     System.out.printf("Num Edges: %d\n",graph.numEdges());
     System.out.printf("Density: %.2f\n",graph.density());
-    MaxCliqueSolver<Integer> maxCliqueTool = new IncMaxCliqueAdapter();
+    //MaxCliqueSolver<Integer> maxCliqueTool = new IncMaxCliqueAdapter();
     //MaxCliqueSolver<Integer> maxCliqueTool = new MausMaxCliqueSolver();
     ArrayList<UndirectedGraph<Integer>> cliques = maxCliqueTool.getCliqueCovering(graph);
     return cliques;
@@ -255,7 +262,7 @@ public class Metrics{
     System.out.printf("Num Vertices: %d\n",graph.size());
     System.out.printf("Num Edges: %d\n",graph.numEdges());
     System.out.printf("Density: %.2f\n",graph.density());
-    MaxCliqueSolver<Integer> maxCliqueTool = new IncMaxCliqueAdapter();
+    //MaxCliqueSolver<Integer> maxCliqueTool = new IncMaxCliqueAdapter();
     //MaxCliqueSolver<Integer> maxCliqueTool = new MausMaxCliqueSolver();
     ArrayList<UndirectedGraph<Integer>> cliques = maxCliqueTool.getCliqueCovering(graph);
     return cliques;
@@ -289,7 +296,7 @@ public class Metrics{
       UndirectedGraph<Integer> graph = buildSimilarityGraph(threshold);
       String graphFileName = graph.getGraphFileName();
       UndirectedGraph<Integer> clique;
-      MaxCliqueSolver<Integer> maxCliqueTool = new IncMaxCliqueAdapter();
+      //MaxCliqueSolver<Integer> maxCliqueTool = new IncMaxCliqueAdapter();
       if(i == 0){
         long startTime = new Date().getTime();
         clique = maxCliqueTool.findMaxClique(graph);
@@ -348,7 +355,7 @@ public class Metrics{
     }
 
     // Find the MAX CLIQUE on the list of neighboringElements
-    MaxCliqueSolver<Integer> maxCliqueTool = new IncMaxCliqueAdapter();
+    //MaxCliqueSolver<Integer> maxCliqueTool = new IncMaxCliqueAdapter();
     UndirectedGraph<Integer> neighborsGraph = graph.subset(neighboringElements);
     neighborsGraph.setGraphFileName(graphFileName);
     long startTime = new Date().getTime();
@@ -367,7 +374,10 @@ public class Metrics{
     LinkedList<Integer> newCliqueElements = new LinkedList<Integer>();
 
     newCliqueElements.addAll(lastCliqueElements);
-    newCliqueElements.addAll(neighborsClique.getElements());
+    if(neighborsClique != null) {
+      newCliqueElements.addAll(neighborsClique.getElements());
+    }
+    //newCliqueElements.addAll(neighborsClique.getElements());
 
     // return the subset of the graph that contains all the elements in the last clique and in the
     // clique found in the neighbors

@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [None]
 
 ## Unreleased
+### Added
+- --diff feature to JProtMetrics executable. Can now print out regions of
+  dissimilarity.
 ### Changed
 - Minor updates in the text output of the executable JProtMetrics
 ### Removed
