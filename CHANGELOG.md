@@ -20,10 +20,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [None]
 
 ## Unreleased
+
+## [0.7.1] 2018-06-06
 ### Added
 - --diff feature to JProtMetrics executable. Can now print out regions of
   dissimilarity.
 ### Changed
+- All JProtMetrics usage options are now independent, as they should be.
 - Minor updates in the text output of the executable JProtMetrics
 ### Removed
 - Constructor in Metrics that takes a csv file as input for the CA distance
